@@ -36,9 +36,12 @@ const iconOptions = [
 ];
 
 export default function AdminPage() {
-  const [sessionId, setSessionId] = useState<string | null>(
-    localStorage.getItem("adminSessionId")
-  );
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  
+  // Clear any old session on component mount
+  useEffect(() => {
+    localStorage.removeItem("adminSessionId");
+  }, []);
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [newErrorType, setNewErrorType] = useState({
     errorId: "",
