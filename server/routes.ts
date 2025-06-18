@@ -186,6 +186,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+
+  // Get all error types (admin)
+  app.get("/api/admin/error-types", requireAdmin, async (req, res) => {
+    try {
+      const errorTypes = await storage.getActiveErrorTypes();
+      res.json(errorTypes);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Create error type (admin)
+  app.post("/api/admin/error-types", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertErrorTypeSchema.parse(req.body);
+      const errorType = await storage.createErrorType(validatedData);
+      res.json(errorType);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Internal server error" });
+      }
+    }
+  });
+
+  // Update error type (admin)
+  app.put("/api/admin/error-types/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertErrorTypeSchema.parse(req.body);
+      const errorType = await storage.updateErrorType(id, validatedData);
+      res.json(errorType);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Internal server error" });
+      }
+    }
+  });
+
+  // Delete error type (admin)
+  app.delete("/api/admin/error-types/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteErrorType(id);
+      res.json({ message: "Error type deleted" });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Get all support tickets (admin)
+  app.get("/api/admin/tickets", requireAdmin, async (req, res) => {
+    try {
+      const tickets = await storage.getAllSupportTickets();
+      res.json(tickets);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Update support ticket status (admin)
+  app.put("/api/admin/tickets/:rmaNumber/status", requireAdmin, async (req, res) => {
+    try {
+      const { rmaNumber } = req.params;
+      const { status, statusDetails, trackingNumber } = req.body;
+      
+      const ticket = await storage.updateSupportTicketStatus(rmaNumber, status, statusDetails, trackingNumber);
+      res.json(ticket);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

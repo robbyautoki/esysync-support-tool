@@ -49,6 +49,14 @@ export default function AdminPage() {
     instructions: "",
   });
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingData, setEditingData] = useState({
+    errorId: "",
+    title: "",
+    description: "",
+    iconName: "Monitor",
+    videoUrl: "",
+    instructions: "",
+  });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -161,6 +169,83 @@ export default function AdminPage() {
       return;
     }
     createMutation.mutate(newErrorType);
+  };
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: typeof editingData }) => {
+      const response = await fetch(`/api/admin/error-types/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-session-id": sessionId!,
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update error type");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/error-types"] });
+      setEditingId(null);
+      setEditingData({
+        errorId: "",
+        title: "",
+        description: "",
+        iconName: "Monitor",
+        videoUrl: "",
+        instructions: "",
+      });
+      toast({
+        title: "Problem aktualisiert",
+        description: "Die Änderungen wurden erfolgreich gespeichert",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Fehler beim Speichern",
+        description: "Die Änderungen konnten nicht gespeichert werden",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEdit = (errorType: ErrorType) => {
+    setEditingId(errorType.id);
+    setEditingData({
+      errorId: errorType.errorId,
+      title: errorType.title,
+      description: errorType.description,
+      iconName: errorType.iconName,
+      videoUrl: errorType.videoUrl || "",
+      instructions: errorType.instructions || "",
+    });
+  };
+
+  const handleUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingData.errorId || !editingData.title || !editingData.description) {
+      toast({
+        title: "Unvollständige Eingaben",
+        description: "Bitte füllen Sie alle Pflichtfelder aus",
+        variant: "destructive",
+      });
+      return;
+    }
+    updateMutation.mutate({ id: editingId!, data: editingData });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditingData({
+      errorId: "",
+      title: "",
+      description: "",
+      iconName: "Monitor",
+      videoUrl: "",
+      instructions: "",
+    });
   };
 
   const handleDelete = (id: number) => {
@@ -377,38 +462,142 @@ export default function AdminPage() {
               ) : (
                 <div className="space-y-4 max-h-96 overflow-y-auto">
                   {Array.isArray(errorTypes) && errorTypes.map((errorType: ErrorType) => (
-                    <div
-                      key={errorType.id}
-                      className="glassmorphism-strong rounded-xl p-4 flex items-center justify-between"
-                    >
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{errorType.title}</h3>
-                        <p className="text-sm text-gray-600">{errorType.description}</p>
-                        <div className="flex items-center mt-1 text-xs text-gray-500">
-                          <span>ID: {errorType.errorId}</span>
-                          <span className="mx-2">•</span>
-                          <span>Symbol: {errorType.iconName}</span>
+                    <div key={errorType.id} className="glassmorphism-strong rounded-xl p-4">
+                      {editingId === errorType.id ? (
+                        // Edit Form
+                        <form onSubmit={handleUpdate} className="space-y-4">
+                          <div>
+                            <Label htmlFor="editErrorId">Problem-ID</Label>
+                            <Input
+                              id="editErrorId"
+                              value={editingData.errorId}
+                              onChange={(e) => setEditingData(prev => ({ ...prev, errorId: e.target.value }))}
+                              className="mt-1"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="editTitle">Titel</Label>
+                            <Input
+                              id="editTitle"
+                              value={editingData.title}
+                              onChange={(e) => setEditingData(prev => ({ ...prev, title: e.target.value }))}
+                              className="mt-1"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="editDescription">Beschreibung</Label>
+                            <Input
+                              id="editDescription"
+                              value={editingData.description}
+                              onChange={(e) => setEditingData(prev => ({ ...prev, description: e.target.value }))}
+                              className="mt-1"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="editIconName">Symbol</Label>
+                            <select
+                              id="editIconName"
+                              value={editingData.iconName}
+                              onChange={(e) => setEditingData(prev => ({ ...prev, iconName: e.target.value }))}
+                              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            >
+                              {iconOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="editVideoUrl">Video-URL (optional)</Label>
+                            <Input
+                              id="editVideoUrl"
+                              value={editingData.videoUrl}
+                              onChange={(e) => setEditingData(prev => ({ ...prev, videoUrl: e.target.value }))}
+                              placeholder="https://example.com/video.mp4"
+                              className="mt-1"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="editInstructions">Anleitung (optional)</Label>
+                            <textarea
+                              id="editInstructions"
+                              value={editingData.instructions}
+                              onChange={(e) => setEditingData(prev => ({ ...prev, instructions: e.target.value }))}
+                              placeholder="Schritt-für-Schritt Anleitung für die Problemlösung..."
+                              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent min-h-[100px] resize-vertical"
+                              style={{ '--tw-ring-color': '#6d0df0' } as any}
+                              rows={4}
+                            />
+                          </div>
+
+                          <div className="flex gap-2">
+                            <Button
+                              type="submit"
+                              disabled={updateMutation.isPending}
+                              className="flex-1 text-white rounded-xl py-2"
+                              style={{ backgroundColor: '#6d0df0' }}
+                            >
+                              {updateMutation.isPending ? "Speichern..." : "Speichern"}
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={handleCancelEdit}
+                              variant="outline"
+                              className="flex-1 rounded-xl py-2"
+                            >
+                              Abbrechen
+                            </Button>
+                          </div>
+                        </form>
+                      ) : (
+                        // Display Mode
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900">{errorType.title}</h3>
+                            <p className="text-sm text-gray-600">{errorType.description}</p>
+                            <div className="flex items-center mt-1 text-xs text-gray-500">
+                              <span>ID: {errorType.errorId}</span>
+                              <span className="mx-2">•</span>
+                              <span>Symbol: {errorType.iconName}</span>
+                            </div>
+                            {errorType.videoUrl && (
+                              <div className="mt-2 text-xs" style={{ color: '#6d0df0' }}>
+                                <span>📹 Video: {errorType.videoUrl}</span>
+                              </div>
+                            )}
+                            {errorType.instructions && (
+                              <div className="mt-1 text-xs text-green-600">
+                                <span>📋 Anleitung: {errorType.instructions.substring(0, 100)}...</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex gap-2 ml-4">
+                            <Button
+                              onClick={() => handleEdit(errorType)}
+                              variant="outline"
+                              size="sm"
+                              className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              onClick={() => handleDelete(errorType.id)}
+                              disabled={deleteMutation.isPending}
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 border-red-300 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
-                        {errorType.videoUrl && (
-                          <div className="mt-2 text-xs" style={{ color: '#6d0df0' }}>
-                            <span>📹 Video verfügbar</span>
-                          </div>
-                        )}
-                        {errorType.instructions && (
-                          <div className="mt-1 text-xs text-green-600">
-                            <span>📋 Anleitung verfügbar ({errorType.instructions.split('\n').length} Schritte)</span>
-                          </div>
-                        )}
-                      </div>
-                      <Button
-                        onClick={() => handleDelete(errorType.id)}
-                        disabled={deleteMutation.isPending}
-                        variant="outline"
-                        size="sm"
-                        className="ml-4 text-red-600 border-red-300 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      )}
                     </div>
                   ))}
                   
