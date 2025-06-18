@@ -70,10 +70,10 @@ export default function PDFGeneration({ formData, updateFormData, onStartOver }:
   const downloadPDF = () => {
     const pdfData = {
       rmaNumber: formData.rmaNumber!,
-      customerNumber: formData.customerNumber!,
+      customerNumber: formData.accountNumber!,
       errorType: errorDisplayNames[formData.selectedError as keyof typeof errorDisplayNames],
       shippingMethod: shippingDisplayNames[formData.shippingMethod as keyof typeof shippingDisplayNames],
-      address: "AVANTOR Service Center\nMustermann Str. 123\n12345 Musterstadt",
+      address: formData.returnAddress || formData.displayLocation!,
     };
 
     generatePDF(pdfData);
@@ -140,7 +140,15 @@ export default function PDFGeneration({ formData, updateFormData, onStartOver }:
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-green-500 mr-2" />
-                    Kundennummer: {formData.customerNumber}
+                    Account: {formData.accountNumber}
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="w-4 h-4 text-green-500 mr-2" />
+                    Display: {formData.displayNumber}
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="w-4 h-4 text-green-500 mr-2" />
+                    Email: {formData.contactEmail}
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-green-500 mr-2" />

@@ -150,3 +150,11 @@ Preferred communication style: Simple, everyday language.
 - Added company logo to top left header on both support and admin pages
 - Logo sourced from esysync.com and integrated with Vite asset pipeline
 - Fixed header with glassmorphism background and responsive design
+
+✓ Comprehensive Customer Data Collection (June 18, 2025)
+- Replaced simple customer number validation with detailed data collection form
+- New customer data fields: Account Number, Display Number, Display Location, Return Address, Email
+- Updated database schema with migration from customer_number to comprehensive fields
+- Enhanced Kanban board to display detailed customer and display information
+- Updated PDF generation to include all customer data fields
+- Maintained glassmorphism design throughout new customer data form

@@ -156,12 +156,16 @@ export default function KanbanBoard({ sessionId }: KanbanBoardProps) {
                           {ticket.rmaNumber}
                         </h3>
                         <Badge className={config.color} variant="outline">
-                          {ticket.customerNumber}
+                          {ticket.accountNumber}
                         </Badge>
                       </div>
                       
                       <div className="text-xs text-gray-600 space-y-1">
+                        <p><strong>Account:</strong> {ticket.accountNumber}</p>
+                        <p><strong>Display:</strong> {ticket.displayNumber}</p>
                         <p><strong>Problem:</strong> {ticket.errorType}</p>
+                        <p><strong>Standort:</strong> {ticket.displayLocation?.substring(0, 50)}...</p>
+                        <p><strong>Email:</strong> {ticket.contactEmail}</p>
                         <p><strong>Versand:</strong> {ticket.shippingMethod}</p>
                         <p><strong>Erstellt:</strong> {new Date(ticket.createdAt).toLocaleDateString('de-DE')}</p>
                         {ticket.statusDetails && (
