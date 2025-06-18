@@ -1,4 +1,6 @@
 import { users, customers, supportTickets, type User, type InsertUser, type Customer, type InsertCustomer, type SupportTicket, type InsertSupportTicket } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -10,70 +12,50 @@ export interface IStorage {
   getSupportTicket(rmaNumber: string): Promise<SupportTicket | undefined>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private customers: Map<string, Customer>;
-  private supportTickets: Map<string, SupportTicket>;
-  private currentUserId: number;
-  private currentCustomerId: number;
-  private currentTicketId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.customers = new Map();
-    this.supportTickets = new Map();
-    this.currentUserId = 1;
-    this.currentCustomerId = 1;
-    this.currentTicketId = 1;
-
-    // Add some demo customers for validation
-    this.createCustomer({ customerNumber: "KD123456", email: "test@example.com", name: "Test Customer" });
-    this.createCustomer({ customerNumber: "KD789012", email: "demo@example.com", name: "Demo Customer" });
-    this.createCustomer({ customerNumber: "KD345678", email: "sample@example.com", name: "Sample Customer" });
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
     return user;
   }
 
   async getCustomerByNumber(customerNumber: string): Promise<Customer | undefined> {
-    return this.customers.get(customerNumber);
+    const [customer] = await db.select().from(customers).where(eq(customers.customerNumber, customerNumber));
+    return customer || undefined;
   }
 
   async createCustomer(insertCustomer: InsertCustomer): Promise<Customer> {
-    const id = this.currentCustomerId++;
-    const customer: Customer = { ...insertCustomer, id };
-    this.customers.set(insertCustomer.customerNumber, customer);
+    const [customer] = await db
+      .insert(customers)
+      .values(insertCustomer)
+      .returning();
     return customer;
   }
 
   async createSupportTicket(insertTicket: InsertSupportTicket): Promise<SupportTicket> {
-    const id = this.currentTicketId++;
-    const ticket: SupportTicket = { 
-      ...insertTicket, 
-      id,
-      createdAt: new Date()
-    };
-    this.supportTickets.set(insertTicket.rmaNumber, ticket);
+    const [ticket] = await db
+      .insert(supportTickets)
+      .values(insertTicket)
+      .returning();
     return ticket;
   }
 
   async getSupportTicket(rmaNumber: string): Promise<SupportTicket | undefined> {
-    return this.supportTickets.get(rmaNumber);
+    const [ticket] = await db.select().from(supportTickets).where(eq(supportTickets.rmaNumber, rmaNumber));
+    return ticket || undefined;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
