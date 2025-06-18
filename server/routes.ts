@@ -258,6 +258,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public ticket tracking route
+  app.get('/api/track/:rmaNumber', async (req, res) => {
+    try {
+      const { rmaNumber } = req.params;
+      const ticket = await storage.getSupportTicket(rmaNumber);
+      
+      if (!ticket) {
+        return res.status(404).json({ message: "Ticket nicht gefunden" });
+      }
+      
+      // Return ticket data without sensitive admin information
+      const publicTicketData = {
+        id: ticket.id,
+        rmaNumber: ticket.rmaNumber,
+        accountNumber: ticket.accountNumber,
+        displayNumber: ticket.displayNumber,
+        displayLocation: ticket.displayLocation,
+        contactEmail: ticket.contactEmail,
+        errorType: ticket.errorType,
+        shippingMethod: ticket.shippingMethod,
+        status: ticket.status,
+        statusDetails: ticket.statusDetails,
+        trackingNumber: ticket.trackingNumber,
+        createdAt: ticket.createdAt
+      };
+      
+      res.json(publicTicketData);
+    } catch (error) {
+      console.error("Error fetching ticket:", error);
+      res.status(500).json({ message: "Fehler beim Abrufen des Tickets" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

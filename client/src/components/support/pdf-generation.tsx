@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { FileText, Check, Download, Mail, RotateCcw } from "lucide-react";
+import { FileText, Check, Download, Mail, RotateCcw, Package, Copy, ExternalLink, CheckCircle } from "lucide-react";
 import { generatePDF } from "@/lib/pdf-generator";
 import { useToast } from "@/hooks/use-toast";
 import type { SupportFormData } from "@/pages/support";

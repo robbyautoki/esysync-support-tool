@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import SupportPage from "@/pages/support";
 import AdminPage from "@/pages/admin";
+import TrackStatus from "@/pages/track-status";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -12,6 +13,7 @@ function Router() {
     <Switch>
       <Route path="/" component={SupportPage} />
       <Route path="/admin" component={AdminPage} />
+      <Route path="/track/:rmaNumber?" component={TrackStatus} />
       <Route component={NotFound} />
     </Switch>
   );
