@@ -186,3 +186,13 @@ Preferred communication style: Simple, everyday language.
 - Search and sorting functionality by name, date, or ticket count
 - Statistics dashboard with customer and ticket metrics
 - Real-time data from support ticket database
+
+✓ E-Mail-Einstellungen & Automatisierung (June 18, 2025)
+- Added comprehensive email settings section in admin dashboard
+- Configurable reminder emails after 7 and 14 days for unprocessed tickets
+- Automatic ticket closure after 21 days with notification email
+- Customizable email templates with variable placeholders
+- Template editor with subject and body customization
+- Email timing configuration (reminder days and auto-close)
+- Toggle switches to enable/disable individual email templates
+- Variable system for dynamic content (RMA number, customer data, dates)

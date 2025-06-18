@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, BarChart3, LogOut, Plus, List, Edit, Trash2, Users } from "lucide-react";
+import { Settings, BarChart3, LogOut, Plus, List, Edit, Trash2, Users, Mail } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import KanbanBoard from "@/components/admin/kanban-board";
 import CustomersOverview from "@/components/admin/customers-overview";
+import EmailSettings from "@/components/admin/email-settings";
 import type { ErrorType } from "@shared/schema";
 import logoPath from "@assets/logo.png";
 
@@ -343,6 +344,15 @@ export default function AdminPage() {
               <Users className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
               Kunden
             </button>
+            <button
+              onClick={() => setActiveTab("email")}
+              className={`w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong transition-all duration-200 flex items-center text-left ${
+                activeTab === "email" ? "bg-white/40 shadow-lg" : "hover:bg-white/20"
+              }`}
+            >
+              <Mail className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+              E-Mail Einstellungen
+            </button>
           </div>
 
           {/* Logout Button */}
@@ -603,6 +613,10 @@ export default function AdminPage() {
 
         {activeTab === "customers" && (
           <CustomersOverview sessionId={sessionId!} />
+        )}
+
+        {activeTab === "email" && (
+          <EmailSettings sessionId={sessionId!} />
         )}
       </div>
     </div>
