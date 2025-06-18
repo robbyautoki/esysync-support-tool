@@ -9,9 +9,14 @@ const sessions = new Map<string, { username: string; isAdmin: boolean }>();
 
 const requireAdmin = (req: any, res: any, next: any) => {
   const sessionId = req.headers['x-session-id'];
+  console.log("Admin check - Session ID:", sessionId);
+  console.log("Active sessions:", Array.from(sessions.keys()));
+  
   const session = sessions.get(sessionId);
+  console.log("Found session:", session);
   
   if (!session || !session.isAdmin) {
+    console.log("Admin access denied for session:", sessionId);
     return res.status(401).json({ message: "Admin access required" });
   }
   
