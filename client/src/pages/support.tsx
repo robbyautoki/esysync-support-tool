@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import HeroSection from "@/components/support/hero-section";
 import StepIndicator from "@/components/support/step-indicator";
 import ErrorSelection from "@/components/support/error-selection";
+import Troubleshooting from "@/components/support/troubleshooting";
 import ShippingOptions from "@/components/support/shipping-options";
 import CustomerNumber from "@/components/support/customer-number";
 import PDFGeneration from "@/components/support/pdf-generation";
@@ -12,6 +13,8 @@ import logoPath from "@assets/logo.png";
 export interface SupportFormData {
   selectedError: string | null;
   restartConfirmed: boolean;
+  troubleshootingCompleted: boolean;
+  problemResolved: boolean;
   shippingMethod: string | null;
   customerNumber: string | null;
   rmaNumber?: string;
@@ -22,6 +25,8 @@ export default function SupportPage() {
   const [formData, setFormData] = useState<SupportFormData>({
     selectedError: null,
     restartConfirmed: false,
+    troubleshootingCompleted: false,
+    problemResolved: false,
     shippingMethod: null,
     customerNumber: null,
   });

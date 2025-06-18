@@ -32,6 +32,8 @@ export const errorTypes = pgTable("error_types", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   iconName: text("icon_name").notNull(),
+  videoUrl: text("video_url"),
+  instructions: text("instructions"),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
