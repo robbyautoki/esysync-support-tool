@@ -13,7 +13,7 @@
   --card-foreground: hsl(20, 14.3%, 4.1%);
   --border: hsl(20, 5.9%, 90%);
   --input: hsl(20, 5.9%, 90%);
-  --primary: hsl(207, 90%, 54%);
+  --primary: hsl(268, 95%, 50%);
   --primary-foreground: hsl(211, 100%, 99%);
   --secondary: hsl(60, 4.8%, 95.9%);
   --secondary-foreground: hsl(24, 9.8%, 10%);
@@ -25,7 +25,7 @@
   --radius: 0.5rem;
   
   /* Apple Glassmorphism Colors */
-  --ios-blue: hsl(207, 100%, 50%);
+  --ios-blue: hsl(268, 95%, 50%);
   --apple-gray: hsl(0, 0%, 11.4%);
   --apple-secondary: hsl(0, 0%, 53.7%);
   --glass-bg: hsla(0, 0%, 100%, 0.8);
@@ -45,7 +45,7 @@
   --card-foreground: hsl(0, 0%, 98%);
   --border: hsl(240, 3.7%, 15.9%);
   --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(207, 90%, 54%);
+  --primary: hsl(268, 95%, 50%);
   --primary-foreground: hsl(211, 100%, 99%);
   --secondary: hsl(240, 3.7%, 15.9%);
   --secondary-foreground: hsl(0, 0%, 98%);
@@ -84,11 +84,11 @@
   }
   
   .apple-shadow {
-    box-shadow: 0 4px 24px hsla(207, 100%, 50%, 0.08), 0 2px 8px hsla(0, 0%, 0%, 0.04);
+    box-shadow: 0 4px 24px hsla(268, 95%, 50%, 0.08), 0 2px 8px hsla(0, 0%, 0%, 0.04);
   }
   
   .apple-shadow-lg {
-    box-shadow: 0 8px 32px hsla(207, 100%, 50%, 0.12), 0 4px 16px hsla(0, 0%, 0%, 0.06);
+    box-shadow: 0 8px 32px hsla(268, 95%, 50%, 0.12), 0 4px 16px hsla(0, 0%, 0%, 0.06);
   }
   
   .fade-in {
@@ -101,11 +101,11 @@
   
   .chip:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px hsla(207, 100%, 50%, 0.15);
+    box-shadow: 0 6px 20px hsla(268, 95%, 50%, 0.15);
   }
   
   .chip.selected {
-    background: linear-gradient(135deg, var(--ios-blue), hsl(207, 100%, 70%));
+    background: linear-gradient(135deg, var(--ios-blue), hsl(268, 95%, 70%));
     color: white;
   }
   
@@ -132,6 +132,6 @@
 
 /* Background pattern */
 .bg-pattern {
-  background-image: radial-gradient(circle at 1px 1px, hsla(207, 100%, 50%, 0.05) 1px, transparent 0);
+  background-image: radial-gradient(circle at 1px 1px, hsla(268, 95%, 50%, 0.05) 1px, transparent 0);
   background-size: 20px 20px;
 }
