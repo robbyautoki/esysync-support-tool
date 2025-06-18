@@ -63,8 +63,16 @@ export default function AdminPage() {
   const { data: errorTypes, isLoading } = useQuery({
     queryKey: ["/api/admin/error-types"],
     enabled: !!sessionId,
-    meta: {
-      headers: { "x-session-id": sessionId },
+    queryFn: async () => {
+      const response = await fetch("/api/admin/error-types", {
+        headers: {
+          "x-session-id": sessionId!,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch error types");
+      }
+      return response.json();
     },
   });
 

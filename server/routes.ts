@@ -9,7 +9,11 @@ const sessions = new Map<string, { username: string; isAdmin: boolean }>();
 
 const requireAdmin = (req: any, res: any, next: any) => {
   const sessionId = req.headers['x-session-id'];
+  console.log('Admin auth check - sessionId:', sessionId);
+  console.log('Available sessions:', Array.from(sessions.keys()));
+  
   const session = sessions.get(sessionId);
+  console.log('Session found:', session);
   
   if (!session || !session.isAdmin) {
     return res.status(401).json({ message: "Admin access required" });
@@ -26,8 +30,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { username, password } = req.body;
       
       if (username === "admin" && password === "admin123") {
-        const sessionId = Math.random().toString(36).substring(7);
+        const sessionId = Math.random().toString(36).substring(2, 8);
         sessions.set(sessionId, { username: "admin", isAdmin: true });
+        
+        console.log('Admin login successful - sessionId:', sessionId);
+        console.log('Session stored:', sessions.get(sessionId));
         
         res.json({ sessionId, username: "admin", isAdmin: true });
       } else {
