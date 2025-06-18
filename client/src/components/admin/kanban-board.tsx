@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, Wrench, Truck } from "lucide-react";
+import { Package, Wrench, Truck, Maximize2, Minimize2, X } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import type { SupportTicket } from "@shared/schema";
@@ -37,6 +37,7 @@ export default function KanbanBoard({ sessionId }: KanbanBoardProps) {
   const [editingTicket, setEditingTicket] = useState<string | null>(null);
   const [statusDetails, setStatusDetails] = useState("");
   const [trackingNumber, setTrackingNumber] = useState("");
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -121,14 +122,33 @@ export default function KanbanBoard({ sessionId }: KanbanBoardProps) {
     );
   }
 
-  return (
+  const kanbanContent = (
     <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">RMA Ticket Kanban Board</h2>
-        <p className="text-gray-600">Verwalten Sie den Status aller RMA-Tickets</p>
+      <div className="flex items-center justify-between">
+        <div className="text-center flex-1">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">RMA Ticket Kanban Board</h2>
+          <p className="text-gray-600">Verwalten Sie den Status aller RMA-Tickets</p>
+        </div>
+        <Button
+          onClick={() => setIsFullscreen(!isFullscreen)}
+          variant="outline"
+          className="px-4 py-2 rounded-xl glassmorphism-strong border-white/30 hover:bg-white/20 transition-all duration-200"
+        >
+          {isFullscreen ? (
+            <>
+              <Minimize2 className="w-4 h-4 mr-2" style={{ color: '#6d0df0' }} />
+              Minimieren
+            </>
+          ) : (
+            <>
+              <Maximize2 className="w-4 h-4 mr-2" style={{ color: '#6d0df0' }} />
+              Vollbild
+            </>
+          )}
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      <div className={`grid gap-8 ${isFullscreen ? 'grid-cols-1 2xl:grid-cols-3' : 'grid-cols-1 xl:grid-cols-3'}`}>
         {Object.entries(statusConfig).map(([status, config]) => {
           const statusTickets = groupedTickets[status as keyof typeof groupedTickets];
           const IconComponent = config.icon;
@@ -145,11 +165,11 @@ export default function KanbanBoard({ sessionId }: KanbanBoardProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4 max-h-[600px] overflow-y-auto">
+                <div className={`space-y-4 overflow-y-auto ${isFullscreen ? 'max-h-[80vh]' : 'max-h-[600px]'}`}>
                   {statusTickets.map((ticket: SupportTicket) => (
                     <div
                       key={ticket.id}
-                      className="glassmorphism-strong rounded-xl p-4 space-y-2"
+                      className="glassmorphism-strong rounded-xl p-4 space-y-3 hover:bg-white/30 transition-all duration-200 border border-white/20"
                     >
                       <div className="flex items-center justify-between">
                         <h3 className="font-semibold text-gray-900 text-sm">
@@ -263,4 +283,32 @@ export default function KanbanBoard({ sessionId }: KanbanBoardProps) {
       </div>
     </div>
   );
+
+  if (isFullscreen) {
+    return (
+      <div className="fixed inset-0 z-50 bg-gray-50/95 backdrop-blur-xl p-8">
+        <div className="h-full flex flex-col">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">RMA Ticket Kanban Board - Vollbild</h2>
+              <p className="text-gray-600">Verwalten Sie den Status aller RMA-Tickets</p>
+            </div>
+            <Button
+              onClick={() => setIsFullscreen(false)}
+              variant="outline"
+              className="px-4 py-2 rounded-xl glassmorphism-strong border-white/30 hover:bg-white/20 transition-all duration-200"
+            >
+              <X className="w-4 h-4 mr-2" style={{ color: '#6d0df0' }} />
+              Schließen
+            </Button>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            {kanbanContent}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return kanbanContent;
 }

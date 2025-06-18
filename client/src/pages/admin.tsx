@@ -324,44 +324,60 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="glassmorphism rounded-3xl p-6 apple-shadow mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <img 
-                src={logoPath} 
-                alt="Logo" 
-                className="h-10 w-auto mr-6"
-              />
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin-Dashboard</h1>
-                <p className="text-gray-600">Verwalten Sie Display-Probleme für die Support-Seite</p>
-              </div>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Fixed Left Sidebar Navigation */}
+      <div className="w-80 fixed left-0 top-0 h-full glassmorphism apple-shadow border-r border-white/20 p-6 z-10">
+        {/* Logo and Header */}
+        <div className="mb-8">
+          <div className="flex items-center mb-6">
+            <img 
+              src={logoPath} 
+              alt="Logo" 
+              className="h-8 w-auto mr-3"
+            />
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
+              <p className="text-sm text-gray-600">Display Management</p>
             </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <Tabs defaultValue="problems" className="space-y-6" orientation="horizontal">
+          <TabsList className="grid w-full grid-cols-1 gap-2 bg-transparent h-auto p-0">
+            <TabsTrigger 
+              value="problems" 
+              className="w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong data-[state=active]:bg-white/40 data-[state=active]:shadow-lg transition-all duration-200"
+            >
+              <Settings className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+              Problem-Verwaltung
+            </TabsTrigger>
+            <TabsTrigger 
+              value="kanban" 
+              className="w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong data-[state=active]:bg-white/40 data-[state=active]:shadow-lg transition-all duration-200"
+            >
+              <BarChart3 className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+              Kanban Board
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Logout Button */}
+          <div className="mt-8 pt-8 border-t border-white/20">
             <Button
               onClick={handleLogout}
               variant="outline"
-              className="px-4 py-2 border border-red-300 text-red-600 rounded-xl hover:bg-red-50"
+              className="w-full px-4 py-3 border border-red-300 text-red-600 rounded-xl hover:bg-red-50 glassmorphism-strong"
             >
               <LogOut className="w-4 h-4 mr-2" />
               Abmelden
             </Button>
           </div>
-        </div>
+        </Tabs>
+      </div>
 
+      {/* Main Content Area */}
+      <div className="flex-1 ml-80 p-8">
         <Tabs defaultValue="problems" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="problems" className="flex items-center">
-              <Settings className="w-4 h-4 mr-2" />
-              Problem-Verwaltung
-            </TabsTrigger>
-            <TabsTrigger value="kanban" className="flex items-center">
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Kanban Board
-            </TabsTrigger>
-          </TabsList>
 
           <TabsContent value="problems">
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
