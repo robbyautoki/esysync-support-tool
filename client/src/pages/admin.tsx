@@ -371,6 +371,16 @@ export default function AdminPage() {
                           <span className="mx-2">•</span>
                           <span>Symbol: {errorType.iconName}</span>
                         </div>
+                        {errorType.videoUrl && (
+                          <div className="mt-2 text-xs text-purple-600">
+                            <span>📹 Video verfügbar</span>
+                          </div>
+                        )}
+                        {errorType.instructions && (
+                          <div className="mt-1 text-xs text-green-600">
+                            <span>📋 Anleitung verfügbar ({errorType.instructions.split('\n').length} Schritte)</span>
+                          </div>
+                        )}
                       </div>
                       <Button
                         onClick={() => handleDelete(errorType.id)}
