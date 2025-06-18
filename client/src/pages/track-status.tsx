@@ -56,12 +56,32 @@ export default function TrackStatus() {
     }
   };
 
-  const getStatusProgress = (status: string) => {
-    switch (status) {
-      case "pending": return 33;
-      case "workshop": return 66;
-      case "shipped": return 100;
-      default: return 0;
+  const getStatusProgress = (status: string, shippingMethod: string) => {
+    // Different progress based on shipping method
+    if (shippingMethod === "complete-replacement") {
+      // Kompletttausch: direkter Versand ohne Workshop
+      switch (status) {
+        case "pending": return 50;
+        case "shipped": return 100;
+        default: return 0;
+      }
+    } else if (shippingMethod === "technician") {
+      // Techniker-Abholung: erweiterte Schritte
+      switch (status) {
+        case "pending": return 25;
+        case "workshop": return 50;
+        case "technician-scheduled": return 75;
+        case "shipped": return 100;
+        default: return 0;
+      }
+    } else {
+      // Standard Versand (own-package, avantor-box)
+      switch (status) {
+        case "pending": return 33;
+        case "workshop": return 66;
+        case "shipped": return 100;
+        default: return 0;
+      }
     }
   };
 
@@ -157,13 +177,13 @@ export default function TrackStatus() {
                       <div>
                         <div className="flex justify-between text-sm text-gray-600 mb-2">
                           <span>Fortschritt</span>
-                          <span>{getStatusProgress(ticket.status)}%</span>
+                          <span>{getStatusProgress(ticket.status, ticket.shippingMethod)}%</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-3">
                           <div 
                             className="h-3 rounded-full transition-all duration-1000"
                             style={{ 
-                              width: `${getStatusProgress(ticket.status)}%`,
+                              width: `${getStatusProgress(ticket.status, ticket.shippingMethod)}%`,
                               background: `linear-gradient(90deg, #6d0df0 0%, #9d4edd 100%)`
                             }}
                           ></div>
@@ -186,17 +206,14 @@ export default function TrackStatus() {
                         </p>
                       </div>
 
-                      {/* Status Timeline */}
+                      {/* Dynamic Status Timeline based on shipping method */}
                       <div className="space-y-4">
                         <h4 className="font-semibold text-gray-900">Status-Verlauf</h4>
                         <div className="space-y-3">
-                          <div className={`flex items-center p-3 rounded-lg ${ticket.status === "pending" ? "bg-purple-50 border border-purple-200" : "bg-gray-50"}`}>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${ticket.status === "pending" ? "bg-purple-500" : "bg-green-500"}`}>
-                              {ticket.status === "pending" ? (
-                                <Clock className="w-4 h-4 text-white" />
-                              ) : (
-                                <CheckCircle2 className="w-4 h-4 text-white" />
-                              )}
+                          {/* Always show: Ticket eingereicht */}
+                          <div className="flex items-center p-3 rounded-lg bg-green-50 border border-green-200">
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-green-500">
+                              <CheckCircle2 className="w-4 h-4 text-white" />
                             </div>
                             <div className="ml-4">
                               <p className="font-medium text-gray-900">Ticket eingereicht</p>
@@ -212,39 +229,115 @@ export default function TrackStatus() {
                             </div>
                           </div>
 
-                          <div className={`flex items-center p-3 rounded-lg ${ticket.status === "workshop" ? "bg-orange-50 border border-orange-200" : ticket.status === "shipped" ? "bg-gray-50" : "bg-gray-100 opacity-50"}`}>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${ticket.status === "workshop" ? "bg-orange-500" : ticket.status === "shipped" ? "bg-green-500" : "bg-gray-300"}`}>
-                              {ticket.status === "workshop" ? (
-                                <Wrench className="w-4 h-4 text-white" />
-                              ) : ticket.status === "shipped" ? (
-                                <CheckCircle2 className="w-4 h-4 text-white" />
-                              ) : (
-                                <Clock className="w-4 h-4 text-white" />
-                              )}
+                          {/* Conditional steps based on shipping method */}
+                          {ticket.shippingMethod === "complete-replacement" ? (
+                            // Kompletttausch: Direkt zur Lieferung
+                            <div className={`flex items-center p-3 rounded-lg ${ticket.status === "shipped" ? "bg-green-50 border border-green-200" : "bg-gray-100 opacity-50"}`}>
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${ticket.status === "shipped" ? "bg-green-500" : "bg-gray-300"}`}>
+                                {ticket.status === "shipped" ? (
+                                  <CheckCircle2 className="w-4 h-4 text-white" />
+                                ) : (
+                                  <Clock className="w-4 h-4 text-white" />
+                                )}
+                              </div>
+                              <div className="ml-4">
+                                <p className="font-medium text-gray-900">Ersatzgerät versendet</p>
+                                <p className="text-sm text-gray-600">
+                                  {ticket.status === "shipped" ? "Kompletttausch abgeschlossen" : "Wird vorbereitet"}
+                                </p>
+                              </div>
                             </div>
-                            <div className="ml-4">
-                              <p className="font-medium text-gray-900">Workshop-Bearbeitung</p>
-                              <p className="text-sm text-gray-600">
-                                {ticket.status === "workshop" || ticket.status === "shipped" ? "In Bearbeitung" : "Ausstehend"}
-                              </p>
-                            </div>
-                          </div>
+                          ) : ticket.shippingMethod === "technician" ? (
+                            // Techniker-Abholung: Erweiterte Schritte
+                            <>
+                              <div className={`flex items-center p-3 rounded-lg ${ticket.status === "workshop" ? "bg-orange-50 border border-orange-200" : ticket.status === "shipped" ? "bg-gray-50" : "bg-gray-100 opacity-50"}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${ticket.status === "workshop" ? "bg-orange-500" : ticket.status === "shipped" ? "bg-green-500" : "bg-gray-300"}`}>
+                                  {ticket.status === "workshop" ? (
+                                    <Wrench className="w-4 h-4 text-white" />
+                                  ) : ticket.status === "shipped" ? (
+                                    <CheckCircle2 className="w-4 h-4 text-white" />
+                                  ) : (
+                                    <Clock className="w-4 h-4 text-white" />
+                                  )}
+                                </div>
+                                <div className="ml-4">
+                                  <p className="font-medium text-gray-900">Workshop-Bearbeitung</p>
+                                  <p className="text-sm text-gray-600">
+                                    {ticket.status === "workshop" || ticket.status === "shipped" ? "In Bearbeitung" : "Ausstehend"}
+                                  </p>
+                                </div>
+                              </div>
 
-                          <div className={`flex items-center p-3 rounded-lg ${ticket.status === "shipped" ? "bg-green-50 border border-green-200" : "bg-gray-100 opacity-50"}`}>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${ticket.status === "shipped" ? "bg-green-500" : "bg-gray-300"}`}>
-                              {ticket.status === "shipped" ? (
-                                <CheckCircle2 className="w-4 h-4 text-white" />
-                              ) : (
-                                <Clock className="w-4 h-4 text-white" />
-                              )}
-                            </div>
-                            <div className="ml-4">
-                              <p className="font-medium text-gray-900">Versandt</p>
-                              <p className="text-sm text-gray-600">
-                                {ticket.status === "shipped" ? "Abgeschlossen" : "Ausstehend"}
-                              </p>
-                            </div>
-                          </div>
+                              <div className={`flex items-center p-3 rounded-lg ${ticket.status === "technician-scheduled" ? "bg-blue-50 border border-blue-200" : "bg-gray-100 opacity-50"}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${ticket.status === "technician-scheduled" ? "bg-blue-500" : "bg-gray-300"}`}>
+                                  {ticket.status === "technician-scheduled" ? (
+                                    <User className="w-4 h-4 text-white" />
+                                  ) : (
+                                    <Clock className="w-4 h-4 text-white" />
+                                  )}
+                                </div>
+                                <div className="ml-4">
+                                  <p className="font-medium text-gray-900">Techniker-Termin geplant</p>
+                                  <p className="text-sm text-gray-600">
+                                    {ticket.status === "technician-scheduled" ? "Termin vereinbart" : "Ausstehend"}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className={`flex items-center p-3 rounded-lg ${ticket.status === "shipped" ? "bg-green-50 border border-green-200" : "bg-gray-100 opacity-50"}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${ticket.status === "shipped" ? "bg-green-500" : "bg-gray-300"}`}>
+                                  {ticket.status === "shipped" ? (
+                                    <CheckCircle2 className="w-4 h-4 text-white" />
+                                  ) : (
+                                    <Clock className="w-4 h-4 text-white" />
+                                  )}
+                                </div>
+                                <div className="ml-4">
+                                  <p className="font-medium text-gray-900">Installation abgeschlossen</p>
+                                  <p className="text-sm text-gray-600">
+                                    {ticket.status === "shipped" ? "Techniker-Service beendet" : "Ausstehend"}
+                                  </p>
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            // Standard Versand (own-package, avantor-box)
+                            <>
+                              <div className={`flex items-center p-3 rounded-lg ${ticket.status === "workshop" ? "bg-orange-50 border border-orange-200" : ticket.status === "shipped" ? "bg-gray-50" : "bg-gray-100 opacity-50"}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${ticket.status === "workshop" ? "bg-orange-500" : ticket.status === "shipped" ? "bg-green-500" : "bg-gray-300"}`}>
+                                  {ticket.status === "workshop" ? (
+                                    <Wrench className="w-4 h-4 text-white" />
+                                  ) : ticket.status === "shipped" ? (
+                                    <CheckCircle2 className="w-4 h-4 text-white" />
+                                  ) : (
+                                    <Clock className="w-4 h-4 text-white" />
+                                  )}
+                                </div>
+                                <div className="ml-4">
+                                  <p className="font-medium text-gray-900">Workshop-Bearbeitung</p>
+                                  <p className="text-sm text-gray-600">
+                                    {ticket.status === "workshop" || ticket.status === "shipped" ? "Display wird repariert" : "Warten auf Eingang"}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className={`flex items-center p-3 rounded-lg ${ticket.status === "shipped" ? "bg-green-50 border border-green-200" : "bg-gray-100 opacity-50"}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${ticket.status === "shipped" ? "bg-green-500" : "bg-gray-300"}`}>
+                                  {ticket.status === "shipped" ? (
+                                    <CheckCircle2 className="w-4 h-4 text-white" />
+                                  ) : (
+                                    <Clock className="w-4 h-4 text-white" />
+                                  )}
+                                </div>
+                                <div className="ml-4">
+                                  <p className="font-medium text-gray-900">Repariertes Display versendet</p>
+                                  <p className="text-sm text-gray-600">
+                                    {ticket.status === "shipped" ? "Rückversand abgeschlossen" : "Ausstehend"}
+                                  </p>
+                                </div>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     </CardContent>

@@ -216,3 +216,11 @@ Preferred communication style: Simple, everyday language.
 - Timeline view showing ticket creation and status progression
 - Detailed ticket information display for customers
 - Public API endpoint for secure ticket status retrieval
+
+✓ Dynamic Progress Based on Shipping Method (June 18, 2025)
+- Progress tracking now adapts to chosen shipping option
+- Complete Replacement: 50% pending → 100% shipped (no workshop phase)
+- Technician Service: 25% pending → 50% workshop → 75% scheduled → 100% completed
+- Standard Shipping: 33% pending → 66% workshop → 100% shipped
+- Timeline view shows different workflow steps per shipping method
+- Contextual status descriptions match shipping method expectations
