@@ -321,8 +321,8 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="glassmorphism rounded-3xl p-6 apple-shadow mb-8">
           <div className="flex items-center justify-between">
@@ -361,7 +361,7 @@ export default function AdminPage() {
           </TabsList>
 
           <TabsContent value="problems">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
               {/* Add New Problem */}
               <Card className="glassmorphism border-0 apple-shadow">
                 <CardHeader>

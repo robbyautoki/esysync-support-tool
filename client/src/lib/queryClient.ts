@@ -28,10 +28,17 @@ export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+  async ({ queryKey, meta }) => {
+    const headers = (meta?.headers as Record<string, string>) || {};
+    const fetchOptions: RequestInit = {
       credentials: "include",
-    });
+    };
+    
+    if (Object.keys(headers).length > 0) {
+      fetchOptions.headers = headers;
+    }
+    
+    const res = await fetch(queryKey[0] as string, fetchOptions);
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
       return null;
