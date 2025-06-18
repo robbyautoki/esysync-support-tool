@@ -176,3 +176,13 @@ Preferred communication style: Simple, everyday language.
 - Efficient space usage for maximum ticket visibility
 - Quick action buttons for status changes
 - Streamlined fullscreen mode for large-scale ticket management
+
+✓ Kunden-Übersicht im Admin Dashboard (June 18, 2025)
+- Added comprehensive customer overview in admin navigation
+- Table view showing all customers who submitted support requests
+- Display first and last ticket submission dates for each customer
+- Customer details including account number, email, display info, and location
+- Total ticket count and pending tickets per customer
+- Search and sorting functionality by name, date, or ticket count
+- Statistics dashboard with customer and ticket metrics
+- Real-time data from support ticket database
