@@ -78,12 +78,12 @@ export default function ErrorSelection({ formData, updateFormData, onNext, onPre
                   `}
                 >
                   <div className="flex items-center">
-                    <IconComponent className={`w-8 h-8 mr-4 ${isSelected ? 'text-white' : 'text-purple-500'}`} />
+                    <IconComponent className={`w-8 h-8 mr-4 ${isSelected ? 'text-white' : ''}`} style={!isSelected ? { color: '#6d0df0' } : {}} />
                     <div>
                       <h3 className={`font-semibold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
                         {error.title}
                       </h3>
-                      <p className={`text-sm ${isSelected ? 'text-purple-100' : 'text-gray-600'}`}>
+                      <p className={`text-sm ${isSelected ? 'text-gray-100' : 'text-gray-600'}`}>
                         {error.description}
                       </p>
                     </div>
@@ -121,7 +121,8 @@ export default function ErrorSelection({ formData, updateFormData, onNext, onPre
           <Button
             onClick={onNext}
             disabled={!canContinue}
-            className="px-8 py-3 bg-purple-500 text-white rounded-full apple-shadow disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200"
+            className="px-8 py-3 text-white rounded-full apple-shadow disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200"
+            style={{ backgroundColor: '#6d0df0' }}
           >
             Weiter
             <ArrowRight className="w-4 h-4 ml-2" />

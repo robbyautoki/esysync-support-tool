@@ -61,9 +61,10 @@ export default function ShippingOptions({ formData, updateFormData, onNext, onPr
               key={option.id}
               className={`
                 glassmorphism-strong rounded-2xl p-6 apple-shadow cursor-pointer transition-all duration-200
-                ${option.recommended ? 'border-2 border-purple-500' : ''}
+                ${option.recommended ? 'border-2' : ''}
                 hover:shadow-lg
               `}
+              style={option.recommended ? { borderColor: '#6d0df0' } : {}}
             >
               <Label htmlFor={option.id} className="flex items-center cursor-pointer">
                 <RadioGroupItem value={option.id} id={option.id} className="mr-4" />

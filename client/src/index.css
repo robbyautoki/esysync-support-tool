@@ -13,7 +13,7 @@
   --card-foreground: hsl(20, 14.3%, 4.1%);
   --border: hsl(20, 5.9%, 90%);
   --input: hsl(20, 5.9%, 90%);
-  --primary: hsl(268, 95%, 50%);
+  --primary: hsl(269, 95%, 50%);
   --primary-foreground: hsl(211, 100%, 99%);
   --secondary: hsl(60, 4.8%, 95.9%);
   --secondary-foreground: hsl(24, 9.8%, 10%);
@@ -25,7 +25,7 @@
   --radius: 0.5rem;
   
   /* Apple Glassmorphism Colors */
-  --ios-blue: hsl(268, 95%, 50%);
+  --ios-blue: hsl(269, 95%, 50%);
   --apple-gray: hsl(0, 0%, 11.4%);
   --apple-secondary: hsl(0, 0%, 53.7%);
   --glass-bg: hsla(0, 0%, 100%, 0.8);
