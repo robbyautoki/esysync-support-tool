@@ -1,0 +1,81 @@
+✅ Prompt für eine minimalistische Glassmorphism-Supportseite im Apple-Stil
+Erstelle eine moderne, minimalistische Landingpage im Apple-Design (Glassmorphism), um Kunden bei Display-Problemen zu helfen. Die Seite führt in mehreren Schritten durch den Supportprozess und erzeugt ein PDF mit RMA-Nummer für den Versand. Designstil wie Apple.com oder iOS: Weißtöne, Halbtransparenz, Blur-Effekte, weiche Schatten, runde Ecken.
+
+🧭 Seitenstruktur (Schritte)
+🔹 Hero-Bereich (Startseite)
+
+Titel: „Wir helfen Ihnen bei Display-Problemen – schnell und einfach.“
+
+Untertitel: „Bitte folgen Sie den nächsten Schritten für Reparatur oder Austausch.“
+
+Call-to-Action: „Support starten“
+
+Hinweis: „Kundennummer bereithalten. Bitte lesen Sie unsere FAQ am Seitenende.“
+
+📌 Schritt 1: Fehlerauswahl
+Typische Probleme als klickbare Chips / Buttons:
+
+„Bleibt schwarz“
+
+„Linien im Bild“
+
+„Hängt nach Neustart“
+
+„Keine Verbindung“
+
+etc.
+
+⚠️ Pflicht-Bestätigung (vor Schritt 2):
+Checkbox mit dem Text:
+
+„Ich bestätige, dass ich das Display vorab neugestartet habe.“
+
+Nur wenn diese Checkbox aktiviert ist, wird der Prozess fortgesetzt (z. B. Button „Weiter“ freigeschaltet).
+
+🧾 Schritt 2: Versandoption wählen
+Auswahlfelder mit Preisangaben:
+
+Eigene Verpackung: 18,00 €
+
+AVANTOR-Box mit Rückschein: 18,00 €
+
+Techniker-Abholung
+
+Kompletttausch: 229,00 €
+
+🧮 Schritt 3: Kundennummer eingeben
+Pflichtfeld zur Eingabe:
+
+Label: „Ihre Kundennummer“
+
+Button: „PDF mit RMA erstellen“
+
+📄 Schritt 4: PDF-Generierung
+PDF enthält:
+
+RMA-Nummer
+
+Fehlerbeschreibung
+
+Kundennummer
+
+Versandadresse
+
+☎️ Optional: Experteneinschätzung
+Button: „Ich brauche Hilfe vom Telefonsupport“
+
+❓ Schritt 5: FAQ am Seitenende
+Accordion oder Collapsible Elements:
+
+„Wie lange dauert eine Reparatur?“
+
+„Was kostet ein neues Panel?“
+
+„Was ist eine RMA?“
+
+„Kann ich mehrere Displays einschicken?“
+
+„Wie lange ist Garantie auf Ersatzteile?“ (Antwort: 12 Monate)
+
+💡 Stilvorgaben: Apple Glassmorphism UI
+Farben: Weiß, silber, hellgrau, leicht blaue Schatten
