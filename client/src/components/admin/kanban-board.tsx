@@ -128,7 +128,7 @@ export default function KanbanBoard({ sessionId }: KanbanBoardProps) {
         <p className="text-gray-600">Verwalten Sie den Status aller RMA-Tickets</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         {Object.entries(statusConfig).map(([status, config]) => {
           const statusTickets = groupedTickets[status as keyof typeof groupedTickets];
           const IconComponent = config.icon;
@@ -145,7 +145,7 @@ export default function KanbanBoard({ sessionId }: KanbanBoardProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                <div className="space-y-4 max-h-[600px] overflow-y-auto">
                   {statusTickets.map((ticket: SupportTicket) => (
                     <div
                       key={ticket.id}
