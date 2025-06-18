@@ -10,6 +10,23 @@ interface TroubleshootingProps {
   onPrev: () => void;
 }
 
+// Function to convert YouTube URL to embeddable format
+const getEmbeddableVideoUrl = (url: string) => {
+  if (!url) return null;
+  
+  // YouTube URL patterns
+  const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url.match(youtubeRegex);
+  
+  if (match) {
+    // Convert to YouTube embed URL
+    return `https://www.youtube.com/embed/${match[1]}`;
+  }
+  
+  // For other video URLs, return as is
+  return url;
+};
+
 export default function Troubleshooting({ formData, updateFormData, onNext, onPrev }: TroubleshootingProps) {
   const { data: errorTypes, isLoading } = useQuery({
     queryKey: ["/api/error-types"],
@@ -51,16 +68,34 @@ export default function Troubleshooting({ formData, updateFormData, onNext, onPr
               </h3>
               
               {selectedError?.videoUrl ? (
-                <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100">
-                  <video 
-                    controls 
-                    className="w-full h-full object-cover"
-                    poster="/api/placeholder/640/360"
-                  >
-                    <source src={selectedError.videoUrl} type="video/mp4" />
-                    Ihr Browser unterstützt keine HTML5-Videos.
-                  </video>
-                </div>
+                (() => {
+                  const embeddableUrl = getEmbeddableVideoUrl(selectedError.videoUrl);
+                  const isYouTube = selectedError.videoUrl.includes('youtube.com') || selectedError.videoUrl.includes('youtu.be');
+                  
+                  return (
+                    <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100">
+                      {isYouTube ? (
+                        <iframe
+                          src={embeddableUrl}
+                          className="w-full h-full"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          title="Video-Anleitung"
+                        />
+                      ) : (
+                        <video 
+                          controls 
+                          className="w-full h-full object-cover"
+                          poster="/api/placeholder/640/360"
+                        >
+                          <source src={selectedError.videoUrl} type="video/mp4" />
+                          Ihr Browser unterstützt keine HTML5-Videos.
+                        </video>
+                      )}
+                    </div>
+                  );
+                })()
               ) : (
                 <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
                   <div className="text-center">
