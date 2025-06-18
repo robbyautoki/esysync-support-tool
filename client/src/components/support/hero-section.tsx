@@ -14,7 +14,14 @@ export default function HeroSection({ onStartSupport }: HeroSectionProps) {
         </div>
         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
           Wir helfen Ihnen bei <br />
-          <span className="bg-clip-text text-transparent" style={{ background: 'linear-gradient(to right, #6d0df0, #8b1bf0)' }}>
+          <span 
+            className="bg-clip-text text-transparent"
+            style={{ 
+              background: 'linear-gradient(to right, #6d0df0, #8b1bf0)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}
+          >
             Display-Problemen
           </span>
         </h1>
