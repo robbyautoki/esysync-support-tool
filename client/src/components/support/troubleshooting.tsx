@@ -115,8 +115,8 @@ export default function Troubleshooting({ formData, updateFormData, onNext, onPr
                   onClick={() => handleTroubleshootingCompleted(false)}
                   className="px-8 py-3 text-white rounded-full apple-shadow transition-all duration-200"
                   style={{ backgroundColor: '#6d0df0' }}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#5a0bd9'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = '#6d0df0'}
+                  onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#5a0bd9'}
+                  onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#6d0df0'}
                 >
                   Nein, weiter zum Support
                   <ArrowRight className="w-4 h-4 ml-2" />

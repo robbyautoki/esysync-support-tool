@@ -19,12 +19,13 @@ export default function StepIndicator({ currentStep, totalSteps }: StepIndicator
                   className={`
                     w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300
                     ${isActive 
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-400 text-white' 
+                      ? 'text-white' 
                       : isCompleted
                         ? 'bg-gradient-to-r from-green-500 to-green-400 text-white'
                         : 'bg-gray-200 text-gray-500'
                     }
                   `}
+                  style={isActive ? { background: 'linear-gradient(to right, #6d0df0, #8b1bf0)' } : {}}
                 >
                   {stepNumber}
                 </div>
