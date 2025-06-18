@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Monitor, BarChart3, PauseCircle, Unlink, ArrowLeft, ArrowRight } from "lucide-react";
+import { Monitor, BarChart3, PauseCircle, Unlink, ArrowLeft, ArrowRight, AlertTriangle, Zap, Wifi, Volume } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import type { SupportFormData } from "@/pages/support";
+import type { ErrorType } from "@shared/schema";
 
 interface ErrorSelectionProps {
   formData: SupportFormData;
@@ -10,35 +12,23 @@ interface ErrorSelectionProps {
   onPrev: () => void;
 }
 
-const errorTypes = [
-  {
-    id: "black-screen",
-    title: "Bleibt schwarz",
-    description: "Display zeigt kein Bild an",
-    icon: Monitor,
-  },
-  {
-    id: "lines",
-    title: "Linien im Bild", 
-    description: "Störende Linien oder Streifen",
-    icon: BarChart3,
-  },
-  {
-    id: "freeze",
-    title: "Hängt nach Neustart",
-    description: "Display reagiert nicht mehr",
-    icon: PauseCircle,
-  },
-  {
-    id: "no-connection",
-    title: "Keine Verbindung",
-    description: "Signal wird nicht erkannt", 
-    icon: Unlink,
-  },
-];
+const iconMap = {
+  Monitor,
+  BarChart3,
+  PauseCircle,
+  Unlink,
+  AlertTriangle,
+  Zap,
+  Wifi,
+  Volume,
+};
 
 export default function ErrorSelection({ formData, updateFormData, onNext, onPrev }: ErrorSelectionProps) {
   const canContinue = formData.selectedError && formData.restartConfirmed;
+
+  const { data: errorTypes, isLoading } = useQuery({
+    queryKey: ["/api/error-types"],
+  });
 
   const selectError = (errorId: string) => {
     updateFormData({ selectedError: errorId });
@@ -56,35 +46,41 @@ export default function ErrorSelection({ formData, updateFormData, onNext, onPre
           <p className="text-gray-600">Wählen Sie das Problem aus, das bei Ihrem Display auftritt.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          {errorTypes.map((error) => {
-            const Icon = error.icon;
-            const isSelected = formData.selectedError === error.id;
-            
-            return (
-              <button
-                key={error.id}
-                onClick={() => selectError(error.id)}
-                className={`
-                  chip glassmorphism p-4 rounded-2xl text-left apple-shadow transition-all duration-200
-                  ${isSelected ? 'selected' : 'hover:transform hover:-translate-y-1'}
-                `}
-              >
-                <div className="flex items-center">
-                  <Icon className={`w-8 h-8 mr-4 ${isSelected ? 'text-white' : 'text-blue-500'}`} />
-                  <div>
-                    <h3 className={`font-semibold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
-                      {error.title}
-                    </h3>
-                    <p className={`text-sm ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
-                      {error.description}
-                    </p>
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="pulse-loading">Lade Probleme...</div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            {Array.isArray(errorTypes) && errorTypes.map((error: ErrorType) => {
+              const IconComponent = iconMap[error.iconName as keyof typeof iconMap] || Monitor;
+              const isSelected = formData.selectedError === error.errorId;
+              
+              return (
+                <button
+                  key={error.id}
+                  onClick={() => selectError(error.errorId)}
+                  className={`
+                    chip glassmorphism p-4 rounded-2xl text-left apple-shadow transition-all duration-200
+                    ${isSelected ? 'selected' : 'hover:transform hover:-translate-y-1'}
+                  `}
+                >
+                  <div className="flex items-center">
+                    <IconComponent className={`w-8 h-8 mr-4 ${isSelected ? 'text-white' : 'text-blue-500'}`} />
+                    <div>
+                      <h3 className={`font-semibold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                        {error.title}
+                      </h3>
+                      <p className={`text-sm ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
+                        {error.description}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Restart Confirmation */}
         <div className="glassmorphism-strong rounded-2xl p-6 mb-6">

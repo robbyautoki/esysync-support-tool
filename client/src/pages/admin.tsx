@@ -339,7 +339,7 @@ export default function AdminPage() {
                     </div>
                   ))}
                   
-                  {errorTypes?.length === 0 && (
+                  {Array.isArray(errorTypes) && errorTypes.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       Noch keine Probleme erstellt
                     </div>

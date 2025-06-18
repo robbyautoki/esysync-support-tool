@@ -111,7 +111,32 @@ This is a modern support ticket system designed specifically for handling displa
 
 Changelog:
 - June 18, 2025. Initial setup
+- June 18, 2025. Added PostgreSQL database with full data persistence
+- June 18, 2025. Added Admin Dashboard with dynamic error type management at /admin
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+## Recent Changes
+
+✓ PostgreSQL Database Implementation
+- Migrated from in-memory storage to persistent PostgreSQL database
+- Added database tables: users, customers, support_tickets, error_types
+- Implemented full CRUD operations with Drizzle ORM
+
+✓ Admin Dashboard System
+- Created admin authentication system (username: admin, password: admin123)
+- Built admin interface at /admin route (not visible on landing page)
+- Dynamic error type management: create, view, delete error types
+- Real-time synchronization between admin changes and support form
+
+✓ Dynamic Error Selection
+- Error types now loaded from database instead of hardcoded
+- Support form automatically updates when admin adds/removes problems
+- Maintains glassmorphism design with dynamic icon mapping
+
+✓ Enhanced Data Architecture
+- Customer validation through database
+- RMA ticket creation with full persistence
+- Admin session management for secure access
