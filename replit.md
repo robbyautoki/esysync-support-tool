@@ -140,3 +140,13 @@ Preferred communication style: Simple, everyday language.
 - Customer validation through database
 - RMA ticket creation with full persistence
 - Admin session management for secure access
+
+✓ Color Scheme Update (June 18, 2025)
+- Changed entire application color scheme from blue to purple
+- Updated all buttons, icons, borders, and hover states to purple (#6d0ef0)
+- Maintained glassmorphism design aesthetic with new purple accent color
+
+✓ Logo Integration (June 18, 2025)
+- Added company logo to top left header on both support and admin pages
+- Logo sourced from esysync.com and integrated with Vite asset pipeline
+- Fixed header with glassmorphism background and responsive design
