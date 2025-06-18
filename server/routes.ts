@@ -154,13 +154,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/support-tickets", async (req, res) => {
     try {
       const validatedData = insertSupportTicketSchema.parse(req.body);
-      
-      // Validate customer exists
-      const customer = await storage.getCustomerByNumber(validatedData.customerNumber);
-      if (!customer) {
-        return res.status(400).json({ message: "Invalid customer number" });
-      }
-
       const ticket = await storage.createSupportTicket(validatedData);
       res.json(ticket);
     } catch (error) {
