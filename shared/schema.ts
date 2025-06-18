@@ -16,7 +16,11 @@ export const supportTickets = pgTable("support_tickets", {
   errorType: text("error_type").notNull(),
   shippingMethod: text("shipping_method").notNull(),
   restartConfirmed: boolean("restart_confirmed").notNull(),
+  status: text("status").notNull().default("pending"), // pending, workshop, shipped
+  statusDetails: text("status_details"), // Additional status information
+  trackingNumber: text("tracking_number"), // For shipped items
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const customers = pgTable("customers", {

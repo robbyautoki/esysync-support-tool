@@ -48,6 +48,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Get all support tickets for Kanban board
+  app.get("/api/admin/tickets", requireAdmin, async (req, res) => {
+    try {
+      const tickets = await storage.getAllSupportTickets();
+      res.json(tickets);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Admin: Update ticket status
+  app.patch("/api/admin/tickets/:rmaNumber/status", requireAdmin, async (req, res) => {
+    try {
+      const { rmaNumber } = req.params;
+      const { status, statusDetails, trackingNumber } = req.body;
+      
+      const ticket = await storage.updateSupportTicketStatus(rmaNumber, status, statusDetails, trackingNumber);
+      res.json(ticket);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Admin: Get all error types
   app.get("/api/admin/error-types", requireAdmin, async (req, res) => {
     try {

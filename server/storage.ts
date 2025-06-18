@@ -10,6 +10,8 @@ export interface IStorage {
   createCustomer(customer: InsertCustomer): Promise<Customer>;
   createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
   getSupportTicket(rmaNumber: string): Promise<SupportTicket | undefined>;
+  getAllSupportTickets(): Promise<SupportTicket[]>;
+  updateSupportTicketStatus(rmaNumber: string, status: string, statusDetails?: string, trackingNumber?: string): Promise<SupportTicket>;
   getActiveErrorTypes(): Promise<ErrorType[]>;
   createErrorType(errorType: InsertErrorType): Promise<ErrorType>;
   updateErrorType(id: number, updates: Partial<InsertErrorType>): Promise<ErrorType>;
@@ -59,6 +61,24 @@ export class DatabaseStorage implements IStorage {
   async getSupportTicket(rmaNumber: string): Promise<SupportTicket | undefined> {
     const [ticket] = await db.select().from(supportTickets).where(eq(supportTickets.rmaNumber, rmaNumber));
     return ticket || undefined;
+  }
+
+  async getAllSupportTickets(): Promise<SupportTicket[]> {
+    return await db.select().from(supportTickets).orderBy(supportTickets.createdAt);
+  }
+
+  async updateSupportTicketStatus(rmaNumber: string, status: string, statusDetails?: string, trackingNumber?: string): Promise<SupportTicket> {
+    const [ticket] = await db
+      .update(supportTickets)
+      .set({ 
+        status, 
+        statusDetails, 
+        trackingNumber,
+        updatedAt: new Date()
+      })
+      .where(eq(supportTickets.rmaNumber, rmaNumber))
+      .returning();
+    return ticket;
   }
 
   async getActiveErrorTypes(): Promise<ErrorType[]> {
