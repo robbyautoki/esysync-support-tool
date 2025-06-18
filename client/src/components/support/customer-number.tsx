@@ -144,7 +144,8 @@ export default function CustomerNumber({ formData, updateFormData, onNext, onPre
           <Button
             onClick={handleGeneratePDF}
             disabled={!canContinue}
-            className="px-8 py-3 bg-purple-500 text-white rounded-full apple-shadow disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200"
+            className="px-8 py-3 text-white rounded-full apple-shadow disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200"
+            style={{ backgroundColor: '#6d0df0' }}
           >
             <FileText className="w-4 h-4 mr-2" />
             PDF mit RMA erstellen

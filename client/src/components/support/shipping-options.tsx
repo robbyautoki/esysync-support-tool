@@ -73,12 +73,12 @@ export default function ShippingOptions({ formData, updateFormData, onNext, onPr
                     <h3 className="font-semibold text-gray-900 flex items-center">
                       {option.title}
                       {option.recommended && (
-                        <span className="ml-2 text-xs bg-purple-500 text-white px-2 py-1 rounded-full">
+                        <span className="ml-2 text-xs text-white px-2 py-1 rounded-full" style={{ backgroundColor: '#6d0df0' }}>
                           Empfohlen
                         </span>
                       )}
                     </h3>
-                    <span className={`text-xl font-bold ${option.priceClass || 'text-purple-500'}`}>
+                    <span className={`text-xl font-bold ${option.priceClass || ''}`} style={!option.priceClass ? { color: '#6d0df0' } : {}}>
                       {option.price}
                     </span>
                   </div>
@@ -101,7 +101,8 @@ export default function ShippingOptions({ formData, updateFormData, onNext, onPr
           <Button
             onClick={onNext}
             disabled={!canContinue}
-            className="px-8 py-3 bg-purple-500 text-white rounded-full apple-shadow disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200"
+            className="px-8 py-3 text-white rounded-full apple-shadow disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200"
+            style={{ backgroundColor: '#6d0df0' }}
           >
             Weiter
             <ArrowRight className="w-4 h-4 ml-2" />

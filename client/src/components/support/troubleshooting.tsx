@@ -38,7 +38,7 @@ export default function Troubleshooting({ formData, updateFormData, onNext, onPr
 
         {isLoading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderBottomColor: '#6d0df0' }}></div>
             <p className="text-gray-600 mt-4">Lade Anleitung...</p>
           </div>
         ) : (
@@ -46,7 +46,7 @@ export default function Troubleshooting({ formData, updateFormData, onNext, onPr
             {/* Video Section */}
             <div className="glassmorphism rounded-2xl p-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                <Play className="w-5 h-5 mr-2 text-purple-500" />
+                <Play className="w-5 h-5 mr-2" style={{ color: '#6d0df0' }} />
                 Video-Anleitung
               </h3>
               
@@ -74,7 +74,7 @@ export default function Troubleshooting({ formData, updateFormData, onNext, onPr
             {/* Instructions Section */}
             <div className="glassmorphism rounded-2xl p-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                <CheckCircle className="w-5 h-5 mr-2 text-purple-500" />
+                <CheckCircle className="w-5 h-5 mr-2" style={{ color: '#6d0df0' }} />
                 Schritt-für-Schritt Anleitung
               </h3>
               
@@ -113,7 +113,10 @@ export default function Troubleshooting({ formData, updateFormData, onNext, onPr
                 </Button>
                 <Button
                   onClick={() => handleTroubleshootingCompleted(false)}
-                  className="px-8 py-3 bg-purple-500 text-white rounded-full apple-shadow hover:bg-purple-600 transition-all duration-200"
+                  className="px-8 py-3 text-white rounded-full apple-shadow transition-all duration-200"
+                  style={{ backgroundColor: '#6d0df0' }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#5a0bd9'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#6d0df0'}
                 >
                   Nein, weiter zum Support
                   <ArrowRight className="w-4 h-4 ml-2" />
