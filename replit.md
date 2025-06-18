@@ -196,3 +196,13 @@ Preferred communication style: Simple, everyday language.
 - Email timing configuration (reminder days and auto-close)
 - Toggle switches to enable/disable individual email templates
 - Variable system for dynamic content (RMA number, customer data, dates)
+
+✓ Statistiken & Auswertungen (June 18, 2025)
+- Added comprehensive statistics dashboard with problem frequency analysis
+- Visual problem ranking showing most common display issues and occurrence rates
+- Time-based filtering (7 days, 30 days, 90 days, all time)
+- Key performance metrics: total tickets, resolution rate, average resolution time
+- Status distribution charts with pending, workshop, and shipped breakdowns
+- 7-day trend analysis showing daily ticket creation and resolution patterns
+- Unique customer counting and average resolution time calculations
+- Export functionality for statistical reports
