@@ -5,7 +5,7 @@ import StepIndicator from "@/components/support/step-indicator";
 import ErrorSelection from "@/components/support/error-selection";
 import Troubleshooting from "@/components/support/troubleshooting";
 import ShippingOptions from "@/components/support/shipping-options";
-import CustomerNumber from "@/components/support/customer-number";
+import CustomerData from "@/components/support/customer-data";
 import PDFGeneration from "@/components/support/pdf-generation";
 import FAQSection from "@/components/support/faq-section";
 import logoPath from "@assets/logo.png";
@@ -16,7 +16,12 @@ export interface SupportFormData {
   troubleshootingCompleted: boolean;
   problemResolved: boolean;
   shippingMethod: string | null;
-  customerNumber: string | null;
+  // Customer and display data
+  accountNumber: string | null;
+  displayNumber: string | null;
+  displayLocation: string | null;
+  returnAddress: string | null;
+  contactEmail: string | null;
   rmaNumber?: string;
 }
 
@@ -28,7 +33,11 @@ export default function SupportPage() {
     troubleshootingCompleted: false,
     problemResolved: false,
     shippingMethod: null,
-    customerNumber: null,
+    accountNumber: null,
+    displayNumber: null,
+    displayLocation: null,
+    returnAddress: null,
+    contactEmail: null,
   });
 
   const updateFormData = (updates: Partial<SupportFormData>) => {
@@ -150,7 +159,7 @@ export default function SupportPage() {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.6 }}
               >
-                <CustomerNumber
+                <CustomerData
                   formData={formData}
                   updateFormData={updateFormData}
                   onNext={nextStep}

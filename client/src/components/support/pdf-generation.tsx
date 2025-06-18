@@ -47,7 +47,11 @@ export default function PDFGeneration({ formData, updateFormData, onStartOver }:
     try {
       const ticketData = {
         rmaNumber: formData.rmaNumber!,
-        customerNumber: formData.customerNumber!,
+        accountNumber: formData.accountNumber!,
+        displayNumber: formData.displayNumber!,
+        displayLocation: formData.displayLocation!,
+        returnAddress: formData.returnAddress,
+        contactEmail: formData.contactEmail!,
         errorType: formData.selectedError!,
         shippingMethod: formData.shippingMethod!,
         restartConfirmed: formData.restartConfirmed,

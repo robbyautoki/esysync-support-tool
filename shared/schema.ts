@@ -12,7 +12,12 @@ export const users = pgTable("users", {
 export const supportTickets = pgTable("support_tickets", {
   id: serial("id").primaryKey(),
   rmaNumber: text("rma_number").notNull().unique(),
-  customerNumber: text("customer_number").notNull(),
+  // Customer and display data
+  accountNumber: text("account_number").notNull(),
+  displayNumber: text("display_number").notNull(),
+  displayLocation: text("display_location").notNull(),
+  returnAddress: text("return_address"),
+  contactEmail: text("contact_email").notNull(),
   errorType: text("error_type").notNull(),
   shippingMethod: text("shipping_method").notNull(),
   restartConfirmed: boolean("restart_confirmed").notNull(),
