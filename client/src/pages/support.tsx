@@ -43,6 +43,8 @@ export default function SupportPage() {
     setFormData({
       selectedError: null,
       restartConfirmed: false,
+      troubleshootingCompleted: false,
+      problemResolved: false,
       shippingMethod: null,
       customerNumber: null,
     });
@@ -67,7 +69,7 @@ export default function SupportPage() {
             </div>
             {currentStep > 0 && (
               <div className="flex-1 max-w-2xl mx-8">
-                <StepIndicator currentStep={currentStep} totalSteps={4} />
+                <StepIndicator currentStep={currentStep} totalSteps={5} />
               </div>
             )}
           </div>
@@ -114,7 +116,7 @@ export default function SupportPage() {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.6 }}
               >
-                <ShippingOptions
+                <Troubleshooting
                   formData={formData}
                   updateFormData={updateFormData}
                   onNext={nextStep}
@@ -131,7 +133,7 @@ export default function SupportPage() {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.6 }}
               >
-                <CustomerNumber
+                <ShippingOptions
                   formData={formData}
                   updateFormData={updateFormData}
                   onNext={nextStep}
@@ -143,6 +145,23 @@ export default function SupportPage() {
             {currentStep === 4 && (
               <motion.div
                 key="step4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.6 }}
+              >
+                <CustomerNumber
+                  formData={formData}
+                  updateFormData={updateFormData}
+                  onNext={nextStep}
+                  onPrev={prevStep}
+                />
+              </motion.div>
+            )}
+
+            {currentStep === 5 && (
+              <motion.div
+                key="step5"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}

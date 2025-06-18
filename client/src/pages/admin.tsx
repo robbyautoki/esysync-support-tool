@@ -43,6 +43,8 @@ export default function AdminPage() {
     title: "",
     description: "",
     iconName: "Monitor",
+    videoUrl: "",
+    instructions: "",
   });
   const [editingId, setEditingId] = useState<number | null>(null);
   const { toast } = useToast();
@@ -103,7 +105,7 @@ export default function AdminPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/error-types"] });
       queryClient.invalidateQueries({ queryKey: ["/api/error-types"] });
-      setNewErrorType({ errorId: "", title: "", description: "", iconName: "Monitor" });
+      setNewErrorType({ errorId: "", title: "", description: "", iconName: "Monitor", videoUrl: "", instructions: "" });
       toast({
         title: "Problem hinzugefügt",
         description: "Das neue Problem wurde erfolgreich erstellt",
@@ -297,7 +299,7 @@ export default function AdminPage() {
                     id="iconName"
                     value={newErrorType.iconName}
                     onChange={(e) => setNewErrorType(prev => ({ ...prev, iconName: e.target.value }))}
-                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   >
                     {iconOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -305,6 +307,29 @@ export default function AdminPage() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <Label htmlFor="videoUrl">Video-URL (optional)</Label>
+                  <Input
+                    id="videoUrl"
+                    value={newErrorType.videoUrl}
+                    onChange={(e) => setNewErrorType(prev => ({ ...prev, videoUrl: e.target.value }))}
+                    placeholder="z.B. https://example.com/video.mp4"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="instructions">Anleitung (optional)</Label>
+                  <textarea
+                    id="instructions"
+                    value={newErrorType.instructions}
+                    onChange={(e) => setNewErrorType(prev => ({ ...prev, instructions: e.target.value }))}
+                    placeholder="Schritt-für-Schritt Anleitung für die Problemlösung..."
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent min-h-[100px] resize-vertical"
+                    rows={4}
+                  />
                 </div>
 
                 <Button
