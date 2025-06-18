@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Monitor, BarChart3, PauseCircle, Unlink, ArrowLeft, ArrowRight, AlertTriangle, Zap, Wifi, Volume } from "lucide-react";
+import { Monitor, BarChart3, PauseCircle, Unlink, ArrowLeft, ArrowRight, AlertTriangle, Zap, Wifi, Volume, RotateCcw, FileX, Settings, WifiOff, ShieldAlert, Package, Lightbulb, Battery, Smartphone, Shield, Power, Router } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { SupportFormData } from "@/pages/support";
 import type { ErrorType } from "@shared/schema";
@@ -21,6 +21,18 @@ const iconMap = {
   Zap,
   Wifi,
   Volume,
+  RotateCcw,
+  FileX,
+  Settings,
+  WifiOff,
+  ShieldAlert,
+  Package,
+  Lightbulb,
+  Battery,
+  Smartphone,
+  Shield,
+  Power,
+  Router,
 };
 
 export default function ErrorSelection({ formData, updateFormData, onNext, onPrev }: ErrorSelectionProps) {

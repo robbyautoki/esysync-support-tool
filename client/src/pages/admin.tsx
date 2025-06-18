@@ -18,6 +18,18 @@ const iconOptions = [
   { value: "Zap", label: "Zap" },
   { value: "Wifi", label: "Wifi" },
   { value: "Volume", label: "Volume" },
+  { value: "RotateCcw", label: "RotateCcw" },
+  { value: "FileX", label: "FileX" },
+  { value: "Settings", label: "Settings" },
+  { value: "WifiOff", label: "WifiOff" },
+  { value: "ShieldAlert", label: "ShieldAlert" },
+  { value: "Package", label: "Package" },
+  { value: "Lightbulb", label: "Lightbulb" },
+  { value: "Battery", label: "Battery" },
+  { value: "Smartphone", label: "Smartphone" },
+  { value: "Shield", label: "Shield" },
+  { value: "Power", label: "Power" },
+  { value: "Router", label: "Router" },
 ];
 
 export default function AdminPage() {
