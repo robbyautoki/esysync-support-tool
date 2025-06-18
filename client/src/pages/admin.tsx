@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { ErrorType } from "@shared/schema";
+import logoPath from "@assets/logo.png";
 
 const iconOptions = [
   { value: "Monitor", label: "Monitor" },
@@ -224,9 +225,16 @@ export default function AdminPage() {
         {/* Header */}
         <div className="glassmorphism rounded-3xl p-6 apple-shadow mb-8">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin-Dashboard</h1>
-              <p className="text-gray-600">Verwalten Sie Display-Probleme für die Support-Seite</p>
+            <div className="flex items-center">
+              <img 
+                src={logoPath} 
+                alt="Logo" 
+                className="h-10 w-auto mr-6"
+              />
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin-Dashboard</h1>
+                <p className="text-gray-600">Verwalten Sie Display-Probleme für die Support-Seite</p>
+              </div>
             </div>
             <Button
               onClick={handleLogout}

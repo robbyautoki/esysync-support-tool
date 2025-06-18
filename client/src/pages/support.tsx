@@ -7,6 +7,7 @@ import ShippingOptions from "@/components/support/shipping-options";
 import CustomerNumber from "@/components/support/customer-number";
 import PDFGeneration from "@/components/support/pdf-generation";
 import FAQSection from "@/components/support/faq-section";
+import logoPath from "@assets/logo.png";
 
 export interface SupportFormData {
   selectedError: string | null;
@@ -48,16 +49,27 @@ export default function SupportPage() {
       {/* Background Pattern */}
       <div className="fixed inset-0 opacity-30 bg-pattern" />
 
-      {/* Progress Indicator */}
-      {currentStep > 0 && (
-        <div className="fixed top-0 left-0 right-0 z-50 glassmorphism">
-          <div className="max-w-4xl mx-auto px-6 py-4">
-            <StepIndicator currentStep={currentStep} totalSteps={4} />
+      {/* Header with Logo */}
+      <header className="fixed top-0 left-0 right-0 z-50 glassmorphism">
+        <div className="max-w-6xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <img 
+                src={logoPath} 
+                alt="Logo" 
+                className="h-10 w-auto"
+              />
+            </div>
+            {currentStep > 0 && (
+              <div className="flex-1 max-w-2xl mx-8">
+                <StepIndicator currentStep={currentStep} totalSteps={4} />
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </header>
 
-      <main className={`${currentStep > 0 ? 'pt-24' : 'pt-12'} pb-12`}>
+      <main className="pt-24 pb-12">
         <div className="max-w-4xl mx-auto px-6">
           <AnimatePresence mode="wait">
             {currentStep === 0 && (
