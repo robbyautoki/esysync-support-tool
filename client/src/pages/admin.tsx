@@ -268,15 +268,15 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Add New Problem */}
               <Card className="glassmorphism border-0 apple-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center text-gray-900">
-                <Plus className="w-5 h-5 mr-2" style={{ color: '#6d0df0' }} />
-                Neues Problem hinzufügen
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleCreate} className="space-y-4">
-                <div>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-gray-900">
+                    <Plus className="w-5 h-5 mr-2" style={{ color: '#6d0df0' }} />
+                    Neues Problem hinzufügen
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleCreate} className="space-y-4">
+                    <div>
                   <Label htmlFor="errorId">Problem-ID</Label>
                   <Input
                     id="errorId"

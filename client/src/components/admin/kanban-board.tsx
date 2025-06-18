@@ -107,9 +107,9 @@ export default function KanbanBoard({ sessionId }: KanbanBoardProps) {
   };
 
   const groupedTickets = {
-    pending: tickets.filter((t: SupportTicket) => t.status === "pending"),
-    workshop: tickets.filter((t: SupportTicket) => t.status === "workshop"),
-    shipped: tickets.filter((t: SupportTicket) => t.status === "shipped"),
+    pending: tickets.filter((t) => t.status === "pending"),
+    workshop: tickets.filter((t) => t.status === "workshop"),
+    shipped: tickets.filter((t) => t.status === "shipped"),
   };
 
   if (isLoading) {
