@@ -37,6 +37,7 @@ const iconOptions = [
 
 export default function AdminPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("problems");
   
   // Restore session from localStorage on component mount
   useEffect(() => {
@@ -343,23 +344,27 @@ export default function AdminPage() {
         </div>
 
         {/* Navigation */}
-        <Tabs defaultValue="problems" className="space-y-6" orientation="horizontal">
-          <TabsList className="grid w-full grid-cols-1 gap-2 bg-transparent h-auto p-0">
-            <TabsTrigger 
-              value="problems" 
-              className="w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong data-[state=active]:bg-white/40 data-[state=active]:shadow-lg transition-all duration-200"
+        <div className="space-y-6">
+          <div className="grid w-full grid-cols-1 gap-2">
+            <button
+              onClick={() => setActiveTab("problems")}
+              className={`w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong transition-all duration-200 flex items-center text-left ${
+                activeTab === "problems" ? "bg-white/40 shadow-lg" : "hover:bg-white/20"
+              }`}
             >
               <Settings className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
               Problem-Verwaltung
-            </TabsTrigger>
-            <TabsTrigger 
-              value="kanban" 
-              className="w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong data-[state=active]:bg-white/40 data-[state=active]:shadow-lg transition-all duration-200"
+            </button>
+            <button
+              onClick={() => setActiveTab("kanban")}
+              className={`w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong transition-all duration-200 flex items-center text-left ${
+                activeTab === "kanban" ? "bg-white/40 shadow-lg" : "hover:bg-white/20"
+              }`}
             >
               <BarChart3 className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
               Kanban Board
-            </TabsTrigger>
-          </TabsList>
+            </button>
+          </div>
 
           {/* Logout Button */}
           <div className="mt-8 pt-8 border-t border-white/20">
@@ -372,15 +377,13 @@ export default function AdminPage() {
               Abmelden
             </Button>
           </div>
-        </Tabs>
+        </div>
       </div>
 
       {/* Main Content Area */}
       <div className="flex-1 ml-80 p-8">
-        <Tabs defaultValue="problems" className="space-y-6">
-
-          <TabsContent value="problems">
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        {activeTab === "problems" && (
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
               {/* Add New Problem */}
               <Card className="glassmorphism border-0 apple-shadow">
                 <CardHeader>
@@ -641,12 +644,11 @@ export default function AdminPage() {
             </CardContent>
           </Card>
             </div>
-          </TabsContent>
+        )}
 
-          <TabsContent value="kanban">
-            <KanbanBoard sessionId={sessionId!} />
-          </TabsContent>
-        </Tabs>
+        {activeTab === "kanban" && (
+          <KanbanBoard sessionId={sessionId!} />
+        )}
       </div>
     </div>
   );
