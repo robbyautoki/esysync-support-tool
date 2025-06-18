@@ -13,7 +13,7 @@ export default function TrackStatus() {
   const [searchAttempted, setSearchAttempted] = useState(false);
 
   const { data: ticket, isLoading, error } = useQuery<SupportTicket>({
-    queryKey: ["/api/track", rmaNumber],
+    queryKey: [`/api/track/${rmaNumber}`],
     enabled: !!rmaNumber && searchAttempted,
     retry: false,
   });
