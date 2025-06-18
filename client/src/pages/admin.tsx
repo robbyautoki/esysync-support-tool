@@ -244,7 +244,7 @@ export default function AdminPage() {
           <Card className="glassmorphism border-0 apple-shadow">
             <CardHeader>
               <CardTitle className="flex items-center text-gray-900">
-                <Plus className="w-5 h-5 mr-2 text-blue-500" />
+                <Plus className="w-5 h-5 mr-2 text-purple-500" />
                 Neues Problem hinzufügen
               </CardTitle>
             </CardHeader>
@@ -302,7 +302,7 @@ export default function AdminPage() {
                 <Button
                   type="submit"
                   disabled={createMutation.isPending}
-                  className="w-full bg-blue-500 text-white rounded-xl py-3"
+                  className="w-full bg-purple-500 text-white rounded-xl py-3"
                 >
                   {createMutation.isPending ? "Wird hinzugefügt..." : "Problem hinzufügen"}
                 </Button>
@@ -314,7 +314,7 @@ export default function AdminPage() {
           <Card className="glassmorphism border-0 apple-shadow">
             <CardHeader>
               <CardTitle className="flex items-center text-gray-900">
-                <Edit className="w-5 h-5 mr-2 text-blue-500" />
+                <Edit className="w-5 h-5 mr-2 text-purple-500" />
                 Vorhandene Probleme
               </CardTitle>
             </CardHeader>

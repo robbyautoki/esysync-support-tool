@@ -153,9 +153,9 @@ export default function SupportPage() {
           <div className="text-center text-sm text-gray-500">
             <p>&copy; 2024 AVANTOR Service Center. Alle Rechte vorbehalten.</p>
             <div className="mt-2 space-x-4">
-              <a href="#" className="hover:text-blue-500 transition-colors duration-200">Datenschutz</a>
-              <a href="#" className="hover:text-blue-500 transition-colors duration-200">Impressum</a>
-              <a href="#" className="hover:text-blue-500 transition-colors duration-200">AGB</a>
+              <a href="#" className="hover:text-purple-500 transition-colors duration-200">Datenschutz</a>
+              <a href="#" className="hover:text-purple-500 transition-colors duration-200">Impressum</a>
+              <a href="#" className="hover:text-purple-500 transition-colors duration-200">AGB</a>
             </div>
           </div>
         </div>
