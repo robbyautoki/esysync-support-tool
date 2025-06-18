@@ -55,7 +55,11 @@ export default function SupportPage() {
       troubleshootingCompleted: false,
       problemResolved: false,
       shippingMethod: null,
-      customerNumber: null,
+      accountNumber: null,
+      displayNumber: null,
+      displayLocation: null,
+      returnAddress: null,
+      contactEmail: null,
     });
     setCurrentStep(0);
   };

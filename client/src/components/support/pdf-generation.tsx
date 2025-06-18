@@ -31,22 +31,38 @@ export default function PDFGeneration({ formData, updateFormData, onStartOver }:
   const { toast } = useToast();
 
   useEffect(() => {
-    // Simulate PDF generation process
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setPdfGenerated(true);
-      
-      // Create support ticket in backend
-      createSupportTicket();
-    }, 2000);
+    // Generate RMA number and create ticket
+    const generateRMAAndCreateTicket = async () => {
+      try {
+        // Generate RMA number first
+        const currentYear = new Date().getFullYear();
+        const randomNum = Math.floor(100000 + Math.random() * 900000);
+        const rmaNumber = `RMA-${currentYear}-${randomNum}`;
+        
+        // Update form data with RMA number
+        updateFormData({ rmaNumber });
 
-    return () => clearTimeout(timer);
+        // Simulate PDF generation process
+        setTimeout(async () => {
+          setIsLoading(false);
+          setPdfGenerated(true);
+          
+          // Create support ticket in backend
+          await createSupportTicket(rmaNumber);
+        }, 2000);
+      } catch (error) {
+        console.error("Failed to generate RMA:", error);
+        setIsLoading(false);
+      }
+    };
+
+    generateRMAAndCreateTicket();
   }, []);
 
-  const createSupportTicket = async () => {
+  const createSupportTicket = async (rmaNumber: string) => {
     try {
       const ticketData = {
-        rmaNumber: formData.rmaNumber!,
+        rmaNumber,
         accountNumber: formData.accountNumber!,
         displayNumber: formData.displayNumber!,
         displayLocation: formData.displayLocation!,
@@ -57,13 +73,26 @@ export default function PDFGeneration({ formData, updateFormData, onStartOver }:
         restartConfirmed: formData.restartConfirmed,
       };
 
-      await fetch("/api/support-tickets", {
+      const response = await fetch("/api/support-tickets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(ticketData),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("API Error:", errorData);
+        throw new Error(`Failed to create ticket: ${response.status}`);
+      }
+
+      console.log("Support ticket created successfully");
     } catch (error) {
       console.error("Failed to create support ticket:", error);
+      toast({
+        title: "Fehler",
+        description: "Das Support-Ticket konnte nicht erstellt werden.",
+        variant: "destructive",
+      });
     }
   };
 
