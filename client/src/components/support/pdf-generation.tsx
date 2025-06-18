@@ -97,7 +97,7 @@ export default function PDFGeneration({ formData, updateFormData, onStartOver }:
           {/* Loading State */}
           {isLoading && (
             <div className="mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-500 rounded-full mb-4 pulse-loading">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-500 rounded-full mb-4 pulse-loading">
                 <FileText className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">PDF wird erstellt...</h2>
@@ -114,7 +114,7 @@ export default function PDFGeneration({ formData, updateFormData, onStartOver }:
               <h2 className="text-3xl font-bold text-gray-900 mb-2">PDF erfolgreich erstellt!</h2>
               <p className="text-gray-600 mb-8">
                 Ihre RMA-Nummer: 
-                <span className="font-mono text-blue-500 font-bold ml-1">
+                <span className="font-mono text-purple-500 font-bold ml-1">
                   {formData.rmaNumber}
                 </span>
               </p>
@@ -152,7 +152,7 @@ export default function PDFGeneration({ formData, updateFormData, onStartOver }:
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
                   onClick={downloadPDF}
-                  className="px-8 py-3 bg-blue-500 text-white rounded-full apple-shadow hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
+                  className="px-8 py-3 bg-purple-500 text-white rounded-full apple-shadow hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   PDF herunterladen
@@ -160,7 +160,7 @@ export default function PDFGeneration({ formData, updateFormData, onStartOver }:
                 <Button
                   onClick={emailPDF}
                   variant="outline"
-                  className="px-8 py-3 border border-blue-500 text-blue-500 rounded-full hover:bg-blue-500 hover:text-white transition-all duration-200"
+                  className="px-8 py-3 border border-purple-500 text-purple-500 rounded-full hover:bg-purple-500 hover:text-white transition-all duration-200"
                 >
                   <Mail className="w-4 h-4 mr-2" />
                   Per E-Mail senden

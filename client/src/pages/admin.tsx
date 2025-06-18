@@ -169,7 +169,7 @@ export default function AdminPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
         <div className="glassmorphism rounded-3xl p-8 apple-shadow w-full max-w-md">
           <div className="text-center mb-8">
-            <Settings className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+            <Settings className="w-16 h-16 text-purple-500 mx-auto mb-4" />
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin-Anmeldung</h1>
             <p className="text-gray-600">Melden Sie sich an, um das Dashboard zu verwalten</p>
           </div>
@@ -202,7 +202,7 @@ export default function AdminPage() {
             <Button
               type="submit"
               disabled={loginMutation.isPending}
-              className="w-full bg-blue-500 text-white rounded-xl py-3"
+              className="w-full bg-purple-500 text-white rounded-xl py-3"
             >
               {loginMutation.isPending ? "Anmelden..." : "Anmelden"}
             </Button>
