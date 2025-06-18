@@ -3,12 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash2, Plus, Edit, Settings, LogOut } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Trash2, Plus, Edit, Settings, LogOut, BarChart3 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { ErrorType } from "@shared/schema";
 import logoPath from "@assets/logo.png";
+import KanbanBoard from "@/components/admin/kanban-board";
 
 const iconOptions = [
   { value: "Monitor", label: "Monitor" },
@@ -250,9 +252,22 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Add New Problem */}
-          <Card className="glassmorphism border-0 apple-shadow">
+        <Tabs defaultValue="problems" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="problems" className="flex items-center">
+              <Settings className="w-4 h-4 mr-2" />
+              Problem-Verwaltung
+            </TabsTrigger>
+            <TabsTrigger value="kanban" className="flex items-center">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Kanban Board
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="problems">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Add New Problem */}
+              <Card className="glassmorphism border-0 apple-shadow">
             <CardHeader>
               <CardTitle className="flex items-center text-gray-900">
                 <Plus className="w-5 h-5 mr-2" style={{ color: '#6d0df0' }} />
@@ -406,7 +421,13 @@ export default function AdminPage() {
               )}
             </CardContent>
           </Card>
-        </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="kanban">
+            <KanbanBoard sessionId={sessionId!} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
