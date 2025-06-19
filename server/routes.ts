@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertSupportTicketSchema, insertErrorTypeSchema } from "@shared/schema";
 import { z } from "zod";
+import ActivityLogger from "./activity-logger";
 
 // Simple session middleware for admin authentication
 const sessions = new Map<string, { username: string; isAdmin: boolean }>();
@@ -34,7 +35,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const sessionId = Math.random().toString(36).substring(2, 8);
         sessions.set(sessionId, { username: "admin", isAdmin: true });
         
-
+        await ActivityLogger.logAdminLogin(username, req);
         
         res.json({ sessionId, username: "admin", isAdmin: true });
       } else {
@@ -71,7 +72,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { rmaNumber } = req.params;
       const { status, statusDetails, trackingNumber } = req.body;
       
+      const oldTicket = await storage.getSupportTicket(rmaNumber);
       const ticket = await storage.updateSupportTicketStatus(rmaNumber, status, statusDetails, trackingNumber);
+      
+      if (oldTicket) {
+        await ActivityLogger.logStatusChanged(rmaNumber, oldTicket.status, status, req.user.username, req);
+      }
+      
       res.json(ticket);
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
@@ -93,6 +100,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertErrorTypeSchema.parse(req.body);
       const errorType = await storage.createErrorType(validatedData);
+      
+      await ActivityLogger.logErrorTypeCreated(validatedData.title, req.user.username, req);
+      
       res.json(errorType);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -104,11 +114,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Update error type
-  app.put("/api/admin/error-types/:id", requireAdmin, async (req, res) => {
+  app.put("/api/admin/error-types/:id", requireAdmin, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       const updates = req.body;
       const errorType = await storage.updateErrorType(id, updates);
+      
+      await ActivityLogger.logErrorTypeUpdated(updates.title || `ID ${id}`, req.user.username, req);
+      
       res.json(errorType);
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });

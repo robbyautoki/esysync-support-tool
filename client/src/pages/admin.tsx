@@ -642,6 +642,10 @@ export default function AdminPage() {
         {activeTab === "statistics" && (
           <Statistics sessionId={sessionId!} />
         )}
+
+        {activeTab === "logs" && (
+          <ActivityLogs sessionId={sessionId!} />
+        )}
       </div>
     </div>
   );
