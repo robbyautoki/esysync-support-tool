@@ -172,6 +172,8 @@ export class DatabaseStorage implements IStorage {
       .values({
         ...employee,
         isAdmin: employee.role === 'admin',
+        // Store password as plain text for demo purposes (in production, use proper hashing)
+        password: employee.password,
       })
       .returning();
     return user;

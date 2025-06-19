@@ -6,7 +6,14 @@ import { z } from "zod";
 import ActivityLogger from "./activity-logger";
 
 // Persistent admin sessions with database storage
-const adminSessions = new Map<string, { username: string; isAdmin: boolean; expiresAt: number }>();
+const adminSessions = new Map<string, { 
+  username: string; 
+  isAdmin: boolean; 
+  role?: string; 
+  firstName?: string; 
+  lastName?: string; 
+  expiresAt: number; 
+}>();
 
 const requireAdmin = (req: any, res: any, next: any) => {
   const sessionId = req.headers['x-session-id'];
@@ -30,11 +37,12 @@ const requireAdmin = (req: any, res: any, next: any) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Admin login
+  // Admin/Employee login
   app.post("/api/admin/login", async (req, res) => {
     try {
       const { username, password } = req.body;
       
+      // Check built-in admin account
       if (username === "admin" && password === "admin123") {
         const sessionId = Math.random().toString(36).substring(2, 8);
         const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
@@ -42,16 +50,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         adminSessions.set(sessionId, { 
           username: "admin", 
           isAdmin: true,
+          role: "admin",
           expiresAt 
         });
         
         await ActivityLogger.logAdminLogin(username, req);
         
-        res.json({ sessionId, username: "admin", isAdmin: true });
+        res.json({ sessionId, username: "admin", isAdmin: true, role: "admin" });
+        return;
+      }
+      
+      // Check database users (employees and additional admins)
+      const user = await storage.getUserByUsername(username);
+      if (user && user.isActive && user.password === password) {
+        const sessionId = Math.random().toString(36).substring(2, 8);
+        const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+        
+        adminSessions.set(sessionId, { 
+          username: user.username,
+          isAdmin: user.isAdmin || user.role === 'admin',
+          role: user.role || 'employee',
+          firstName: user.firstName,
+          lastName: user.lastName,
+          expiresAt 
+        });
+        
+        if (user.role === 'admin' || user.isAdmin) {
+          await ActivityLogger.logAdminLogin(username, req);
+        } else {
+          await ActivityLogger.logEmployeeLogin(username, req);
+        }
+        
+        res.json({ 
+          sessionId, 
+          username: user.username, 
+          isAdmin: user.isAdmin || user.role === 'admin',
+          role: user.role || 'employee',
+          firstName: user.firstName,
+          lastName: user.lastName
+        });
       } else {
         res.status(401).json({ message: "Invalid credentials" });
       }
     } catch (error) {
+      console.error("Login error:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });
