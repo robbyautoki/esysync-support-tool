@@ -28,6 +28,7 @@ const iconOptions = [
 export default function AdminPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("problems");
+  const [userRole, setUserRole] = useState<string>("admin");
   
   // Restore session from localStorage and validate it
   useEffect(() => {
@@ -43,6 +44,16 @@ export default function AdminPage() {
           });
           if (response.ok) {
             setSessionId(savedSessionId);
+            // Get user info to determine role
+            const userResponse = await fetch("/api/admin/user", {
+              headers: {
+                "x-session-id": savedSessionId,
+              },
+            });
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              setUserRole(userData.role || "admin");
+            }
           } else {
             // Session invalid, clear it
             localStorage.removeItem("adminSessionId");
@@ -109,6 +120,7 @@ export default function AdminPage() {
     },
     onSuccess: (data) => {
       setSessionId(data.sessionId);
+      setUserRole(data.role || "admin");
       localStorage.setItem("adminSessionId", data.sessionId);
       toast({
         title: "Erfolgreich angemeldet",
@@ -386,24 +398,28 @@ export default function AdminPage() {
               <TrendingUp className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
               Statistiken
             </button>
-            <button
-              onClick={() => setActiveTab("logs")}
-              className={`w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong transition-all duration-200 flex items-center text-left ${
-                activeTab === "logs" ? "bg-white/40 shadow-lg" : "hover:bg-white/20"
-              }`}
-            >
-              <FileText className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
-              Logs
-            </button>
-            <button
-              onClick={() => setActiveTab("employees")}
-              className={`w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong transition-all duration-200 flex items-center text-left ${
-                activeTab === "employees" ? "bg-white/40 shadow-lg" : "hover:bg-white/20"
-              }`}
-            >
-              <UserPlus className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
-              Mitarbeiter
-            </button>
+            {userRole === "admin" && (
+              <button
+                onClick={() => setActiveTab("logs")}
+                className={`w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong transition-all duration-200 flex items-center text-left ${
+                  activeTab === "logs" ? "bg-white/40 shadow-lg" : "hover:bg-white/20"
+                }`}
+              >
+                <FileText className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+                Logs
+              </button>
+            )}
+            {userRole === "admin" && (
+              <button
+                onClick={() => setActiveTab("employees")}
+                className={`w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong transition-all duration-200 flex items-center text-left ${
+                  activeTab === "employees" ? "bg-white/40 shadow-lg" : "hover:bg-white/20"
+                }`}
+              >
+                <UserPlus className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+                Mitarbeiter
+              </button>
+            )}
           </div>
 
           {/* Logout Button */}
@@ -674,11 +690,11 @@ export default function AdminPage() {
           <Statistics sessionId={sessionId!} />
         )}
 
-        {activeTab === "logs" && (
+        {activeTab === "logs" && userRole === "admin" && (
           <ActivityLogs sessionId={sessionId!} />
         )}
 
-        {activeTab === "employees" && (
+        {activeTab === "employees" && userRole === "admin" && (
           <Employees sessionId={sessionId!} />
         )}
       </div>

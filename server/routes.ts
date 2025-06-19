@@ -120,6 +120,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get current user info
+  app.get("/api/admin/user", requireAuth, async (req: any, res) => {
+    try {
+      res.json({
+        username: req.user.username,
+        role: req.user.role || "admin",
+        isAdmin: req.user.isAdmin,
+        firstName: req.user.firstName,
+        lastName: req.user.lastName
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Get active error types for frontend
   app.get("/api/error-types", async (req, res) => {
     try {
@@ -227,8 +242,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin/Employee: Get activity logs
-  app.get("/api/admin/logs", requireAuth, async (req, res) => {
+  // Admin only: Get activity logs
+  app.get("/api/admin/logs", requireAdmin, async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 100;
       const offset = parseInt(req.query.offset as string) || 0;
