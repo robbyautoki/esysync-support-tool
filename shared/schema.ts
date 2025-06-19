@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -74,3 +74,23 @@ export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
 export type Customer = typeof customers.$inferSelect;
 export type InsertErrorType = z.infer<typeof insertErrorTypeSchema>;
 export type ErrorType = typeof errorTypes.$inferSelect;
+
+// Activity log table for comprehensive system tracking
+export const activityLogs = pgTable("activity_logs", {
+  id: serial("id").primaryKey(),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+  activityType: text("activity_type").notNull(), // 'ticket_created', 'status_changed', 'admin_login', etc.
+  userType: text("user_type").notNull(), // 'customer', 'admin', 'system'
+  userId: text("user_id"), // customer number, admin username, or system identifier
+  description: text("description").notNull(),
+  entityType: text("entity_type"), // 'ticket', 'error_type', 'customer', etc.
+  entityId: text("entity_id"), // RMA number, error type ID, etc.
+  metadata: text("metadata"), // Additional structured data as JSON string
+  ipAddress: text("ip_address"), // IPv4/IPv6 address
+  userAgent: text("user_agent"), // Browser/client information
+});
+
+export const insertActivityLogSchema = createInsertSchema(activityLogs);
+
+export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
+export type ActivityLog = typeof activityLogs.$inferSelect;

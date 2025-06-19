@@ -1,6 +1,6 @@
-import { users, customers, supportTickets, errorTypes, type User, type InsertUser, type Customer, type InsertCustomer, type SupportTicket, type InsertSupportTicket, type ErrorType, type InsertErrorType } from "@shared/schema";
+import { users, customers, supportTickets, errorTypes, activityLogs, type User, type InsertUser, type Customer, type InsertCustomer, type SupportTicket, type InsertSupportTicket, type ErrorType, type InsertErrorType, type ActivityLog, type InsertActivityLog } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -16,6 +16,12 @@ export interface IStorage {
   createErrorType(errorType: InsertErrorType): Promise<ErrorType>;
   updateErrorType(id: number, updates: Partial<InsertErrorType>): Promise<ErrorType>;
   deleteErrorType(id: number): Promise<void>;
+  // Activity log operations
+  createActivityLog(log: InsertActivityLog): Promise<ActivityLog>;
+  getActivityLogs(limit?: number, offset?: number): Promise<ActivityLog[]>;
+  getActivityLogsByUser(userId: string, userType: string): Promise<ActivityLog[]>;
+  getActivityLogsByEntity(entityType: string, entityId: string): Promise<ActivityLog[]>;
+  getActivityLogsByType(activityType: string): Promise<ActivityLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
