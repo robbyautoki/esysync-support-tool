@@ -28,12 +28,33 @@ export default function AdminPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("problems");
   
-  // Restore session from localStorage on component mount
+  // Restore session from localStorage and validate it
   useEffect(() => {
-    const savedSessionId = localStorage.getItem("adminSessionId");
-    if (savedSessionId) {
-      setSessionId(savedSessionId);
-    }
+    const validateSession = async () => {
+      const savedSessionId = localStorage.getItem("adminSessionId");
+      if (savedSessionId) {
+        // Test if session is still valid
+        try {
+          const response = await fetch("/api/admin/error-types", {
+            headers: {
+              "x-session-id": savedSessionId,
+            },
+          });
+          if (response.ok) {
+            setSessionId(savedSessionId);
+          } else {
+            // Session invalid, clear it
+            localStorage.removeItem("adminSessionId");
+            setSessionId(null);
+          }
+        } catch (error) {
+          localStorage.removeItem("adminSessionId");
+          setSessionId(null);
+        }
+      }
+    };
+    
+    validateSession();
   }, []);
 
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });

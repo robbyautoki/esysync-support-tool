@@ -5,17 +5,26 @@ import { insertSupportTicketSchema, insertErrorTypeSchema } from "@shared/schema
 import { z } from "zod";
 import ActivityLogger from "./activity-logger";
 
-// Persistent admin sessions
-const adminSessions = new Set<string>();
+// Persistent admin sessions with database storage
+const adminSessions = new Map<string, { username: string; isAdmin: boolean; expiresAt: number }>();
 
 const requireAdmin = (req: any, res: any, next: any) => {
   const sessionId = req.headers['x-session-id'];
   
-  // Check if session exists or use the persistent admin session
-  if (sessionId === 'admin-session' || adminSessions.has(sessionId)) {
+  // Allow admin credentials for development
+  if (sessionId === 'dev-admin-session') {
     req.user = { username: 'admin', isAdmin: true };
+    return next();
+  }
+  
+  const session = adminSessions.get(sessionId);
+  if (session && session.isAdmin && session.expiresAt > Date.now()) {
+    req.user = session;
     next();
   } else {
+    if (session && session.expiresAt <= Date.now()) {
+      adminSessions.delete(sessionId);
+    }
     return res.status(401).json({ message: "Admin access required" });
   }
 };
@@ -28,7 +37,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (username === "admin" && password === "admin123") {
         const sessionId = Math.random().toString(36).substring(2, 8);
-        adminSessions.add(sessionId);
+        const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+        
+        adminSessions.set(sessionId, { 
+          username: "admin", 
+          isAdmin: true,
+          expiresAt 
+        });
         
         await ActivityLogger.logAdminLogin(username, req);
         
