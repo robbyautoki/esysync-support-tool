@@ -1,4 +1,4 @@
-import { users, customers, supportTickets, errorTypes, activityLogs, type User, type InsertUser, type Customer, type InsertCustomer, type SupportTicket, type InsertSupportTicket, type ErrorType, type InsertErrorType, type ActivityLog, type InsertActivityLog } from "@shared/schema";
+import { users, customers, supportTickets, errorTypes, activityLogs, type User, type InsertUser, type InsertEmployee, type Customer, type InsertCustomer, type SupportTicket, type InsertSupportTicket, type ErrorType, type InsertErrorType, type ActivityLog, type InsertActivityLog } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
 
@@ -6,6 +6,12 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  // Employee management
+  getAllEmployees(): Promise<User[]>;
+  createEmployee(employee: any): Promise<User>;
+  updateEmployee(id: number, updates: any): Promise<User>;
+  deleteEmployee(id: number): Promise<void>;
+  toggleEmployeeStatus(id: number, isActive: boolean): Promise<User>;
   getCustomerByNumber(customerNumber: string): Promise<Customer | undefined>;
   createCustomer(customer: InsertCustomer): Promise<Customer>;
   createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;

@@ -7,6 +7,13 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   isAdmin: boolean("is_admin").default(false).notNull(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  email: text("email"),
+  role: text("role").default("employee").notNull(), // 'admin', 'employee'
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const supportTickets = pgTable("support_tickets", {
@@ -47,9 +54,18 @@ export const errorTypes = pgTable("error_types", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEmployeeSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  role: z.enum(['admin', 'employee']).default('employee'),
 });
 
 export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
@@ -67,6 +83,7 @@ export const insertErrorTypeSchema = createInsertSchema(errorTypes).omit({
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type InsertEmployee = z.infer<typeof insertEmployeeSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
 export type SupportTicket = typeof supportTickets.$inferSelect;
