@@ -200,6 +200,95 @@ export class ActivityLogger {
       }
     );
   }
+
+  // Employee Management Logging
+  static async logEmployeeCreated(username: string, adminUser: string, req?: any): Promise<void> {
+    await this.log(
+      'employee_created',
+      'admin',
+      `Neuer Mitarbeiter "${username}" wurde erstellt`,
+      {
+        userId: adminUser,
+        entityType: 'employee',
+        entityId: username,
+        ipAddress: req?.ip,
+        userAgent: req?.get('User-Agent'),
+      }
+    );
+  }
+
+  static async logEmployeeUpdated(username: string, adminUser: string, req?: any): Promise<void> {
+    await this.log(
+      'employee_updated',
+      'admin',
+      `Mitarbeiter "${username}" wurde aktualisiert`,
+      {
+        userId: adminUser,
+        entityType: 'employee',
+        entityId: username,
+        ipAddress: req?.ip,
+        userAgent: req?.get('User-Agent'),
+      }
+    );
+  }
+
+  static async logEmployeeDeleted(username: string, adminUser: string, req?: any): Promise<void> {
+    await this.log(
+      'employee_deleted',
+      'admin',
+      `Mitarbeiter "${username}" wurde gelöscht`,
+      {
+        userId: adminUser,
+        entityType: 'employee',
+        entityId: username,
+        ipAddress: req?.ip,
+        userAgent: req?.get('User-Agent'),
+      }
+    );
+  }
+
+  static async logEmployeeStatusChanged(username: string, isActive: boolean, adminUser: string, req?: any): Promise<void> {
+    const status = isActive ? 'aktiviert' : 'deaktiviert';
+    await this.log(
+      'employee_status_changed',
+      'admin',
+      `Mitarbeiter "${username}" wurde ${status}`,
+      {
+        userId: adminUser,
+        entityType: 'employee',
+        entityId: username,
+        metadata: { isActive },
+        ipAddress: req?.ip,
+        userAgent: req?.get('User-Agent'),
+      }
+    );
+  }
+
+  static async logEmployeeLogin(username: string, req?: any): Promise<void> {
+    await this.log(
+      'employee_login',
+      'employee',
+      `Mitarbeiter "${username}" hat sich angemeldet`,
+      {
+        userId: username,
+        ipAddress: req?.ip,
+        userAgent: req?.get('User-Agent'),
+      }
+    );
+  }
+
+  static async logEmployeeLogout(username: string, req?: any): Promise<void> {
+    await this.log(
+      'employee_logout',
+      'employee',
+      `Mitarbeiter "${username}" hat sich abgemeldet`,
+      {
+        userId: username,
+        ipAddress: req?.ip,
+        userAgent: req?.get('User-Agent'),
+      }
+    );
+  }
 }
 
 export default ActivityLogger;

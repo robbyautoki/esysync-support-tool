@@ -159,6 +159,52 @@ export class DatabaseStorage implements IStorage {
       .where(eq(activityLogs.activityType, activityType))
       .orderBy(desc(activityLogs.timestamp));
   }
+
+  // Employee management methods
+  async getAllEmployees(): Promise<User[]> {
+    return await db.select().from(users)
+      .orderBy(desc(users.createdAt));
+  }
+
+  async createEmployee(employee: any): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...employee,
+        isAdmin: employee.role === 'admin',
+      })
+      .returning();
+    return user;
+  }
+
+  async updateEmployee(id: number, updates: any): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        ...updates,
+        isAdmin: updates.role === 'admin',
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async deleteEmployee(id: number): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
+  }
+
+  async toggleEmployeeStatus(id: number, isActive: boolean): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        isActive,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
 }
 
 export const storage = new DatabaseStorage();

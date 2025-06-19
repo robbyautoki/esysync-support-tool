@@ -187,6 +187,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Employee Management Routes
+  app.get('/api/admin/employees', requireAdmin, async (req, res) => {
+    try {
+      const employees = await storage.getAllEmployees();
+      res.json(employees);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post('/api/admin/employees', requireAdmin, async (req: any, res) => {
+    try {
+      const employee = await storage.createEmployee(req.body);
+      await ActivityLogger.logEmployeeCreated(employee.username, req.user.username, req);
+      res.json(employee);
+    } catch (error) {
+      console.error("Error creating employee:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.put('/api/admin/employees/:id', requireAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const employee = await storage.updateEmployee(parseInt(id), req.body);
+      await ActivityLogger.logEmployeeUpdated(employee.username, req.user.username, req);
+      res.json(employee);
+    } catch (error) {
+      console.error("Error updating employee:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete('/api/admin/employees/:id', requireAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const employee = await storage.getUser(parseInt(id));
+      await storage.deleteEmployee(parseInt(id));
+      if (employee) {
+        await ActivityLogger.logEmployeeDeleted(employee.username, req.user.username, req);
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.patch('/api/admin/employees/:id/toggle', requireAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { isActive } = req.body;
+      const employee = await storage.toggleEmployeeStatus(parseInt(id), isActive);
+      await ActivityLogger.logEmployeeStatusChanged(employee.username, isActive, req.user.username, req);
+      res.json(employee);
+    } catch (error) {
+      console.error("Error toggling employee status:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Validate customer number
   app.get("/api/customers/:customerNumber/validate", async (req, res) => {
     try {
