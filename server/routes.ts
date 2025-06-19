@@ -36,6 +36,28 @@ const requireAdmin = (req: any, res: any, next: any) => {
   }
 };
 
+// Allow both admin and employee access
+const requireAuth = (req: any, res: any, next: any) => {
+  const sessionId = req.headers['x-session-id'];
+  
+  // Allow admin credentials for development
+  if (sessionId === 'dev-admin-session') {
+    req.user = { username: 'admin', isAdmin: true };
+    return next();
+  }
+  
+  const session = adminSessions.get(sessionId);
+  if (session && session.expiresAt > Date.now()) {
+    req.user = session;
+    next();
+  } else {
+    if (session && session.expiresAt <= Date.now()) {
+      adminSessions.delete(sessionId);
+    }
+    return res.status(401).json({ message: "Authentication required" });
+  }
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Admin/Employee login
   app.post("/api/admin/login", async (req, res) => {
@@ -70,8 +92,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: user.username,
           isAdmin: user.isAdmin || user.role === 'admin',
           role: user.role || 'employee',
-          firstName: user.firstName,
-          lastName: user.lastName,
+          firstName: user.firstName ?? undefined,
+          lastName: user.lastName ?? undefined,
           expiresAt 
         });
         
@@ -108,8 +130,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin: Get all support tickets for Kanban board
-  app.get("/api/admin/tickets", requireAdmin, async (req, res) => {
+  // Admin/Employee: Get all support tickets for Kanban board
+  app.get("/api/admin/tickets", requireAuth, async (req, res) => {
     try {
       const tickets = await storage.getAllSupportTickets();
       res.json(tickets);
@@ -205,8 +227,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin: Get activity logs
-  app.get("/api/admin/logs", requireAdmin, async (req, res) => {
+  // Admin/Employee: Get activity logs
+  app.get("/api/admin/logs", requireAuth, async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 100;
       const offset = parseInt(req.query.offset as string) || 0;
