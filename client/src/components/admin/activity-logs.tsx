@@ -538,7 +538,7 @@ export default function ActivityLogs({ sessionId }: ActivityLogsProps) {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
+                  <CalendarDays className="h-5 w-5" />
                   Wöchentliche Aktivitätsheatmap
                 </CardTitle>
               </CardHeader>

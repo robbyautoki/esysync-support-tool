@@ -249,6 +249,21 @@ Preferred communication style: Simple, everyday language.
   * Employee creation, updates, deletion, and status changes
   * Separate employee_login/employee_logout tracking vs admin actions
   * Complete audit trail for employee account lifecycle
-- Demo accounts: admin/admin123 (administrator), mitarbeiter1/test123 (employee: Max Mustermann)
+- Demo accounts: admin/admin123 (administrator), robby/robby300 (employee: Robby Reinemann)
 - Enhanced session management supporting both admin and employee roles
 - Employee access to Kanban board, tickets, and activity logs for daily operations
+
+✓ Erweiterte Activity Logs mit Anomalie-Erkennung & Heatmaps (June 19, 2025)
+- Automatische Anomalie-Erkennung für ungewöhnliche Aktivitätsmuster:
+  * Ungewöhnlich viele Login-Versuche (>50 in 24h) - Hohe Priorität
+  * Nächtliche Aktivitäten (22:00-06:00, >10 Aktionen) - Mittlere Priorität
+  * Massive Status-Änderungen durch einen Benutzer (>20 in 24h) - Mittlere Priorität
+  * Schnelle aufeinanderfolgende Aktionen (<5 Sek., >15 Vorkommen) - Niedrige Priorität
+- Benutzer-Aktivitätsheatmaps zur UI-Optimierung:
+  * Stündliche Aktivitätsverteilung (24h-Grid mit Peak-Zeit-Analyse)
+  * Wöchentliche Aktivitätsverteilung (7-Tage-Übersicht)
+  * Top-Aktivitätstypen mit Häufigkeitsbalken
+  * Benutzer-Aktivitätsranking mit visuellen Progress-Bars
+- Tab-basierte Navigation: Activity Logs | Anomalie-Erkennung | Aktivitäts-Heatmap
+- Rollenbasierte Zugriffsbeschränkung: Nur Admins haben Zugriff auf "Logs"
+- Enhanced UI mit Purple-Theme und professioneller Datenvisualisierung
