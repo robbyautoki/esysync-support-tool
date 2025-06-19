@@ -82,19 +82,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { rmaNumber } = req.params;
       const { status, statusDetails, trackingNumber } = req.body;
       
-      console.log(`[TICKET UPDATE] RMA: ${rmaNumber}, New Status: ${status}`);
-      
       const oldTicket = await storage.getSupportTicket(rmaNumber);
-      console.log(`[TICKET UPDATE] Old Status: ${oldTicket?.status}`);
-      
       const ticket = await storage.updateSupportTicketStatus(rmaNumber, status, statusDetails, trackingNumber);
       
-      if (oldTicket) {
-        console.log(`[TICKET UPDATE] Logging status change: ${oldTicket.status} -> ${status}`);
+      if (oldTicket && oldTicket.status !== status) {
         await ActivityLogger.logStatusChanged(rmaNumber, oldTicket.status, status, req.user.username, req);
-        console.log(`[TICKET UPDATE] Status change logged successfully`);
-      } else {
-        console.log(`[TICKET UPDATE] No old ticket found for ${rmaNumber}`);
       }
       
       res.json(ticket);
