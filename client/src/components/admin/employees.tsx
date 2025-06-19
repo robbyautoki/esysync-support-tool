@@ -74,11 +74,16 @@ export default function Employees({ sessionId }: EmployeesProps) {
 
   const createMutation = useMutation({
     mutationFn: async (data: EmployeeFormData) => {
-      return await apiRequest('/api/admin/employees', {
+      const response = await fetch('/api/admin/employees', {
         method: 'POST',
-        headers: { 'X-Session-ID': sessionId },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Session-ID': sessionId 
+        },
         body: JSON.stringify(data),
       });
+      if (!response.ok) throw new Error('Failed to create employee');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/employees'] });
@@ -100,11 +105,16 @@ export default function Employees({ sessionId }: EmployeesProps) {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<EmployeeFormData> }) => {
-      return await apiRequest(`/api/admin/employees/${id}`, {
+      const response = await fetch(`/api/admin/employees/${id}`, {
         method: 'PUT',
-        headers: { 'X-Session-ID': sessionId },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Session-ID': sessionId 
+        },
         body: JSON.stringify(data),
       });
+      if (!response.ok) throw new Error('Failed to update employee');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/employees'] });
@@ -127,10 +137,12 @@ export default function Employees({ sessionId }: EmployeesProps) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/admin/employees/${id}`, {
+      const response = await fetch(`/api/admin/employees/${id}`, {
         method: 'DELETE',
         headers: { 'X-Session-ID': sessionId },
       });
+      if (!response.ok) throw new Error('Failed to delete employee');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/employees'] });
@@ -150,11 +162,16 @@ export default function Employees({ sessionId }: EmployeesProps) {
 
   const toggleStatusMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: number; isActive: boolean }) => {
-      return await apiRequest(`/api/admin/employees/${id}/toggle`, {
+      const response = await fetch(`/api/admin/employees/${id}/toggle`, {
         method: 'PATCH',
-        headers: { 'X-Session-ID': sessionId },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Session-ID': sessionId 
+        },
         body: JSON.stringify({ isActive }),
       });
+      if (!response.ok) throw new Error('Failed to toggle employee status');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/employees'] });
