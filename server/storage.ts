@@ -111,6 +111,48 @@ export class DatabaseStorage implements IStorage {
   async deleteErrorType(id: number): Promise<void> {
     await db.delete(errorTypes).where(eq(errorTypes.id, id));
   }
+
+  // Activity log operations
+  async createActivityLog(log: InsertActivityLog): Promise<ActivityLog> {
+    const [activityLog] = await db
+      .insert(activityLogs)
+      .values(log)
+      .returning();
+    return activityLog;
+  }
+
+  async getActivityLogs(limit: number = 100, offset: number = 0): Promise<ActivityLog[]> {
+    return await db
+      .select()
+      .from(activityLogs)
+      .orderBy(desc(activityLogs.timestamp))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getActivityLogsByUser(userId: string, userType: string): Promise<ActivityLog[]> {
+    return await db
+      .select()
+      .from(activityLogs)
+      .where(and(eq(activityLogs.userId, userId), eq(activityLogs.userType, userType)))
+      .orderBy(desc(activityLogs.timestamp));
+  }
+
+  async getActivityLogsByEntity(entityType: string, entityId: string): Promise<ActivityLog[]> {
+    return await db
+      .select()
+      .from(activityLogs)
+      .where(and(eq(activityLogs.entityType, entityType), eq(activityLogs.entityId, entityId)))
+      .orderBy(desc(activityLogs.timestamp));
+  }
+
+  async getActivityLogsByType(activityType: string): Promise<ActivityLog[]> {
+    return await db
+      .select()
+      .from(activityLogs)
+      .where(eq(activityLogs.activityType, activityType))
+      .orderBy(desc(activityLogs.timestamp));
+  }
 }
 
 export const storage = new DatabaseStorage();

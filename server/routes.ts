@@ -126,6 +126,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Get activity logs
+  app.get("/api/admin/logs", requireAdmin, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const activityType = req.query.type as string;
+      const userType = req.query.userType as string;
+      const userId = req.query.userId as string;
+      
+      let logs;
+      if (activityType) {
+        logs = await storage.getActivityLogsByType(activityType);
+      } else if (userType && userId) {
+        logs = await storage.getActivityLogsByUser(userId, userType);
+      } else {
+        logs = await storage.getActivityLogs(limit, offset);
+      }
+      
+      res.json(logs);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Validate customer number
   app.get("/api/customers/:customerNumber/validate", async (req, res) => {
     try {
