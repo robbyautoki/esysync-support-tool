@@ -53,6 +53,10 @@ export default function AdminPage() {
             if (userResponse.ok) {
               const userData = await userResponse.json();
               setUserRole(userData.role || "admin");
+              // Set default tab based on role
+              if (userData.role === "employee") {
+                setActiveTab("kanban");
+              }
             }
           } else {
             // Session invalid, clear it
@@ -122,6 +126,10 @@ export default function AdminPage() {
       setSessionId(data.sessionId);
       setUserRole(data.role || "admin");
       localStorage.setItem("adminSessionId", data.sessionId);
+      // Set default tab based on role
+      if (data.role === "employee") {
+        setActiveTab("kanban");
+      }
       toast({
         title: "Erfolgreich angemeldet",
         description: "Willkommen im Admin-Dashboard",
