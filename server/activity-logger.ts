@@ -61,7 +61,7 @@ export class ActivityLogger {
         userId: adminUser,
         entityType: 'ticket',
         entityId: rmaNumber,
-        metadata: { oldStatus, newStatus },
+        metadata: { oldStatus, newStatus, rmaNumber },
         ipAddress: req?.ip,
         userAgent: req?.get('User-Agent'),
       }

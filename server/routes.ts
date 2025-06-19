@@ -76,24 +76,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin: Update ticket status
-  app.patch("/api/admin/tickets/:rmaNumber/status", requireAdmin, async (req: any, res) => {
+  // Admin: Update ticket status (both PATCH and PUT for compatibility)
+  const updateTicketStatus = async (req: any, res: any) => {
     try {
       const { rmaNumber } = req.params;
       const { status, statusDetails, trackingNumber } = req.body;
       
+      console.log(`[TICKET UPDATE] RMA: ${rmaNumber}, New Status: ${status}`);
+      
       const oldTicket = await storage.getSupportTicket(rmaNumber);
+      console.log(`[TICKET UPDATE] Old Status: ${oldTicket?.status}`);
+      
       const ticket = await storage.updateSupportTicketStatus(rmaNumber, status, statusDetails, trackingNumber);
       
       if (oldTicket) {
+        console.log(`[TICKET UPDATE] Logging status change: ${oldTicket.status} -> ${status}`);
         await ActivityLogger.logStatusChanged(rmaNumber, oldTicket.status, status, req.user.username, req);
+        console.log(`[TICKET UPDATE] Status change logged successfully`);
+      } else {
+        console.log(`[TICKET UPDATE] No old ticket found for ${rmaNumber}`);
       }
       
       res.json(ticket);
     } catch (error) {
+      console.error("Error updating ticket status:", error);
       res.status(500).json({ message: "Internal server error" });
     }
-  });
+  };
+
+  app.patch("/api/admin/tickets/:rmaNumber/status", requireAdmin, updateTicketStatus);
+  app.put("/api/admin/tickets/:rmaNumber/status", requireAdmin, updateTicketStatus);
 
   // Admin: Get all error types
   app.get("/api/admin/error-types", requireAdmin, async (req, res) => {
