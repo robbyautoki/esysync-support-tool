@@ -67,7 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Update ticket status
-  app.patch("/api/admin/tickets/:rmaNumber/status", requireAdmin, async (req, res) => {
+  app.patch("/api/admin/tickets/:rmaNumber/status", requireAdmin, async (req: any, res) => {
     try {
       const { rmaNumber } = req.params;
       const { status, statusDetails, trackingNumber } = req.body;
@@ -96,7 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Create error type
-  app.post("/api/admin/error-types", requireAdmin, async (req, res) => {
+  app.post("/api/admin/error-types", requireAdmin, async (req: any, res) => {
     try {
       const validatedData = insertErrorTypeSchema.parse(req.body);
       const errorType = await storage.createErrorType(validatedData);
@@ -129,10 +129,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Delete error type
-  app.delete("/api/admin/error-types/:id", requireAdmin, async (req, res) => {
+  app.delete("/api/admin/error-types/:id", requireAdmin, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      
+      // Get error type before deletion for logging
+      const errorTypes = await storage.getActiveErrorTypes();
+      const errorType = errorTypes.find(et => et.id === id);
+      
       await storage.deleteErrorType(id);
+      
+      if (errorType) {
+        await ActivityLogger.logErrorTypeDeleted(errorType.title, req.user.username, req);
+      }
+      
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
@@ -197,6 +207,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertSupportTicketSchema.parse(req.body);
       const ticket = await storage.createSupportTicket(validatedData);
+      
+      await ActivityLogger.logTicketCreated(
+        ticket.rmaNumber, 
+        ticket.accountNumber || 'Unbekannt', 
+        ticket.errorType, 
+        req
+      );
+      
       res.json(ticket);
     } catch (error) {
       if (error instanceof z.ZodError) {
