@@ -155,6 +155,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Get archived tickets
+  app.get("/api/admin/tickets/archived", requireAuth, async (req, res) => {
+    try {
+      const tickets = await storage.getArchivedTickets();
+      res.json(tickets);
+    } catch (error) {
+      console.error('Error fetching archived tickets:', error);
+      res.status(500).json({ message: "Failed to fetch archived tickets" });
+    }
+  });
+
+  // Admin: Update ticket (extended version)
+  app.patch("/api/admin/tickets/:rmaNumber", requireAuth, async (req: any, res) => {
+    try {
+      const { rmaNumber } = req.params;
+      const updates = req.body;
+      const editedBy = req.user?.username || 'system';
+      
+      const ticket = await storage.updateSupportTicket(rmaNumber, updates, editedBy);
+      
+      // Create log entry
+      await storage.createTicketLog({
+        ticketId: ticket.id,
+        rmaNumber: ticket.rmaNumber,
+        action: 'ticket_updated',
+        description: `Ticket wurde von ${editedBy} bearbeitet`,
+        editedBy,
+        newValue: JSON.stringify(updates)
+      });
+      
+      res.json(ticket);
+    } catch (error) {
+      console.error('Error updating ticket:', error);
+      res.status(500).json({ message: "Failed to update ticket" });
+    }
+  });
+
+  // Admin: Get ticket logs
+  app.get("/api/admin/tickets/:rmaNumber/logs", requireAuth, async (req, res) => {
+    try {
+      const { rmaNumber } = req.params;
+      const logs = await storage.getTicketLogs(rmaNumber);
+      res.json(logs);
+    } catch (error) {
+      console.error('Error fetching ticket logs:', error);
+      res.status(500).json({ message: "Failed to fetch ticket logs" });
+    }
+  });
+
+  // Admin: Archive old tickets (manual trigger)
+  app.post("/api/admin/tickets/archive", requireAdmin, async (req, res) => {
+    try {
+      const archivedCount = await storage.archiveOldTickets();
+      res.json({ archivedCount });
+    } catch (error) {
+      console.error('Error archiving tickets:', error);
+      res.status(500).json({ message: "Failed to archive tickets" });
+    }
+  });
+
   // Admin: Update ticket status (both PATCH and PUT for compatibility)
   const updateTicketStatus = async (req: any, res: any) => {
     try {

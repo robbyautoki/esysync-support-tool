@@ -1,6 +1,6 @@
-import { users, customers, supportTickets, errorTypes, activityLogs, type User, type InsertUser, type InsertEmployee, type Customer, type InsertCustomer, type SupportTicket, type InsertSupportTicket, type ErrorType, type InsertErrorType, type ActivityLog, type InsertActivityLog } from "@shared/schema";
+import { users, customers, supportTickets, errorTypes, activityLogs, ticketLogs, type User, type InsertUser, type InsertEmployee, type Customer, type InsertCustomer, type SupportTicket, type InsertSupportTicket, type ErrorType, type InsertErrorType, type ActivityLog, type InsertActivityLog, type TicketLog, type InsertTicketLog } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, lt } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -17,7 +17,13 @@ export interface IStorage {
   createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
   getSupportTicket(rmaNumber: string): Promise<SupportTicket | undefined>;
   getAllSupportTickets(): Promise<SupportTicket[]>;
+  getArchivedTickets(): Promise<SupportTicket[]>;
   updateSupportTicketStatus(rmaNumber: string, status: string, statusDetails?: string, trackingNumber?: string): Promise<SupportTicket>;
+  updateSupportTicket(rmaNumber: string, updates: Partial<SupportTicket>, editedBy: string): Promise<SupportTicket>;
+  archiveOldTickets(): Promise<number>;
+  // Ticket log operations
+  createTicketLog(log: InsertTicketLog): Promise<TicketLog>;
+  getTicketLogs(rmaNumber: string): Promise<TicketLog[]>;
   getActiveErrorTypes(): Promise<ErrorType[]>;
   createErrorType(errorType: InsertErrorType): Promise<ErrorType>;
   updateErrorType(id: number, updates: Partial<InsertErrorType>): Promise<ErrorType>;
@@ -76,21 +82,69 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllSupportTickets(): Promise<SupportTicket[]> {
-    return await db.select().from(supportTickets).orderBy(supportTickets.createdAt);
+    return await db.select().from(supportTickets)
+      .where(eq(supportTickets.isArchived, false))
+      .orderBy(supportTickets.createdAt);
+  }
+
+  async getArchivedTickets(): Promise<SupportTicket[]> {
+    return await db.select().from(supportTickets)
+      .where(eq(supportTickets.isArchived, true))
+      .orderBy(supportTickets.archivedAt);
   }
 
   async updateSupportTicketStatus(rmaNumber: string, status: string, statusDetails?: string, trackingNumber?: string): Promise<SupportTicket> {
+    // Set workshop entry date when moving to workshop
+    const updateData: any = { 
+      status, 
+      statusDetails, 
+      trackingNumber,
+      updatedAt: new Date()
+    };
+    
+    if (status === 'workshop') {
+      updateData.workshopEntryDate = new Date();
+    }
+
+    const [ticket] = await db
+      .update(supportTickets)
+      .set(updateData)
+      .where(eq(supportTickets.rmaNumber, rmaNumber))
+      .returning();
+    return ticket;
+  }
+
+  async updateSupportTicket(rmaNumber: string, updates: Partial<SupportTicket>, editedBy: string): Promise<SupportTicket> {
     const [ticket] = await db
       .update(supportTickets)
       .set({ 
-        status, 
-        statusDetails, 
-        trackingNumber,
+        ...updates, 
+        lastEditedBy: editedBy,
         updatedAt: new Date()
       })
       .where(eq(supportTickets.rmaNumber, rmaNumber))
       .returning();
     return ticket;
+  }
+
+  async archiveOldTickets(): Promise<number> {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const result = await db
+      .update(supportTickets)
+      .set({ 
+        isArchived: true, 
+        archivedAt: new Date() 
+      })
+      .where(
+        and(
+          eq(supportTickets.isArchived, false),
+          lt(supportTickets.createdAt, thirtyDaysAgo)
+        )
+      );
+    
+    return result.length || 0;
   }
 
   async getActiveErrorTypes(): Promise<ErrorType[]> {
@@ -206,6 +260,23 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user;
+  }
+
+  // Ticket log operations
+  async createTicketLog(log: InsertTicketLog): Promise<TicketLog> {
+    const [ticketLog] = await db
+      .insert(ticketLogs)
+      .values(log)
+      .returning();
+    return ticketLog;
+  }
+
+  async getTicketLogs(rmaNumber: string): Promise<TicketLog[]> {
+    return await db
+      .select()
+      .from(ticketLogs)
+      .where(eq(ticketLogs.rmaNumber, rmaNumber))
+      .orderBy(ticketLogs.createdAt);
   }
 }
 

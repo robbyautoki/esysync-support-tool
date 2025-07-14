@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, BarChart3, LogOut, Plus, List, Edit, Trash2, Users, Mail, TrendingUp, FileText, UserPlus, Video, Play, Pause } from "lucide-react";
+import { Settings, BarChart3, LogOut, Plus, List, Edit, Trash2, Users, Mail, TrendingUp, FileText, UserPlus, Video, Play, Pause, Archive } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import KanbanBoard from "@/components/admin/kanban-board";
+import EnhancedKanbanBoard from "@/components/admin/enhanced-kanban-board";
 import CustomersOverview from "@/components/admin/customers-overview";
 import EmailSettings from "@/components/admin/email-settings";
 import Statistics from "@/components/admin/statistics";
@@ -476,6 +476,13 @@ export default function AdminPage() {
                 Mitarbeiter
               </button>
             )}
+            <button
+              onClick={() => window.location.href = '/archive'}
+              className="w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong transition-all duration-200 flex items-center text-left hover:bg-white/20"
+            >
+              <Archive className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+              Ticket-Archiv
+            </button>
           </div>
 
           {/* Logout Button */}
@@ -809,7 +816,7 @@ export default function AdminPage() {
         )}
 
         {activeTab === "kanban" && (
-          <KanbanBoard sessionId={sessionId!} />
+          <EnhancedKanbanBoard sessionId={sessionId!} />
         )}
 
         {activeTab === "customers" && (

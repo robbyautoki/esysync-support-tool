@@ -31,8 +31,32 @@ export const supportTickets = pgTable("support_tickets", {
   status: text("status").notNull().default("pending"), // pending, workshop, shipped
   statusDetails: text("status_details"), // Additional status information
   trackingNumber: text("tracking_number"), // For shipped items
+  // Extended ticket management fields
+  assignedTo: text("assigned_to"), // Zuständiger
+  processor: text("processor"), // Bearbeiter
+  notes: text("notes"), // Notizfeld
+  repairLog: text("repair_log"), // Log-Feld für Reparaturen
+  repairDetails: text("repair_details"), // Was wurde gemacht?
+  isArchived: boolean("is_archived").default(false).notNull(),
+  archivedAt: timestamp("archived_at"),
+  priorityLevel: text("priority_level").default("normal").notNull(), // normal, high, urgent
+  workshopEntryDate: timestamp("workshop_entry_date"), // Wann ins Workshop gekommen
+  lastEditedBy: text("last_edited_by"), // Wer hat zuletzt bearbeitet
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Neue Tabelle für Ticket-Bearbeitungslog
+export const ticketLogs = pgTable("ticket_logs", {
+  id: serial("id").primaryKey(),
+  ticketId: integer("ticket_id").notNull(),
+  rmaNumber: text("rma_number").notNull(),
+  action: text("action").notNull(), // status_change, note_added, repair_update, assignment_change
+  previousValue: text("previous_value"),
+  newValue: text("new_value"),
+  description: text("description").notNull(),
+  editedBy: text("edited_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const customers = pgTable("customers", {
@@ -74,6 +98,11 @@ export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit
   createdAt: true,
 });
 
+export const insertTicketLogSchema = createInsertSchema(ticketLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertCustomerSchema = createInsertSchema(customers).omit({
   id: true,
 });
@@ -92,6 +121,8 @@ export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
 export type Customer = typeof customers.$inferSelect;
 export type InsertErrorType = z.infer<typeof insertErrorTypeSchema>;
 export type ErrorType = typeof errorTypes.$inferSelect;
+export type InsertTicketLog = z.infer<typeof insertTicketLogSchema>;
+export type TicketLog = typeof ticketLogs.$inferSelect;
 
 // Activity log table for comprehensive system tracking
 export const activityLogs = pgTable("activity_logs", {
