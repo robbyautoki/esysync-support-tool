@@ -60,51 +60,53 @@ export default function Troubleshooting({ formData, updateFormData, onNext, onPr
           </div>
         ) : (
           <div className="space-y-8">
-            {/* Video Section */}
-            <div className="glassmorphism rounded-2xl p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                <Play className="w-5 h-5 mr-2" style={{ color: '#6d0df0' }} />
-                Video-Anleitung
-              </h3>
-              
-              {selectedError?.videoUrl ? (
-                (() => {
-                  const embeddableUrl = getEmbeddableVideoUrl(selectedError.videoUrl);
-                  const isYouTube = selectedError.videoUrl.includes('youtube.com') || selectedError.videoUrl.includes('youtu.be');
-                  
-                  return (
-                    <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100">
-                      {isYouTube ? (
-                        <iframe
-                          src={embeddableUrl}
-                          className="w-full h-full"
-                          frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          title="Video-Anleitung"
-                        />
-                      ) : (
-                        <video 
-                          controls 
-                          className="w-full h-full object-cover"
-                          poster="/api/placeholder/640/360"
-                        >
-                          <source src={selectedError.videoUrl} type="video/mp4" />
-                          Ihr Browser unterstützt keine HTML5-Videos.
-                        </video>
-                      )}
+            {/* Video Section - Only show if video is enabled */}
+            {selectedError?.videoEnabled && (
+              <div className="glassmorphism rounded-2xl p-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                  <Play className="w-5 h-5 mr-2" style={{ color: '#6d0df0' }} />
+                  Video-Anleitung
+                </h3>
+                
+                {selectedError?.videoUrl ? (
+                  (() => {
+                    const embeddableUrl = getEmbeddableVideoUrl(selectedError.videoUrl);
+                    const isYouTube = selectedError.videoUrl.includes('youtube.com') || selectedError.videoUrl.includes('youtu.be');
+                    
+                    return (
+                      <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100">
+                        {isYouTube ? (
+                          <iframe
+                            src={embeddableUrl}
+                            className="w-full h-full"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            title="Video-Anleitung"
+                          />
+                        ) : (
+                          <video 
+                            controls 
+                            className="w-full h-full object-cover"
+                            poster="/api/placeholder/640/360"
+                          >
+                            <source src={selectedError.videoUrl} type="video/mp4" />
+                            Ihr Browser unterstützt keine HTML5-Videos.
+                          </video>
+                        )}
+                      </div>
+                    );
+                  })()
+                ) : (
+                  <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
+                    <div className="text-center">
+                      <Play className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500">Kein Video verfügbar</p>
                     </div>
-                  );
-                })()
-              ) : (
-                <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
-                  <div className="text-center">
-                    <Play className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">Kein Video verfügbar</p>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             {/* Instructions Section */}
             <div className="glassmorphism rounded-2xl p-6">
