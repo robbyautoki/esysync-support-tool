@@ -603,12 +603,13 @@ export default function AdminPage() {
 
                   <div>
                     <Label htmlFor="instructions">Lösungsschritte</Label>
-                    <Input
+                    <textarea
                       id="instructions"
                       value={newErrorType.instructions}
                       onChange={(e) => setNewErrorType(prev => ({ ...prev, instructions: e.target.value }))}
                       placeholder="Schritt-für-Schritt Anweisungen"
-                      className="mt-1"
+                      rows={4}
+                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
                     />
                   </div>
 
@@ -693,11 +694,12 @@ export default function AdminPage() {
                               className="text-sm"
                               disabled={!editingData.videoEnabled}
                             />
-                            <Input
+                            <textarea
                               value={editingData.instructions}
                               onChange={(e) => setEditingData(prev => ({ ...prev, instructions: e.target.value }))}
                               placeholder="Lösungsschritte"
-                              className="text-sm"
+                              rows={4}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm resize-none"
                             />
                             <div className="flex gap-2">
                               <Button
