@@ -267,3 +267,14 @@ Preferred communication style: Simple, everyday language.
 - Tab-basierte Navigation: Activity Logs | Anomalie-Erkennung | Aktivitäts-Heatmap
 - Rollenbasierte Zugriffsbeschränkung: Nur Admins haben Zugriff auf "Logs"
 - Enhanced UI mit Purple-Theme und professioneller Datenvisualisierung
+
+✓ Video-Tutorial Management System (July 14, 2025)
+- Integriertes Video-Management direkt in der bestehenden Problemtyp-Verwaltung
+- Video-Aktivierung/Deaktivierung per Toggle-Switch für jeden Problemtyp
+- Live-Status-Anzeige mit Badges: "Aktiv" (grün), "Deaktiviert" (rot), "Kein Video" (gelb)
+- Backend-API für Video-Einstellungen: PATCH /api/admin/error-types/:id/video
+- Erweiterte Datenbank-Schema mit videoEnabled-Feld (boolean, default: true)
+- Video-Einstellungen sowohl im Edit-Modus als auch bei der Erstellung neuer Probleme
+- Benutzerfreundliche Warnung bei aktivierten Videos ohne konfigurierte URL
+- Vollständige Activity-Protokollierung aller Video-Einstellungsänderungen
+- Nahtlose Integration in bestehende glassmorphism Admin-Oberfläche

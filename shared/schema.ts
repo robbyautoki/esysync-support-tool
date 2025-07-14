@@ -49,6 +49,7 @@ export const errorTypes = pgTable("error_types", {
   description: text("description").notNull(),
   iconName: text("icon_name").notNull(),
   videoUrl: text("video_url"),
+  videoEnabled: boolean("video_enabled").default(true).notNull(),
   instructions: text("instructions"),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

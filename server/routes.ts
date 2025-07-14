@@ -242,6 +242,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Update video settings for error type
+  app.patch("/api/admin/error-types/:id/video", requireAdmin, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { videoEnabled, videoUrl } = req.body;
+      
+      const updates: any = {};
+      if (typeof videoEnabled === 'boolean') {
+        updates.videoEnabled = videoEnabled;
+      }
+      if (videoUrl !== undefined) {
+        updates.videoUrl = videoUrl || null;
+      }
+      
+      const errorType = await storage.updateErrorType(id, updates);
+      
+      await ActivityLogger.logErrorTypeUpdated(
+        `Video-Einstellungen für ${errorType.title}`, 
+        req.user.username, 
+        req
+      );
+      
+      res.json(errorType);
+    } catch (error) {
+      console.error("Error updating video settings:", error);
+      res.status(500).json({ message: "Failed to update video settings" });
+    }
+  });
+
   // Admin only: Get activity logs
   app.get("/api/admin/logs", requireAdmin, async (req, res) => {
     try {

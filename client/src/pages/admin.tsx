@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, BarChart3, LogOut, Plus, List, Edit, Trash2, Users, Mail, TrendingUp, FileText, UserPlus } from "lucide-react";
+import { Settings, BarChart3, LogOut, Plus, List, Edit, Trash2, Users, Mail, TrendingUp, FileText, UserPlus, Video, Play, Pause } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import KanbanBoard from "@/components/admin/kanban-board";
@@ -12,6 +14,7 @@ import EmailSettings from "@/components/admin/email-settings";
 import Statistics from "@/components/admin/statistics";
 import ActivityLogs from "@/components/admin/activity-logs";
 import Employees from "@/components/admin/employees";
+
 import type { ErrorType } from "@shared/schema";
 import logoPath from "@assets/logo.png";
 
@@ -80,6 +83,7 @@ export default function AdminPage() {
     description: "",
     iconName: "Monitor",
     videoUrl: "",
+    videoEnabled: true,
     instructions: "",
   });
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -89,6 +93,7 @@ export default function AdminPage() {
     description: "",
     iconName: "Monitor",
     videoUrl: "",
+    videoEnabled: true,
     instructions: "",
   });
   const { toast } = useToast();
@@ -223,6 +228,30 @@ export default function AdminPage() {
     },
   });
 
+  const videoToggleMutation = useMutation({
+    mutationFn: async ({ id, videoEnabled }: { id: number; videoEnabled: boolean }) => {
+      const response = await fetch(`/api/admin/error-types/${id}/video`, {
+        method: "PATCH",
+        body: JSON.stringify({ videoEnabled }),
+        headers: {
+          "Content-Type": "application/json",
+          "x-session-id": sessionId!,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update video settings");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/error-types"] });
+      toast({
+        title: "Video-Einstellungen aktualisiert",
+        description: "Die Video-Tutorial-Einstellungen wurden gespeichert.",
+      });
+    },
+  });
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     loginMutation.mutate(loginForm);
@@ -250,6 +279,7 @@ export default function AdminPage() {
       description: errorType.description,
       iconName: errorType.iconName,
       videoUrl: errorType.videoUrl || "",
+      videoEnabled: (errorType as any).videoEnabled ?? true,
       instructions: errorType.instructions || "",
     });
   };
@@ -269,6 +299,7 @@ export default function AdminPage() {
       description: "",
       iconName: "Monitor",
       videoUrl: "",
+      videoEnabled: true,
       instructions: "",
     });
   };
@@ -277,6 +308,20 @@ export default function AdminPage() {
     if (confirm("Sind Sie sicher, dass Sie dieses Problem löschen möchten?")) {
       deleteMutation.mutate(id);
     }
+  };
+
+  const handleVideoToggle = (id: number, currentVideoEnabled: boolean) => {
+    videoToggleMutation.mutate({ id, videoEnabled: !currentVideoEnabled });
+  };
+
+  const getVideoStatus = (errorType: ErrorType) => {
+    if (!(errorType as any).videoEnabled) {
+      return { text: "Deaktiviert", color: "bg-red-100 text-red-800", icon: Pause };
+    }
+    if (!errorType.videoUrl) {
+      return { text: "Kein Video", color: "bg-yellow-100 text-yellow-800", icon: Video };
+    }
+    return { text: "Aktiv", color: "bg-green-100 text-green-800", icon: Play };
   };
 
   // Login screen
@@ -507,6 +552,14 @@ export default function AdminPage() {
                     </select>
                   </div>
 
+                  <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+                    <Switch
+                      checked={newErrorType.videoEnabled}
+                      onCheckedChange={(checked) => setNewErrorType(prev => ({ ...prev, videoEnabled: checked }))}
+                    />
+                    <Label className="text-sm font-medium">Video-Tutorial aktiviert</Label>
+                  </div>
+
                   <div>
                     <Label htmlFor="videoUrl">Video URL (YouTube)</Label>
                     <Input
@@ -515,6 +568,7 @@ export default function AdminPage() {
                       onChange={(e) => setNewErrorType(prev => ({ ...prev, videoUrl: e.target.value }))}
                       placeholder="https://www.youtube.com/watch?v=..."
                       className="mt-1"
+                      disabled={!newErrorType.videoEnabled}
                     />
                   </div>
 
@@ -595,11 +649,19 @@ export default function AdminPage() {
                                 </option>
                               ))}
                             </select>
+                            <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded">
+                              <Switch
+                                checked={editingData.videoEnabled}
+                                onCheckedChange={(checked) => setEditingData(prev => ({ ...prev, videoEnabled: checked }))}
+                              />
+                              <Label className="text-sm">Video-Tutorial aktiviert</Label>
+                            </div>
                             <Input
                               value={editingData.videoUrl}
                               onChange={(e) => setEditingData(prev => ({ ...prev, videoUrl: e.target.value }))}
                               placeholder="Video URL"
                               className="text-sm"
+                              disabled={!editingData.videoEnabled}
                             />
                             <Input
                               value={editingData.instructions}
@@ -628,42 +690,74 @@ export default function AdminPage() {
                           </form>
                         ) : (
                           // Display Mode
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-gray-900 text-sm mb-1">
-                                {errorType.title}
-                              </h3>
-                              <p className="text-xs text-gray-600 mb-1">
-                                ID: {errorType.errorId}
-                              </p>
-                              <p className="text-xs text-gray-600 mb-1">
-                                {errorType.description}
-                              </p>
-                              {errorType.videoUrl && (
-                                <p className="text-xs text-purple-600">
-                                  📹 Video verfügbar
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-gray-900 text-sm mb-1">
+                                  {errorType.title}
+                                </h3>
+                                <p className="text-xs text-gray-600 mb-1">
+                                  ID: {errorType.errorId}
                                 </p>
-                              )}
+                                <p className="text-xs text-gray-600 mb-1">
+                                  {errorType.description}
+                                </p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  onClick={() => handleEdit(errorType)}
+                                  variant="outline"
+                                  size="sm"
+                                  className="px-3 py-1 text-xs rounded-lg"
+                                >
+                                  <Edit className="w-3 h-3 mr-1" />
+                                  Bearbeiten
+                                </Button>
+                                <Button
+                                  onClick={() => handleDelete(errorType.id)}
+                                  variant="outline"
+                                  size="sm"
+                                  className="px-3 py-1 text-xs rounded-lg border-red-300 text-red-600 hover:bg-red-50"
+                                >
+                                  <Trash2 className="w-3 h-3 mr-1" />
+                                  Löschen
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex gap-2">
-                              <Button
-                                onClick={() => handleEdit(errorType)}
-                                variant="outline"
-                                size="sm"
-                                className="px-3 py-1 text-xs rounded-lg"
-                              >
-                                <Edit className="w-3 h-3 mr-1" />
-                                Bearbeiten
-                              </Button>
-                              <Button
-                                onClick={() => handleDelete(errorType.id)}
-                                variant="outline"
-                                size="sm"
-                                className="px-3 py-1 text-xs rounded-lg border-red-300 text-red-600 hover:bg-red-50"
-                              >
-                                <Trash2 className="w-3 h-3 mr-1" />
-                                Löschen
-                              </Button>
+                            
+                            {/* Video Management Section */}
+                            <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <Video className="h-4 w-4 text-gray-600" />
+                                  <span className="text-xs font-medium text-gray-700">Video-Tutorial</span>
+                                  {(() => {
+                                    const status = getVideoStatus(errorType);
+                                    const StatusIcon = status.icon;
+                                    return (
+                                      <Badge className={`${status.color} text-xs`}>
+                                        <StatusIcon className="h-3 w-3 mr-1" />
+                                        {status.text}
+                                      </Badge>
+                                    );
+                                  })()}
+                                </div>
+                                <Switch
+                                  checked={(errorType as any).videoEnabled ?? true}
+                                  onCheckedChange={() => handleVideoToggle(errorType.id, (errorType as any).videoEnabled ?? true)}
+                                  disabled={videoToggleMutation.isPending}
+                                />
+                              </div>
+                              {(errorType as any).videoEnabled && errorType.videoUrl && (
+                                <div className="text-xs text-gray-600">
+                                  <p className="break-all">{errorType.videoUrl}</p>
+                                </div>
+                              )}
+                              {(errorType as any).videoEnabled && !errorType.videoUrl && (
+                                <div className="text-xs text-yellow-700 bg-yellow-50 p-2 rounded">
+                                  ⚠️ Video aktiviert, aber keine URL konfiguriert
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}
