@@ -100,8 +100,12 @@ export default function PDFGeneration({ formData, updateFormData, onStartOver }:
     const pdfData = {
       rmaNumber: formData.rmaNumber!,
       customerNumber: formData.accountNumber!,
+      accountNumber: formData.accountNumber!,
+      displayNumber: formData.displayNumber!,
+      displayLocation: formData.displayLocation!,
+      contactEmail: formData.contactEmail!,
       errorType: errorDisplayNames[formData.selectedError as keyof typeof errorDisplayNames],
-      shippingMethod: shippingDisplayNames[formData.shippingMethod as keyof typeof shippingDisplayNames],
+      shippingMethod: formData.shippingMethod!,
       address: formData.returnAddress || formData.displayLocation!,
     };
 
@@ -109,7 +113,7 @@ export default function PDFGeneration({ formData, updateFormData, onStartOver }:
     
     toast({
       title: "PDF heruntergeladen",
-      description: "Das RMA-Dokument wurde erfolgreich heruntergeladen.",
+      description: "Das RMA-Dokument wurde erfolgreich als PDF heruntergeladen.",
     });
   };
 
