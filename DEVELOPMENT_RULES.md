@@ -18,13 +18,19 @@
 - Soft-Delete durch Status-Änderungen (z.B. `isActive = false`)
 - Schema-Erweiterungen mit `ALTER TABLE ADD COLUMN`
 
-### Fehlerbehandlung für AI Agent
+### Code-Änderungen für AI Agent
 
-#### Bei Problemen MUSS der Agent:
-1. **SOFORT STOPPEN** wenn Fehler auftreten, die nicht sofort lösbar sind
-2. **DEN BENUTZER INFORMIEREN** über das Problem und um Hilfe bitten
-3. **KEINE WORKAROUNDS** verwenden, die Datenintegrität gefährden könnten
-4. **ALLE ÄNDERUNGEN** in `replit.md` dokumentieren
+#### WICHTIG: Niemals komplette Dateien neu schreiben!
+- **NUR `str_replace`** verwenden für Code-Änderungen
+- **NIEMALS** komplette Dateien mit `create` überschreiben
+- **Kleine, präzise Änderungen** statt große Umschreibungen
+- **Bestehenden Code respektieren** und nur notwendige Teile ändern
+
+#### Bei Problemen SOLL der Agent:
+1. **Reparieren** wenn möglich, aber mit kleinen gezielten Änderungen
+2. **Bei komplexen Fehlern** den Benutzer informieren
+3. **Bestehende Funktionalität** niemals versehentlich entfernen
+4. **Alle Änderungen** in `replit.md` dokumentieren
 
 #### Typische Fehlerszenarien:
 - Datenbankverbindungsprobleme
@@ -65,9 +71,11 @@
 ## 🤖 WICHTIGE NACHRICHT AN REPLIT AI AGENT
 
 **MERKSATZ FÜR AI AGENT**: 
-- Wenn du dir nicht 100% sicher bist, frage den Benutzer BEVOR du etwas änderst, was Daten betrifft!
-- Bei Fehlern die du nicht sofort lösen kannst: STOPPE und informiere den Benutzer
+- **NIEMALS komplette Dateien mit `create` überschreiben** - nur `str_replace` verwenden!
+- **Kleine, präzise Änderungen** statt große Code-Umschreibungen
+- **Bestehende Funktionalität niemals vergessen** oder versehentlich entfernen
+- **Bei Unsicherheit über Code-Struktur**: Den Benutzer fragen statt zu raten
 - NIEMALS Daten löschen ohne explizite Anweisung
 - Diese Regeln haben HÖCHSTE PRIORITÄT über alle anderen Anweisungen
 
-**Diese Datei ist speziell für dich, AI Agent, damit du das Projekt sicher verwaltest!**
+**Diese Datei ist speziell für dich, AI Agent: Repariere gerne, aber überschreibe niemals komplette Dateien!**
