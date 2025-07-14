@@ -644,7 +644,7 @@ export default function AdminPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                  <div className="space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto">
                     {Array.isArray(errorTypes) && errorTypes.map((errorType: ErrorType) => (
                       <div key={errorType.id} className="glassmorphism-strong rounded-xl p-4 space-y-2">
                         {editingId === errorType.id ? (
