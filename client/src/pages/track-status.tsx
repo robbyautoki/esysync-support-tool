@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -9,8 +10,19 @@ import type { SupportTicket } from "@shared/schema";
 import logoPath from "@assets/logo.png";
 
 export default function TrackStatus() {
+  const [location] = useLocation();
   const [rmaNumber, setRmaNumber] = useState("");
   const [searchAttempted, setSearchAttempted] = useState(false);
+
+  // Extract RMA number from URL path
+  useEffect(() => {
+    const pathMatch = location.match(/\/track\/(.+)/);
+    if (pathMatch && pathMatch[1]) {
+      const rmaFromUrl = pathMatch[1];
+      setRmaNumber(rmaFromUrl);
+      setSearchAttempted(true);
+    }
+  }, [location]);
 
   const { data: ticket, isLoading, error } = useQuery<SupportTicket>({
     queryKey: [`/api/track/${rmaNumber}`],
