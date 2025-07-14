@@ -108,6 +108,21 @@ export function generatePDF(data: PDFData) {
       }
     });
     
+    // Return address section
+    yPosition += 10;
+    pdf.setFontSize(14);
+    pdf.setTextColor(109, 13, 240);
+    pdf.text('Rücksende-Adresse:', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(11);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('AVANTO VR Solutions GmbH', 20, yPosition);
+    yPosition += 6;
+    pdf.text('Otto-Lilienthal-Str. 20', 20, yPosition);
+    yPosition += 6;
+    pdf.text('28199 Bremen', 20, yPosition);
+    
     // Footer
     pdf.setFontSize(10);
     pdf.setTextColor(120, 120, 120);
@@ -190,6 +205,18 @@ export function generatePDF(data: PDFData) {
         }
       });
       
+      y += gap;
+      pdf.setFontSize(12);
+      pdf.text('Rücksende-Adresse:', 20, y);
+      y += gap;
+      
+      pdf.setFontSize(11);
+      pdf.text('AVANTO VR Solutions GmbH', 20, y);
+      y += 6;
+      pdf.text('Otto-Lilienthal-Str. 20', 20, y);
+      y += 6;
+      pdf.text('28199 Bremen', 20, y);
+      
       pdf.setFontSize(10);
       pdf.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 20, 280);
       pdf.text('ESYSYNC Service Center', 80, 280);
@@ -211,6 +238,11 @@ Versandoption: ${data.shippingMethod}
 
 Versandadresse:
 ${data.address}
+
+Rücksende-Adresse:
+AVANTO VR Solutions GmbH
+Otto-Lilienthal-Str. 20
+28199 Bremen
 
 Erstellt am: ${new Date().toLocaleDateString('de-DE')}`;
       
