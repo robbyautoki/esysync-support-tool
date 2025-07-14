@@ -22,6 +22,7 @@ import Statistics from "@/components/admin/statistics";
 import ActivityLogs from "@/components/admin/activity-logs";
 import Employees from "@/components/admin/employees";
 import { ErrorType } from "@/shared/schema";
+import logoPath from "@assets/logo.png";
 
 export default function AdminPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -321,7 +322,19 @@ export default function AdminPage() {
   if (!sessionId) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="w-full max-w-md glassmorphism border-0 apple-shadow">
+        {/* Fixed Header with Logo */}
+        <header className="fixed top-0 left-0 right-0 z-50 glassmorphism">
+          <div className="max-w-6xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <img src={logoPath} alt="ESYSYNC Logo" className="h-8 w-auto" />
+                <span className="ml-3 text-xl font-bold text-gray-900">Admin Dashboard</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <Card className="w-full max-w-md glassmorphism border-0 apple-shadow mt-20">
           <CardHeader>
             <CardTitle className="text-center text-gray-900">Admin Login</CardTitle>
           </CardHeader>
@@ -365,452 +378,466 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Fixed Left Sidebar */}
-      <div className="fixed inset-y-0 left-0 w-80 glassmorphism border-r border-white/20 p-6 z-10">
-        <div className="h-full flex flex-col">
-          {/* Navigation */}
-          <div className="space-y-2">
-            <button
-              onClick={() => setActiveTab("problems")}
-              className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
-                activeTab === "problems" 
-                  ? "bg-white/30 text-gray-900 apple-shadow" 
-                  : "text-gray-700 hover:bg-white/20"
-              }`}
-            >
-              <Settings className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
-              Display-Probleme
-            </button>
-            
-            <button
-              onClick={() => setActiveTab("kanban")}
-              className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
-                activeTab === "kanban" 
-                  ? "bg-white/30 text-gray-900 apple-shadow" 
-                  : "text-gray-700 hover:bg-white/20"
-              }`}
-            >
-              <BarChart3 className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
-              Ticket-Verwaltung
-            </button>
-
-            <button
-              onClick={() => setActiveTab("customers")}
-              className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
-                activeTab === "customers" 
-                  ? "bg-white/30 text-gray-900 apple-shadow" 
-                  : "text-gray-700 hover:bg-white/20"
-              }`}
-            >
-              <Users className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
-              Kunden-Übersicht
-            </button>
-
-            <button
-              onClick={() => setActiveTab("email")}
-              className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
-                activeTab === "email" 
-                  ? "bg-white/30 text-gray-900 apple-shadow" 
-                  : "text-gray-700 hover:bg-white/20"
-              }`}
-            >
-              <Mail className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
-              E-Mail-Einstellungen
-            </button>
-
-            <button
-              onClick={() => setActiveTab("statistics")}
-              className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
-                activeTab === "statistics" 
-                  ? "bg-white/30 text-gray-900 apple-shadow" 
-                  : "text-gray-700 hover:bg-white/20"
-              }`}
-            >
-              <BarChart3 className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
-              Statistiken
-            </button>
-
-            {userRole === "admin" && (
-              <button
-                onClick={() => setActiveTab("logs")}
-                className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
-                  activeTab === "logs" 
-                    ? "bg-white/30 text-gray-900 apple-shadow" 
-                    : "text-gray-700 hover:bg-white/20"
-                }`}
-              >
-                <Activity className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
-                Logs
-              </button>
-            )}
-
-            {userRole === "admin" && (
-              <button
-                onClick={() => setActiveTab("employees")}
-                className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
-                  activeTab === "employees" 
-                    ? "bg-white/30 text-gray-900 apple-shadow" 
-                    : "text-gray-700 hover:bg-white/20"
-                }`}
-              >
-                <UserPlus className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
-                Mitarbeiter
-              </button>
-            )}
-          </div>
-
-          {/* Logout Button */}
-          <div className="mt-8 pt-8 border-t border-white/20">
-            <Button
-              onClick={handleLogout}
-              variant="outline"
-              className="w-full px-4 py-3 border border-red-300 text-red-600 rounded-xl hover:bg-red-50 glassmorphism-strong"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Abmelden
-            </Button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Fixed Header with Logo */}
+      <header className="fixed top-0 left-0 right-0 z-50 glassmorphism">
+        <div className="max-w-6xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <img src={logoPath} alt="ESYSYNC Logo" className="h-8 w-auto" />
+              <span className="ml-3 text-xl font-bold text-gray-900">Admin Dashboard</span>
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Main Content Area */}
-      <div className="flex-1 ml-80 p-8">
-        {activeTab === "problems" && (
-          <div className="space-y-8">
-            {/* Add New Problem Button */}
-            {!showNewProblemForm && (
-              <div className="flex justify-center">
-                <Button
-                  onClick={() => setShowNewProblemForm(true)}
-                  className="px-8 py-4 text-white rounded-xl apple-shadow hover:shadow-lg transition-all duration-200 text-lg"
-                  style={{ backgroundColor: '#6d0df0' }}
+      <div className="flex pt-20">
+        {/* Fixed Left Sidebar */}
+        <div className="fixed inset-y-0 left-0 w-80 glassmorphism border-r border-white/20 p-6 z-10 pt-24">
+          <div className="h-full flex flex-col">
+            {/* Navigation */}
+            <div className="space-y-2">
+              <button
+                onClick={() => setActiveTab("problems")}
+                className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
+                  activeTab === "problems" 
+                    ? "bg-white/30 text-gray-900 apple-shadow" 
+                    : "text-gray-700 hover:bg-white/20"
+                }`}
+              >
+                <Settings className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+                Display-Probleme
+              </button>
+              
+              <button
+                onClick={() => setActiveTab("kanban")}
+                className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
+                  activeTab === "kanban" 
+                    ? "bg-white/30 text-gray-900 apple-shadow" 
+                    : "text-gray-700 hover:bg-white/20"
+                }`}
+              >
+                <BarChart3 className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+                Ticket-Verwaltung
+              </button>
+
+              <button
+                onClick={() => setActiveTab("customers")}
+                className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
+                  activeTab === "customers" 
+                    ? "bg-white/30 text-gray-900 apple-shadow" 
+                    : "text-gray-700 hover:bg-white/20"
+                }`}
+              >
+                <Users className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+                Kunden-Übersicht
+              </button>
+
+              <button
+                onClick={() => setActiveTab("email")}
+                className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
+                  activeTab === "email" 
+                    ? "bg-white/30 text-gray-900 apple-shadow" 
+                    : "text-gray-700 hover:bg-white/20"
+                }`}
+              >
+                <Mail className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+                E-Mail-Einstellungen
+              </button>
+
+              <button
+                onClick={() => setActiveTab("statistics")}
+                className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
+                  activeTab === "statistics" 
+                    ? "bg-white/30 text-gray-900 apple-shadow" 
+                    : "text-gray-700 hover:bg-white/20"
+                }`}
+              >
+                <BarChart3 className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+                Statistiken
+              </button>
+
+              {userRole === "admin" && (
+                <button
+                  onClick={() => setActiveTab("logs")}
+                  className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
+                    activeTab === "logs" 
+                      ? "bg-white/30 text-gray-900 apple-shadow" 
+                      : "text-gray-700 hover:bg-white/20"
+                  }`}
                 >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Neues Problem hinzufügen
-                </Button>
-              </div>
-            )}
+                  <Activity className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+                  Logs
+                </button>
+              )}
 
-            {/* Add New Problem Form */}
-            {showNewProblemForm && (
-              <Card className="glassmorphism border-0 apple-shadow max-w-2xl mx-auto">
+              {userRole === "admin" && (
+                <button
+                  onClick={() => setActiveTab("employees")}
+                  className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
+                    activeTab === "employees" 
+                      ? "bg-white/30 text-gray-900 apple-shadow" 
+                      : "text-gray-700 hover:bg-white/20"
+                  }`}
+                >
+                  <UserPlus className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+                  Mitarbeiter
+                </button>
+              )}
+            </div>
+
+            {/* Logout Button */}
+            <div className="mt-8 pt-8 border-t border-white/20">
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                className="w-full px-4 py-3 border border-red-300 text-red-600 rounded-xl hover:bg-red-50 glassmorphism-strong"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Abmelden
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1 ml-80 p-8">
+          {activeTab === "problems" && (
+            <div className="space-y-8">
+              {/* Add New Problem Button */}
+              {!showNewProblemForm && (
+                <div className="flex justify-center">
+                  <Button
+                    onClick={() => setShowNewProblemForm(true)}
+                    className="px-8 py-4 text-white rounded-xl apple-shadow hover:shadow-lg transition-all duration-200 text-lg"
+                    style={{ backgroundColor: '#6d0df0' }}
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Neues Problem hinzufügen
+                  </Button>
+                </div>
+              )}
+
+              {/* Add New Problem Form */}
+              {showNewProblemForm && (
+                <Card className="glassmorphism border-0 apple-shadow max-w-2xl mx-auto">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center text-gray-900">
+                        <Plus className="w-5 h-5 mr-2" style={{ color: '#6d0df0' }} />
+                        Neues Problem hinzufügen
+                      </CardTitle>
+                      <Button
+                        onClick={() => {
+                          setShowNewProblemForm(false);
+                          setNewErrorType({
+                            errorId: "",
+                            title: "",
+                            description: "",
+                            iconName: "Monitor",
+                            videoUrl: "",
+                            videoEnabled: true,
+                            instructions: "",
+                          });
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        Abbrechen
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleCreate} className="space-y-4">
+                      <div>
+                        <Label htmlFor="errorId">Problem-ID</Label>
+                        <Input
+                          id="errorId"
+                          value={newErrorType.errorId}
+                          onChange={(e) => setNewErrorType(prev => ({ ...prev, errorId: e.target.value }))}
+                          placeholder="z.B. display-flicker"
+                          className="mt-1"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="title">Titel</Label>
+                        <Input
+                          id="title"
+                          value={newErrorType.title}
+                          onChange={(e) => setNewErrorType(prev => ({ ...prev, title: e.target.value }))}
+                          placeholder="z.B. Display flackert"
+                          className="mt-1"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="description">Beschreibung</Label>
+                        <Input
+                          id="description"
+                          value={newErrorType.description}
+                          onChange={(e) => setNewErrorType(prev => ({ ...prev, description: e.target.value }))}
+                          placeholder="Detaillierte Beschreibung des Problems"
+                          className="mt-1"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="iconName">Icon</Label>
+                        <select
+                          id="iconName"
+                          value={newErrorType.iconName}
+                          onChange={(e) => setNewErrorType(prev => ({ ...prev, iconName: e.target.value }))}
+                          className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        >
+                          {iconOptions.map(option => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+                        <Switch
+                          checked={newErrorType.videoEnabled}
+                          onCheckedChange={(checked) => setNewErrorType(prev => ({ ...prev, videoEnabled: checked }))}
+                        />
+                        <Label className="text-sm font-medium">Video-Tutorial aktiviert</Label>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="videoUrl">Video URL (YouTube)</Label>
+                        <Input
+                          id="videoUrl"
+                          value={newErrorType.videoUrl}
+                          onChange={(e) => setNewErrorType(prev => ({ ...prev, videoUrl: e.target.value }))}
+                          placeholder="https://www.youtube.com/watch?v=..."
+                          className="mt-1"
+                          disabled={!newErrorType.videoEnabled}
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="instructions">Lösungsschritte</Label>
+                        <Input
+                          id="instructions"
+                          value={newErrorType.instructions}
+                          onChange={(e) => setNewErrorType(prev => ({ ...prev, instructions: e.target.value }))}
+                          placeholder="Schritt-für-Schritt Anweisungen"
+                          className="mt-1"
+                        />
+                      </div>
+
+                      <Button
+                        type="submit"
+                        disabled={createMutation.isPending}
+                        className="w-full text-white rounded-xl py-3"
+                        style={{ backgroundColor: '#6d0df0' }}
+                      >
+                        {createMutation.isPending ? "Erstellen..." : "Problem erstellen"}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Existing Problems */}
+              <Card className="glassmorphism border-0 apple-shadow">
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center text-gray-900">
-                      <Plus className="w-5 h-5 mr-2" style={{ color: '#6d0df0' }} />
-                      Neues Problem hinzufügen
-                    </CardTitle>
-                    <Button
-                      onClick={() => {
-                        setShowNewProblemForm(false);
-                        setNewErrorType({
-                          errorId: "",
-                          title: "",
-                          description: "",
-                          iconName: "Monitor",
-                          videoUrl: "",
-                          videoEnabled: true,
-                          instructions: "",
-                        });
-                      }}
-                      variant="outline"
-                      size="sm"
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      Abbrechen
-                    </Button>
-                  </div>
+                  <CardTitle className="flex items-center text-gray-900">
+                    <List className="w-5 h-5 mr-2" style={{ color: '#6d0df0' }} />
+                    Bestehende Probleme
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleCreate} className="space-y-4">
-                    <div>
-                      <Label htmlFor="errorId">Problem-ID</Label>
-                      <Input
-                        id="errorId"
-                        value={newErrorType.errorId}
-                        onChange={(e) => setNewErrorType(prev => ({ ...prev, errorId: e.target.value }))}
-                        placeholder="z.B. display-flicker"
-                        className="mt-1"
-                      />
+                  {isLoading ? (
+                    <div className="space-y-4">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="glassmorphism-strong rounded-xl p-4 animate-pulse">
+                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                      ))}
                     </div>
-
-                    <div>
-                      <Label htmlFor="title">Titel</Label>
-                      <Input
-                        id="title"
-                        value={newErrorType.title}
-                        onChange={(e) => setNewErrorType(prev => ({ ...prev, title: e.target.value }))}
-                        placeholder="z.B. Display flackert"
-                        className="mt-1"
-                      />
+                  ) : (
+                    <div className="space-y-4 max-h-96 overflow-y-auto">
+                      {Array.isArray(errorTypes) && errorTypes.map((errorType: ErrorType) => (
+                        <div key={errorType.id} className="glassmorphism-strong rounded-xl p-4 space-y-2">
+                          {editingId === errorType.id ? (
+                            // Edit Mode
+                            <form onSubmit={handleUpdate} className="space-y-3">
+                              <Input
+                                value={editingData.errorId}
+                                onChange={(e) => setEditingData(prev => ({ ...prev, errorId: e.target.value }))}
+                                placeholder="Problem-ID"
+                                className="text-sm"
+                              />
+                              <Input
+                                value={editingData.title}
+                                onChange={(e) => setEditingData(prev => ({ ...prev, title: e.target.value }))}
+                                placeholder="Titel"
+                                className="text-sm"
+                              />
+                              <Input
+                                value={editingData.description}
+                                onChange={(e) => setEditingData(prev => ({ ...prev, description: e.target.value }))}
+                                placeholder="Beschreibung"
+                                className="text-sm"
+                              />
+                              <select
+                                value={editingData.iconName}
+                                onChange={(e) => setEditingData(prev => ({ ...prev, iconName: e.target.value }))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                              >
+                                {iconOptions.map(option => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                              <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded">
+                                <Switch
+                                  checked={editingData.videoEnabled}
+                                  onCheckedChange={(checked) => setEditingData(prev => ({ ...prev, videoEnabled: checked }))}
+                                />
+                                <Label className="text-sm">Video-Tutorial aktiviert</Label>
+                              </div>
+                              <Input
+                                value={editingData.videoUrl}
+                                onChange={(e) => setEditingData(prev => ({ ...prev, videoUrl: e.target.value }))}
+                                placeholder="Video URL"
+                                className="text-sm"
+                                disabled={!editingData.videoEnabled}
+                              />
+                              <Input
+                                value={editingData.instructions}
+                                onChange={(e) => setEditingData(prev => ({ ...prev, instructions: e.target.value }))}
+                                placeholder="Lösungsschritte"
+                                className="text-sm"
+                              />
+                              <div className="flex space-x-2">
+                                <Button type="submit" size="sm" style={{ backgroundColor: '#6d0df0', color: 'white' }}>
+                                  <Save className="w-3 h-3 mr-1" />
+                                  Speichern
+                                </Button>
+                                <Button 
+                                  type="button" 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => setEditingId(null)}
+                                >
+                                  <X className="w-3 h-3 mr-1" />
+                                  Abbrechen
+                                </Button>
+                              </div>
+                            </form>
+                          ) : (
+                            // View Mode
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <h3 className="font-semibold text-gray-900">{errorType.title}</h3>
+                                <div className="flex space-x-1">
+                                  <Button
+                                    onClick={() => handleEdit(errorType)}
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <Edit2 className="w-3 h-3" />
+                                  </Button>
+                                  <Button
+                                    onClick={() => deleteMutation.mutate(errorType.id)}
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-8 w-8 p-0 text-red-600"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-600">{errorType.description}</p>
+                              <div className="flex items-center justify-between text-xs text-gray-500">
+                                <span>ID: {errorType.errorId}</span>
+                                <span>Icon: {errorType.iconName}</span>
+                              </div>
+                              
+                              {/* Video Management Section */}
+                              <div className="border-t pt-2 mt-2">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center space-x-2">
+                                    <Video className="h-4 w-4 text-gray-600" />
+                                    <span className="text-xs font-medium text-gray-700">Video-Tutorial</span>
+                                    {(() => {
+                                      const status = getVideoStatus(errorType);
+                                      const StatusIcon = status.icon;
+                                      return (
+                                        <Badge className={`${status.color} text-xs`}>
+                                          <StatusIcon className="h-3 w-3 mr-1" />
+                                          {status.text}
+                                        </Badge>
+                                      );
+                                    })()}
+                                  </div>
+                                  <Switch
+                                    checked={(errorType as any).videoEnabled ?? true}
+                                    onCheckedChange={() => handleVideoToggle(errorType.id, (errorType as any).videoEnabled ?? true)}
+                                    disabled={videoToggleMutation.isPending}
+                                  />
+                                </div>
+                                {(errorType as any).videoEnabled && errorType.videoUrl && (
+                                  <div className="text-xs text-gray-600">
+                                    <p className="break-all">{errorType.videoUrl}</p>
+                                  </div>
+                                )}
+                                {(errorType as any).videoEnabled && !errorType.videoUrl && (
+                                  <div className="text-xs text-yellow-700 bg-yellow-50 p-2 rounded">
+                                    ⚠️ Video aktiviert, aber keine URL konfiguriert
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      
+                      {Array.isArray(errorTypes) && errorTypes.length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                          Noch keine Probleme erstellt
+                        </div>
+                      )}
                     </div>
-
-                    <div>
-                      <Label htmlFor="description">Beschreibung</Label>
-                      <Input
-                        id="description"
-                        value={newErrorType.description}
-                        onChange={(e) => setNewErrorType(prev => ({ ...prev, description: e.target.value }))}
-                        placeholder="Detaillierte Beschreibung des Problems"
-                        className="mt-1"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="iconName">Icon</Label>
-                      <select
-                        id="iconName"
-                        value={newErrorType.iconName}
-                        onChange={(e) => setNewErrorType(prev => ({ ...prev, iconName: e.target.value }))}
-                        className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      >
-                        {iconOptions.map(option => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
-                      <Switch
-                        checked={newErrorType.videoEnabled}
-                        onCheckedChange={(checked) => setNewErrorType(prev => ({ ...prev, videoEnabled: checked }))}
-                      />
-                      <Label className="text-sm font-medium">Video-Tutorial aktiviert</Label>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="videoUrl">Video URL (YouTube)</Label>
-                      <Input
-                        id="videoUrl"
-                        value={newErrorType.videoUrl}
-                        onChange={(e) => setNewErrorType(prev => ({ ...prev, videoUrl: e.target.value }))}
-                        placeholder="https://www.youtube.com/watch?v=..."
-                        className="mt-1"
-                        disabled={!newErrorType.videoEnabled}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="instructions">Lösungsschritte</Label>
-                      <Input
-                        id="instructions"
-                        value={newErrorType.instructions}
-                        onChange={(e) => setNewErrorType(prev => ({ ...prev, instructions: e.target.value }))}
-                        placeholder="Schritt-für-Schritt Anweisungen"
-                        className="mt-1"
-                      />
-                    </div>
-
-                    <Button
-                      type="submit"
-                      disabled={createMutation.isPending}
-                      className="w-full text-white rounded-xl py-3"
-                      style={{ backgroundColor: '#6d0df0' }}
-                    >
-                      {createMutation.isPending ? "Erstellen..." : "Problem erstellen"}
-                    </Button>
-                  </form>
+                  )}
                 </CardContent>
               </Card>
-            )}
+            </div>
+          )}
 
-            {/* Existing Problems */}
-            <Card className="glassmorphism border-0 apple-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center text-gray-900">
-                  <List className="w-5 h-5 mr-2" style={{ color: '#6d0df0' }} />
-                  Bestehende Probleme
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="space-y-4">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="glassmorphism-strong rounded-xl p-4 animate-pulse">
-                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
-                    {Array.isArray(errorTypes) && errorTypes.map((errorType: ErrorType) => (
-                      <div key={errorType.id} className="glassmorphism-strong rounded-xl p-4 space-y-2">
-                        {editingId === errorType.id ? (
-                          // Edit Mode
-                          <form onSubmit={handleUpdate} className="space-y-3">
-                            <Input
-                              value={editingData.errorId}
-                              onChange={(e) => setEditingData(prev => ({ ...prev, errorId: e.target.value }))}
-                              placeholder="Problem-ID"
-                              className="text-sm"
-                            />
-                            <Input
-                              value={editingData.title}
-                              onChange={(e) => setEditingData(prev => ({ ...prev, title: e.target.value }))}
-                              placeholder="Titel"
-                              className="text-sm"
-                            />
-                            <Input
-                              value={editingData.description}
-                              onChange={(e) => setEditingData(prev => ({ ...prev, description: e.target.value }))}
-                              placeholder="Beschreibung"
-                              className="text-sm"
-                            />
-                            <select
-                              value={editingData.iconName}
-                              onChange={(e) => setEditingData(prev => ({ ...prev, iconName: e.target.value }))}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
-                            >
-                              {iconOptions.map(option => (
-                                <option key={option.value} value={option.value}>
-                                  {option.label}
-                                </option>
-                              ))}
-                            </select>
-                            <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded">
-                              <Switch
-                                checked={editingData.videoEnabled}
-                                onCheckedChange={(checked) => setEditingData(prev => ({ ...prev, videoEnabled: checked }))}
-                              />
-                              <Label className="text-sm">Video-Tutorial aktiviert</Label>
-                            </div>
-                            <Input
-                              value={editingData.videoUrl}
-                              onChange={(e) => setEditingData(prev => ({ ...prev, videoUrl: e.target.value }))}
-                              placeholder="Video URL"
-                              className="text-sm"
-                              disabled={!editingData.videoEnabled}
-                            />
-                            <Input
-                              value={editingData.instructions}
-                              onChange={(e) => setEditingData(prev => ({ ...prev, instructions: e.target.value }))}
-                              placeholder="Lösungsschritte"
-                              className="text-sm"
-                            />
-                            <div className="flex space-x-2">
-                              <Button type="submit" size="sm" style={{ backgroundColor: '#6d0df0', color: 'white' }}>
-                                <Save className="w-3 h-3 mr-1" />
-                                Speichern
-                              </Button>
-                              <Button 
-                                type="button" 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={() => setEditingId(null)}
-                              >
-                                <X className="w-3 h-3 mr-1" />
-                                Abbrechen
-                              </Button>
-                            </div>
-                          </form>
-                        ) : (
-                          // View Mode
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <h3 className="font-semibold text-gray-900">{errorType.title}</h3>
-                              <div className="flex space-x-1">
-                                <Button
-                                  onClick={() => handleEdit(errorType)}
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-8 w-8 p-0"
-                                >
-                                  <Edit2 className="w-3 h-3" />
-                                </Button>
-                                <Button
-                                  onClick={() => deleteMutation.mutate(errorType.id)}
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-8 w-8 p-0 text-red-600"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </Button>
-                              </div>
-                            </div>
-                            <p className="text-sm text-gray-600">{errorType.description}</p>
-                            <div className="flex items-center justify-between text-xs text-gray-500">
-                              <span>ID: {errorType.errorId}</span>
-                              <span>Icon: {errorType.iconName}</span>
-                            </div>
-                            
-                            {/* Video Management Section */}
-                            <div className="border-t pt-2 mt-2">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center space-x-2">
-                                  <Video className="h-4 w-4 text-gray-600" />
-                                  <span className="text-xs font-medium text-gray-700">Video-Tutorial</span>
-                                  {(() => {
-                                    const status = getVideoStatus(errorType);
-                                    const StatusIcon = status.icon;
-                                    return (
-                                      <Badge className={`${status.color} text-xs`}>
-                                        <StatusIcon className="h-3 w-3 mr-1" />
-                                        {status.text}
-                                      </Badge>
-                                    );
-                                  })()}
-                                </div>
-                                <Switch
-                                  checked={(errorType as any).videoEnabled ?? true}
-                                  onCheckedChange={() => handleVideoToggle(errorType.id, (errorType as any).videoEnabled ?? true)}
-                                  disabled={videoToggleMutation.isPending}
-                                />
-                              </div>
-                              {(errorType as any).videoEnabled && errorType.videoUrl && (
-                                <div className="text-xs text-gray-600">
-                                  <p className="break-all">{errorType.videoUrl}</p>
-                                </div>
-                              )}
-                              {(errorType as any).videoEnabled && !errorType.videoUrl && (
-                                <div className="text-xs text-yellow-700 bg-yellow-50 p-2 rounded">
-                                  ⚠️ Video aktiviert, aber keine URL konfiguriert
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                    
-                    {Array.isArray(errorTypes) && errorTypes.length === 0 && (
-                      <div className="text-center py-8 text-gray-500">
-                        Noch keine Probleme erstellt
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        )}
+          {activeTab === "kanban" && (
+            <KanbanBoard sessionId={sessionId!} />
+          )}
 
-        {activeTab === "kanban" && (
-          <KanbanBoard sessionId={sessionId!} />
-        )}
+          {activeTab === "customers" && (
+            <CustomersOverview sessionId={sessionId!} />
+          )}
 
-        {activeTab === "customers" && (
-          <CustomersOverview sessionId={sessionId!} />
-        )}
+          {activeTab === "email" && (
+            <EmailSettings sessionId={sessionId!} />
+          )}
 
-        {activeTab === "email" && (
-          <EmailSettings sessionId={sessionId!} />
-        )}
+          {activeTab === "statistics" && (
+            <Statistics sessionId={sessionId!} />
+          )}
 
-        {activeTab === "statistics" && (
-          <Statistics sessionId={sessionId!} />
-        )}
+          {activeTab === "logs" && userRole === "admin" && (
+            <ActivityLogs sessionId={sessionId!} />
+          )}
 
-        {activeTab === "logs" && userRole === "admin" && (
-          <ActivityLogs sessionId={sessionId!} />
-        )}
-
-        {activeTab === "employees" && userRole === "admin" && (
-          <Employees sessionId={sessionId!} />
-        )}
+          {activeTab === "employees" && userRole === "admin" && (
+            <Employees sessionId={sessionId!} />
+          )}
+        </div>
       </div>
     </div>
   );
