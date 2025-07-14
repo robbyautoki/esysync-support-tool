@@ -4,15 +4,60 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Calendar, FileText, Archive } from "lucide-react";
+import { Search, Calendar, FileText, Archive, LogOut, BarChart3, Users, Mail, TrendingUp, UserPlus } from "lucide-react";
 import type { SupportTicket } from "@shared/schema";
+import logoPath from "@assets/logo.png";
 
 export default function ArchivePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [sessionId, setSessionId] = useState<string | null>(null);
+
+  // Restore session from localStorage and validate it
+  useEffect(() => {
+    const validateSession = async () => {
+      const savedSessionId = localStorage.getItem("adminSessionId");
+      if (savedSessionId) {
+        try {
+          const response = await fetch("/api/admin/error-types", {
+            headers: {
+              "x-session-id": savedSessionId,
+            },
+          });
+          if (response.ok) {
+            setSessionId(savedSessionId);
+          } else {
+            localStorage.removeItem("adminSessionId");
+            window.location.href = "/admin";
+          }
+        } catch (error) {
+          console.error("Session validation failed:", error);
+          localStorage.removeItem("adminSessionId");
+          window.location.href = "/admin";
+        }
+      } else {
+        window.location.href = "/admin";
+      }
+    };
+
+    validateSession();
+  }, []);
 
   const { data: archivedTickets = [], isLoading } = useQuery({
     queryKey: ['/api/admin/tickets/archived'],
+    queryFn: async () => {
+      if (!sessionId) return [];
+      const response = await fetch('/api/admin/tickets/archived', {
+        headers: {
+          'x-session-id': sessionId,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch archived tickets');
+      }
+      return response.json();
+    },
+    enabled: !!sessionId,
   });
 
   const filteredTickets = archivedTickets.filter((ticket: SupportTicket) => {
@@ -44,6 +89,20 @@ export default function ArchivePage() {
     }
   };
 
+  const handleLogout = () => {
+    setSessionId(null);
+    localStorage.removeItem("adminSessionId");
+    window.location.href = "/admin";
+  };
+
+  if (!sessionId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-purple-600">Authentifizierung...</div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50 flex items-center justify-center">
@@ -53,21 +112,112 @@ export default function ArchivePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <Archive className="h-8 w-8 text-purple-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Ticket-Archiv</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50">
+      {/* Header */}
+      <div className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-b border-white/20 z-50">
+        <div className="max-w-7xl mx-auto px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <img src={logoPath} alt="ESYSYNC Logo" className="h-8 w-8" />
+              <h1 className="text-xl font-bold text-gray-900">ESYSYNC Admin</h1>
+            </div>
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="border-red-300 text-red-600 hover:bg-red-50"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Abmelden
+            </Button>
           </div>
-          <p className="text-gray-600">
-            Archivierte Tickets nach 30 Tagen - durchsuchbar und filterbar
-          </p>
+        </div>
+      </div>
+
+      <div className="flex pt-20">
+        {/* Left Sidebar */}
+        <div className="fixed left-0 top-20 bottom-0 w-80 bg-white/80 backdrop-blur-lg border-r border-white/20 overflow-y-auto">
+          <div className="p-6">
+            <div className="space-y-2">
+              <button
+                onClick={() => window.location.href = '/admin'}
+                className="w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong transition-all duration-200 flex items-center text-left hover:bg-white/20"
+              >
+                <BarChart3 className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+                Kanban Board
+              </button>
+              <button
+                onClick={() => window.location.href = '/admin#customers'}
+                className="w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong transition-all duration-200 flex items-center text-left hover:bg-white/20"
+              >
+                <Users className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+                Kunden
+              </button>
+              <button
+                onClick={() => window.location.href = '/admin#email'}
+                className="w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong transition-all duration-200 flex items-center text-left hover:bg-white/20"
+              >
+                <Mail className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+                E-Mail Einstellungen
+              </button>
+              <button
+                onClick={() => window.location.href = '/admin#statistics'}
+                className="w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong transition-all duration-200 flex items-center text-left hover:bg-white/20"
+              >
+                <TrendingUp className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+                Statistiken
+              </button>
+              <button
+                className="w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong transition-all duration-200 flex items-center text-left bg-white/40 shadow-lg"
+              >
+                <Archive className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
+                Ticket-Archiv
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Search and Filter */}
-        <Card className="mb-6 backdrop-blur-sm bg-white/80 border-white/20 shadow-lg">
+        {/* Main Content */}
+        <div className="flex-1 ml-80 p-8">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-3 mb-4">
+                    <Archive className="h-8 w-8 text-purple-600" />
+                    <h1 className="text-3xl font-bold text-gray-900">Ticket-Archiv</h1>
+                  </div>
+                  <p className="text-gray-600">
+                    Archivierte Tickets nach 30 Tagen - durchsuchbar und filterbar
+                  </p>
+                </div>
+                <Button
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/admin/test-archive', {
+                        method: 'POST',
+                        headers: {
+                          'x-session-id': sessionId,
+                          'Content-Type': 'application/json'
+                        }
+                      });
+                      if (response.ok) {
+                        window.location.reload();
+                      }
+                    } catch (error) {
+                      console.error('Test archiving failed:', error);
+                    }
+                  }}
+                  variant="outline"
+                  className="text-purple-600 border-purple-300"
+                >
+                  Test Archivierung
+                </Button>
+              </div>
+            </div>
+
+            {/* Search and Filter */}
+            <Card className="mb-6 backdrop-blur-sm bg-white/80 border-white/20 shadow-lg">
           <CardContent className="p-6">
             <div className="flex gap-4 items-center">
               <div className="flex-1 relative">
@@ -93,8 +243,8 @@ export default function ArchivePage() {
           </CardContent>
         </Card>
 
-        {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            {/* Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-lg">
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-purple-600">{archivedTickets.length}</div>
@@ -127,8 +277,8 @@ export default function ArchivePage() {
           </Card>
         </div>
 
-        {/* Tickets Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Tickets Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTickets.map((ticket: SupportTicket) => (
             <Card key={ticket.id} className="backdrop-blur-sm bg-white/80 border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardHeader className="pb-3">
@@ -220,19 +370,21 @@ export default function ArchivePage() {
           ))}
         </div>
 
-        {filteredTickets.length === 0 && (
-          <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-lg">
-            <CardContent className="p-12 text-center">
-              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Keine archivierten Tickets gefunden</h3>
-              <p className="text-gray-600">
-                {searchTerm || statusFilter !== 'all' 
-                  ? 'Versuchen Sie andere Suchbegriffe oder Filter.'
-                  : 'Tickets werden automatisch nach 30 Tagen archiviert.'}
-              </p>
-            </CardContent>
-          </Card>
-        )}
+            {filteredTickets.length === 0 && (
+              <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-lg">
+                <CardContent className="p-12 text-center">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Keine archivierten Tickets gefunden</h3>
+                  <p className="text-gray-600">
+                    {searchTerm || statusFilter !== 'all' 
+                      ? 'Versuchen Sie andere Suchbegriffe oder Filter.'
+                      : 'Tickets werden automatisch nach 30 Tagen archiviert.'}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

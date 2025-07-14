@@ -215,6 +215,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Test archiving (for debugging)
+  app.post("/api/admin/test-archive", requireAdmin, async (req, res) => {
+    try {
+      // For testing, let's create some old tickets or change the archive threshold
+      const allTickets = await storage.getAllSupportTickets();
+      const archivedTickets = await storage.getArchivedTickets();
+      
+      // Archive tickets older than 7 days for testing
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      const oldTickets = allTickets.filter(ticket => 
+        new Date(ticket.createdAt) < sevenDaysAgo
+      );
+
+      // If no old tickets, let's archive the oldest ticket for testing
+      if (oldTickets.length === 0 && allTickets.length > 0) {
+        const oldestTicket = allTickets[0];
+        await storage.updateSupportTicket(oldestTicket.rmaNumber, {
+          isArchived: true,
+          archivedAt: new Date()
+        }, 'test');
+      }
+      
+      res.json({ 
+        activeTickets: allTickets.length,
+        archivedTickets: archivedTickets.length,
+        oldTickets: oldTickets.length,
+        message: "Test archiving completed"
+      });
+    } catch (error) {
+      console.error('Error in test archiving:', error);
+      res.status(500).json({ message: "Failed to test archiving" });
+    }
+  });
+
   // Admin: Update ticket status (both PATCH and PUT for compatibility)
   const updateTicketStatus = async (req: any, res: any) => {
     try {
