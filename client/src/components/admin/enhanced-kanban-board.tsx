@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import type { SupportTicket, TicketLog } from "@shared/schema";
 import jsPDF from 'jspdf';
+import { generateRepairReportPDF, type RepairReportData } from "@/lib/pdf-generator";
 
 interface EnhancedKanbanBoardProps {
   sessionId: string;
@@ -199,6 +200,31 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
       return `${currentUser.firstName} ${currentUser.lastName}`;
     }
     return currentUser?.username || 'admin';
+  };
+
+  const handleDownloadRepairReport = (ticket: SupportTicket) => {
+    const reportData: RepairReportData = {
+      rmaNumber: ticket.rmaNumber,
+      customerData: {
+        accountNumber: ticket.accountNumber || '',
+        displayNumber: ticket.displayNumber || '',
+        displayLocation: ticket.displayLocation || '',
+        email: ticket.email || '',
+      },
+      errorType: ticket.errorType,
+      status: ticket.status,
+      assignedTo: ticket.assignedTo,
+      processor: ticket.processor,
+      priorityLevel: ticket.priorityLevel,
+      notes: ticket.notes,
+      repairDetails: ticket.repairDetails,
+      repairLog: ticket.repairLog,
+      createdAt: ticket.createdAt,
+      updatedAt: ticket.updatedAt || ticket.createdAt,
+      shippingMethod: ticket.shippingMethod,
+    };
+    
+    generateRepairReportPDF(reportData);
   };
 
   // Load available users from API
@@ -612,6 +638,18 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
                                 >
                                   <Edit className="h-3 w-3" />
                                 </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 text-xs px-2 text-purple-600 hover:text-purple-800"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDownloadRepairReport(ticket);
+                                  }}
+                                  title="Reparatur-Bericht"
+                                >
+                                  <Download className="h-3 w-3" />
+                                </Button>
                               </div>
                             </div>
                           </div>
@@ -706,11 +744,11 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
                 )}
                 
                 <Button
-                  onClick={() => generateRepairPDF(selectedTicket)}
-                  className="flex items-center gap-2"
+                  onClick={() => handleDownloadRepairReport(selectedTicket)}
+                  className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white"
                 >
                   <Download className="h-4 w-4" />
-                  Reparatur-PDF generieren
+                  Reparatur-Bericht herunterladen
                 </Button>
               </TabsContent>
               

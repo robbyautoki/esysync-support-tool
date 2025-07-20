@@ -258,3 +258,174 @@ Erstellt am: ${new Date().toLocaleDateString('de-DE')}`;
     }
   }
 }
+
+export interface RepairReportData {
+  rmaNumber: string;
+  customerData: {
+    accountNumber: string;
+    displayNumber: string;
+    displayLocation: string;
+    email: string;
+  };
+  errorType: string;
+  status: string;
+  assignedTo?: string;
+  processor?: string;
+  priorityLevel?: string;
+  notes?: string;
+  repairDetails?: string;
+  repairLog?: string;
+  createdAt: string;
+  updatedAt: string;
+  shippingMethod?: string;
+}
+
+export function generateRepairReportPDF(data: RepairReportData) {
+  try {
+    const pdf = new jsPDF();
+    
+    // Header
+    pdf.setFontSize(18);
+    pdf.setTextColor(109, 13, 240);
+    pdf.text('ESYSYNC Service Center', 60, 30);
+    
+    pdf.setFontSize(14);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Reparatur-Bericht', 80, 45);
+    
+    // Line separator
+    pdf.setLineWidth(0.5);
+    pdf.line(20, 55, 190, 55);
+    
+    // Content
+    let yPosition = 70;
+    const lineHeight = 8;
+    
+    // Ticket Information
+    pdf.setFontSize(12);
+    pdf.text(`RMA-Nummer: ${data.rmaNumber}`, 20, yPosition);
+    yPosition += lineHeight;
+    
+    const statusMap: {[key: string]: string} = {
+      'pending': 'Ausstehend',
+      'workshop': 'In Bearbeitung',
+      'shipped': 'Versendet',
+      'completed': 'Abgeschlossen'
+    };
+    pdf.text(`Status: ${statusMap[data.status] || data.status}`, 20, yPosition);
+    yPosition += lineHeight;
+    
+    if (data.priorityLevel) {
+      const priorityMap: {[key: string]: string} = {
+        'normal': 'Normal',
+        'high': 'Hoch',
+        'urgent': 'Dringend'
+      };
+      pdf.text(`Priorität: ${priorityMap[data.priorityLevel] || data.priorityLevel}`, 20, yPosition);
+      yPosition += lineHeight;
+    }
+    
+    yPosition += 5;
+    
+    // Customer Information
+    pdf.setFontSize(14);
+    pdf.setTextColor(109, 13, 240);
+    pdf.text('Kundeninformationen', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(`Account-Nummer: ${data.customerData.accountNumber}`, 20, yPosition);
+    yPosition += lineHeight;
+    
+    pdf.text(`Display-Nummer: ${data.customerData.displayNumber}`, 20, yPosition);
+    yPosition += lineHeight;
+    
+    pdf.text(`Display-Standort: ${data.customerData.displayLocation}`, 20, yPosition);
+    yPosition += lineHeight;
+    
+    pdf.text(`E-Mail: ${data.customerData.email}`, 20, yPosition);
+    yPosition += lineHeight + 5;
+    
+    // Technical Information
+    pdf.setFontSize(14);
+    pdf.setTextColor(109, 13, 240);
+    pdf.text('Technische Informationen', 20, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(10);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(`Problem: ${data.errorType}`, 20, yPosition);
+    yPosition += lineHeight;
+    
+    if (data.assignedTo) {
+      pdf.text(`Zuständig: ${data.assignedTo}`, 20, yPosition);
+      yPosition += lineHeight;
+    }
+    
+    if (data.processor) {
+      pdf.text(`Bearbeiter: ${data.processor}`, 20, yPosition);
+      yPosition += lineHeight;
+    }
+    
+    yPosition += 5;
+    
+    // Repair Details
+    if (data.repairDetails) {
+      pdf.setFontSize(14);
+      pdf.setTextColor(109, 13, 240);
+      pdf.text('Reparatur-Details', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(10);
+      pdf.setTextColor(0, 0, 0);
+      const repairLines = pdf.splitTextToSize(data.repairDetails, 170);
+      pdf.text(repairLines, 20, yPosition);
+      yPosition += repairLines.length * lineHeight + 5;
+    }
+    
+    // Repair Log
+    if (data.repairLog) {
+      pdf.setFontSize(14);
+      pdf.setTextColor(109, 13, 240);
+      pdf.text('Reparatur-Log', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(10);
+      pdf.setTextColor(0, 0, 0);
+      const logLines = pdf.splitTextToSize(data.repairLog, 170);
+      pdf.text(logLines, 20, yPosition);
+      yPosition += logLines.length * lineHeight + 5;
+    }
+    
+    // Notes
+    if (data.notes) {
+      pdf.setFontSize(14);
+      pdf.setTextColor(109, 13, 240);
+      pdf.text('Notizen', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(10);
+      pdf.setTextColor(0, 0, 0);
+      const noteLines = pdf.splitTextToSize(data.notes, 170);
+      pdf.text(noteLines, 20, yPosition);
+      yPosition += noteLines.length * lineHeight + 5;
+    }
+    
+    // Footer
+    pdf.setFontSize(8);
+    pdf.setTextColor(100, 100, 100);
+    pdf.text(`Erstellt: ${new Date().toLocaleDateString('de-DE')} um ${new Date().toLocaleTimeString('de-DE')}`, 20, 250);
+    pdf.text(`Ticket erstellt: ${new Date(data.createdAt).toLocaleDateString('de-DE')}`, 20, 260);
+    if (data.updatedAt && data.updatedAt !== data.createdAt) {
+      pdf.text(`Letzte Änderung: ${new Date(data.updatedAt).toLocaleDateString('de-DE')}`, 20, 270);
+    }
+    
+    // Save the PDF
+    pdf.save(`Reparatur-Bericht-${data.rmaNumber}.pdf`);
+    
+  } catch (error) {
+    console.error('Repair report PDF generation error:', error);
+    alert('Fehler beim Erstellen des Reparatur-Berichts. Bitte versuchen Sie es erneut.');
+  }
+}
