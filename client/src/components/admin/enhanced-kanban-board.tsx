@@ -22,7 +22,9 @@ import {
   Download,
   History,
   Archive,
-  Users
+  Users,
+  Maximize,
+  Minimize
 } from "lucide-react";
 import type { SupportTicket, TicketLog } from "@shared/schema";
 import jsPDF from 'jspdf';
@@ -37,6 +39,7 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [editingTicket, setEditingTicket] = useState<Partial<SupportTicket>>({});
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -245,136 +248,268 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
   }
 
   return (
-    <div className="space-y-6">
-      {/* Search and Stats */}
-      <div className="flex gap-4 items-center">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Tickets durchsuchen..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Button
-          onClick={() => window.location.href = '/archive'}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <Archive className="h-4 w-4" />
-          Archiv
-        </Button>
-      </div>
-
-      {/* Enhanced Kanban Board */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {['pending', 'workshop', 'shipped'].map((status) => {
-          const statusTickets = getStatusTickets(status);
-          const statusTitle = status === 'pending' ? 'Ausstehend' : 
-                             status === 'workshop' ? 'Workshop' : 'Versendet';
-          
-          return (
-            <Card key={status} className="min-h-[500px]">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    {statusTitle}
-                    <Badge variant="secondary">{statusTickets.length}</Badge>
-                  </span>
-                  {status === 'workshop' && (
-                    <AlertTriangle className="h-4 w-4 text-orange-500" title="Überwachung aktiv" />
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {statusTickets.map((ticket: SupportTicket) => {
-                  const workshopDays = getWorkshopDays(ticket);
-                  const isOverdue = status === 'workshop' && workshopDays > 7;
-                  
-                  return (
-                    <Card
-                      key={ticket.id}
-                      className={`cursor-pointer transition-all hover:shadow-md ${getTicketPriorityColor(ticket)}`}
-                      onClick={() => setSelectedTicket(ticket)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-start">
-                            <div className="font-medium text-purple-600 text-sm">
-                              {ticket.rmaNumber}
-                            </div>
-                            {isOverdue && (
-                              <Badge variant="destructive" className="text-xs">
-                                {workshopDays}d
-                              </Badge>
+    <>
+      {/* Fullscreen Overlay */}
+      {isFullscreen && (
+        <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm">
+          <div className="h-full flex flex-col">
+            {/* Fullscreen Header */}
+            <div className="bg-white/80 backdrop-blur-lg border-b border-white/20 p-4">
+              <div className="flex justify-between items-center max-w-7xl mx-auto">
+                <h2 className="text-xl font-bold text-gray-900">Kanban Board - Vollbild</h2>
+                <Button
+                  onClick={() => setIsFullscreen(false)}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Minimize className="h-4 w-4 mr-2" />
+                  Schließen
+                </Button>
+              </div>
+            </div>
+            
+            {/* Fullscreen Content */}
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                  {['pending', 'workshop', 'shipped'].map((status) => {
+                    const statusTickets = getStatusTickets(status);
+                    const statusTitle = status === 'pending' ? 'Ausstehend' : 
+                                       status === 'workshop' ? 'Workshop' : 'Versendet';
+                    
+                    return (
+                      <Card key={status} className="min-h-[500px]">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="flex items-center justify-between">
+                            <span className="flex items-center gap-2">
+                              {statusTitle}
+                              <Badge variant="secondary">{statusTickets.length}</Badge>
+                            </span>
+                            {status === 'workshop' && (
+                              <AlertTriangle className="h-4 w-4 text-orange-500" />
                             )}
-                          </div>
-                          
-                          <div className="text-xs text-gray-600">
-                            <div>Account: {ticket.accountNumber}</div>
-                            <div className="truncate">{ticket.errorType}</div>
-                          </div>
-
-                          {ticket.assignedTo && (
-                            <div className="flex items-center gap-1 text-xs text-blue-600">
-                              <User className="h-3 w-3" />
-                              {ticket.assignedTo}
-                            </div>
-                          )}
-
-                          {ticket.processor && (
-                            <div className="flex items-center gap-1 text-xs text-green-600">
-                              <Users className="h-3 w-3" />
-                              {ticket.processor}
-                            </div>
-                          )}
-
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <Clock className="h-3 w-3" />
-                            {new Date(ticket.createdAt).toLocaleDateString('de-DE')}
-                          </div>
-
-                          <div className="flex gap-1 flex-wrap">
-                            {status !== 'shipped' && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-6 text-xs px-2"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const nextStatus = status === 'pending' ? 'workshop' : 'shipped';
-                                  handleStatusChange(ticket, nextStatus);
-                                }}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          {statusTickets.map((ticket: SupportTicket) => {
+                            const workshopDays = getWorkshopDays(ticket);
+                            const isOverdue = status === 'workshop' && workshopDays > 7;
+                            
+                            return (
+                              <Card
+                                key={ticket.id}
+                                className={`cursor-pointer transition-all hover:shadow-md ${getTicketPriorityColor(ticket)}`}
+                                onClick={() => setSelectedTicket(ticket)}
                               >
-                                {status === 'pending' ? '→ Workshop' : '→ Versand'}
-                              </Button>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-6 text-xs px-2"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditTicket(ticket);
-                              }}
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                                <CardContent className="p-4">
+                                  <div className="space-y-2">
+                                    <div className="flex justify-between items-start">
+                                      <div className="font-medium text-purple-600 text-sm">
+                                        {ticket.rmaNumber}
+                                      </div>
+                                      {isOverdue && (
+                                        <Badge variant="destructive" className="text-xs">
+                                          {workshopDays}d
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    
+                                    <div className="text-xs text-gray-600">
+                                      <div>Account: {ticket.accountNumber}</div>
+                                      <div className="truncate">{ticket.errorType}</div>
+                                    </div>
 
-      {/* Ticket Detail Dialog */}
-      {selectedTicket && (
+                                    {ticket.assignedTo && (
+                                      <div className="flex items-center gap-1 text-xs text-blue-600">
+                                        <User className="h-3 w-3" />
+                                        {ticket.assignedTo}
+                                      </div>
+                                    )}
+
+                                    <div className="flex justify-between items-center">
+                                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                                        <Clock className="h-3 w-3" />
+                                        {new Date(ticket.createdAt).toLocaleDateString('de-DE')}
+                                      </div>
+
+                                      <div className="flex gap-1 flex-wrap">
+                                        {status !== 'shipped' && (
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-6 text-xs px-2"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              const nextStatus = status === 'pending' ? 'workshop' : 'shipped';
+                                              handleStatusChange(ticket, nextStatus);
+                                            }}
+                                          >
+                                            {status === 'pending' ? '→ Workshop' : '→ Versand'}
+                                          </Button>
+                                        )}
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-6 text-xs px-2"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleEditTicket(ticket);
+                                          }}
+                                        >
+                                          <Edit className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Regular View */}
+      <div className="space-y-6">
+        {/* Search and Stats */}
+        <div className="flex gap-4 items-center">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Tickets durchsuchen..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Button
+            onClick={() => setIsFullscreen(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Maximize className="h-4 w-4" />
+            Vollbild
+          </Button>
+          <Button
+            onClick={() => window.location.href = '/archive'}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Archive className="h-4 w-4" />
+            Archiv
+          </Button>
+        </div>
+
+        {/* Enhanced Kanban Board */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {['pending', 'workshop', 'shipped'].map((status) => {
+            const statusTickets = getStatusTickets(status);
+            const statusTitle = status === 'pending' ? 'Ausstehend' : 
+                               status === 'workshop' ? 'Workshop' : 'Versendet';
+            
+            return (
+              <Card key={status} className="min-h-[500px]">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      {statusTitle}
+                      <Badge variant="secondary">{statusTickets.length}</Badge>
+                    </span>
+                    {status === 'workshop' && (
+                      <AlertTriangle className="h-4 w-4 text-orange-500" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {statusTickets.map((ticket: SupportTicket) => {
+                    const workshopDays = getWorkshopDays(ticket);
+                    const isOverdue = status === 'workshop' && workshopDays > 7;
+                    
+                    return (
+                      <Card
+                        key={ticket.id}
+                        className={`cursor-pointer transition-all hover:shadow-md ${getTicketPriorityColor(ticket)}`}
+                        onClick={() => setSelectedTicket(ticket)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-start">
+                              <div className="font-medium text-purple-600 text-sm">
+                                {ticket.rmaNumber}
+                              </div>
+                              {isOverdue && (
+                                <Badge variant="destructive" className="text-xs">
+                                  {workshopDays}d
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            <div className="text-xs text-gray-600">
+                              <div>Account: {ticket.accountNumber}</div>
+                              <div className="truncate">{ticket.errorType}</div>
+                            </div>
+
+                            {ticket.assignedTo && (
+                              <div className="flex items-center gap-1 text-xs text-blue-600">
+                                <User className="h-3 w-3" />
+                                {ticket.assignedTo}
+                              </div>
+                            )}
+
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-1 text-xs text-gray-500">
+                                <Clock className="h-3 w-3" />
+                                {new Date(ticket.createdAt).toLocaleDateString('de-DE')}
+                              </div>
+
+                              <div className="flex gap-1 flex-wrap">
+                                {status !== 'shipped' && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 text-xs px-2"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const nextStatus = status === 'pending' ? 'workshop' : 'shipped';
+                                      handleStatusChange(ticket, nextStatus);
+                                    }}
+                                  >
+                                    {status === 'pending' ? '→ Workshop' : '→ Versand'}
+                                  </Button>
+                                )}
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 text-xs px-2"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditTicket(ticket);
+                                  }}
+                                >
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Ticket Detail Dialog */}
+        {selectedTicket && (
         <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
@@ -489,11 +624,11 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
             </Tabs>
           </DialogContent>
         </Dialog>
-      )}
+        )}
 
-      {/* Edit Ticket Dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-2xl">
+        {/* Edit Ticket Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Ticket bearbeiten - {editingTicket.rmaNumber}</DialogTitle>
           </DialogHeader>
@@ -580,8 +715,9 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
               </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </>
   );
 }
