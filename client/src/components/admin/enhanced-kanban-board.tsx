@@ -160,14 +160,14 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
   };
 
   const handleEditTicket = (ticket: SupportTicket) => {
-    // Set current user as processor if not already set
+    // Set current user as processor automatically
     const currentUserName = currentUser?.firstName && currentUser?.lastName 
       ? `${currentUser.firstName} ${currentUser.lastName}`
       : currentUser?.username || '';
     
     setEditingTicket({
       ...ticket,
-      processor: ticket.processor || currentUserName // Auto-fill if empty
+      processor: currentUserName // Always set to current user
     });
     setShowEditDialog(true);
   };
