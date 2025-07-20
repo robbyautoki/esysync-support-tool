@@ -85,8 +85,17 @@ export function generatePDF(data: PDFData) {
       pdf.setTextColor(80, 80, 80);
       pdf.text('Kontakt-E-Mail:', 20, yPosition);
       pdf.setTextColor(0, 0, 0);
-      pdf.text(data.contactEmail, 90, yPosition); // Moved further right to avoid overlap
-      yPosition += lineHeight;
+      // Handle long email addresses by using smaller font or wrapping
+      const emailLength = data.contactEmail.length;
+      if (emailLength > 25) {
+        pdf.setFontSize(10); // Use smaller font for long emails
+        pdf.text(data.contactEmail, 20, yPosition + 5);
+        pdf.setFontSize(12); // Reset to normal font
+        yPosition += lineHeight + 2; // Extra space for smaller font
+      } else {
+        pdf.text(data.contactEmail, 95, yPosition);
+        yPosition += lineHeight;
+      }
     }
     
     // Contact person information
@@ -95,7 +104,7 @@ export function generatePDF(data: PDFData) {
       pdf.text('Ansprechpartner:', 20, yPosition);
       pdf.setTextColor(0, 0, 0);
       const contactText = `${data.contactTitle || 'Frau'} ${data.contactPerson}`;
-      pdf.text(contactText, 90, yPosition); // Consistent positioning
+      pdf.text(contactText, 95, yPosition);
       yPosition += lineHeight;
     }
     
@@ -230,8 +239,19 @@ export function generatePDF(data: PDFData) {
       }
       
       if (data.contactEmail) {
-        pdf.text(`Kontakt-E-Mail: ${data.contactEmail}`, 20, y);
-        y += gap;
+        // Handle long emails in fallback PDF too
+        const emailText = `Kontakt-E-Mail: ${data.contactEmail}`;
+        if (data.contactEmail.length > 25) {
+          pdf.text('Kontakt-E-Mail:', 20, y);
+          y += 5;
+          pdf.setFontSize(10);
+          pdf.text(data.contactEmail, 20, y);
+          pdf.setFontSize(12);
+          y += gap;
+        } else {
+          pdf.text(emailText, 20, y);
+          y += gap;
+        }
       }
       
       // Contact person information in fallback
