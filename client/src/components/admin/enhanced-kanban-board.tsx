@@ -43,7 +43,7 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: tickets = [], isLoading } = useQuery({
+  const { data: tickets = [], isLoading, error } = useQuery({
     queryKey: ['/api/admin/tickets'],
     queryFn: async () => {
       const response = await fetch('/api/admin/tickets', {
@@ -56,6 +56,8 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
       }
       return response.json();
     },
+    retry: 3,
+    retryDelay: 1000,
   });
 
   const { data: ticketLogs = [] } = useQuery({
@@ -126,16 +128,33 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
     }
   });
 
-  const filteredTickets = tickets.filter((ticket: SupportTicket) =>
-    ticket.rmaNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ticket.accountNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ticket.errorType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ticket.assignedTo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ticket.processor?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTickets = (tickets || []).filter((ticket: SupportTicket) => {
+    try {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        ticket.rmaNumber?.toLowerCase().includes(searchLower) ||
+        ticket.accountNumber?.toLowerCase().includes(searchLower) ||
+        ticket.errorType?.toLowerCase().includes(searchLower) ||
+        ticket.assignedTo?.toLowerCase().includes(searchLower) ||
+        ticket.processor?.toLowerCase().includes(searchLower)
+      );
+    } catch (error) {
+      console.error('Error filtering ticket:', error);
+      return false;
+    }
+  });
 
-  const getStatusTickets = (status: string) => 
-    filteredTickets.filter((ticket: SupportTicket) => ticket.status === status);
+  const getStatusTickets = (status: string) => {
+    try {
+      if (!filteredTickets || !Array.isArray(filteredTickets)) {
+        return [];
+      }
+      return filteredTickets.filter((ticket: SupportTicket) => ticket.status === status);
+    } catch (error) {
+      console.error('Error filtering tickets:', error);
+      return [];
+    }
+  };
 
   const getTicketPriorityColor = (ticket: SupportTicket) => {
     const priority = ticket.priorityLevel || 'normal';
@@ -243,6 +262,20 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-purple-600">Lade Tickets...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="text-red-500">Fehler beim Laden der Tickets</div>
+        <Button 
+          onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/admin/tickets'] })}
+          variant="outline"
+        >
+          Erneut versuchen
+        </Button>
       </div>
     );
   }
