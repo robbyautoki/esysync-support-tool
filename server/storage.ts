@@ -18,6 +18,7 @@ export interface IStorage {
   getSupportTicket(rmaNumber: string): Promise<SupportTicket | undefined>;
   getAllSupportTickets(): Promise<SupportTicket[]>;
   getArchivedTickets(): Promise<SupportTicket[]>;
+  getAllTicketsForArchive(): Promise<SupportTicket[]>;
   updateSupportTicketStatus(rmaNumber: string, status: string, statusDetails?: string, trackingNumber?: string): Promise<SupportTicket>;
   updateSupportTicket(rmaNumber: string, updates: Partial<SupportTicket>, editedBy: string): Promise<SupportTicket>;
   archiveOldTickets(): Promise<number>;
@@ -91,6 +92,11 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(supportTickets)
       .where(eq(supportTickets.isArchived, true))
       .orderBy(supportTickets.archivedAt);
+  }
+
+  async getAllTicketsForArchive(): Promise<SupportTicket[]> {
+    return await db.select().from(supportTickets)
+      .orderBy(desc(supportTickets.createdAt));
   }
 
   async updateSupportTicketStatus(rmaNumber: string, status: string, statusDetails?: string, trackingNumber?: string): Promise<SupportTicket> {

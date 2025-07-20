@@ -179,13 +179,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Get archived tickets
-  app.get("/api/admin/tickets/archived", requireAuth, async (req, res) => {
+  app.get("/api/admin/archived-tickets", requireAuth, async (req, res) => {
     try {
-      const tickets = await storage.getArchivedTickets();
+      const tickets = await storage.getAllTicketsForArchive();
       res.json(tickets);
     } catch (error) {
-      console.error('Error fetching archived tickets:', error);
-      res.status(500).json({ message: "Failed to fetch archived tickets" });
+      console.error('Error fetching all tickets for archive:', error);
+      res.status(500).json({ message: "Failed to fetch tickets" });
     }
   });
 

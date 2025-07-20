@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Archive, Search, Calendar, User, Monitor, MapPin, Clock, Eye, Trash2 } from "lucide-react";
+import { Archive, Search, Calendar, User, Monitor, MapPin, Clock, Eye, Trash2, Filter, Download, RefreshCw, AlertTriangle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 interface SupportTicket {
@@ -39,8 +39,14 @@ interface TicketArchiveProps {
 export default function TicketArchive({ sessionId }: TicketArchiveProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+  const [problemFilter, setProblemFilter] = useState("all");
+  const [assigneeFilter, setAssigneeFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
+  const [archiveFilter, setArchiveFilter] = useState("all");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
-  const { data: archivedTickets = [], isLoading } = useQuery({
+  const { data: allTickets = [], isLoading, refetch } = useQuery({
     queryKey: ["/api/admin/archived-tickets"],
     enabled: !!sessionId,
     queryFn: async () => {
@@ -50,23 +56,63 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
         },
       });
       if (!response.ok) {
-        throw new Error("Failed to fetch archived tickets");
+        throw new Error("Failed to fetch tickets");
       }
       return response.json();
     },
   });
 
-  const filteredTickets = archivedTickets.filter((ticket: SupportTicket) => {
+  // Get unique values for filter dropdowns
+  const uniqueProblems = [...new Set(allTickets.map((t: SupportTicket) => t.errorType))];
+  const uniqueAssignees = [...new Set(allTickets.filter((t: SupportTicket) => t.assignedTo).map((t: SupportTicket) => t.assignedTo))];
+  const uniquePriorities = [...new Set(allTickets.filter((t: SupportTicket) => t.priorityLevel).map((t: SupportTicket) => t.priorityLevel))];
+
+  const filteredTickets = allTickets.filter((ticket: SupportTicket) => {
     const matchesSearch = searchTerm === "" || 
       ticket.rmaNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.accountNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.errorType.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (ticket.displayNumber && ticket.displayNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (ticket.displayLocation && ticket.displayLocation.toLowerCase().includes(searchTerm.toLowerCase()));
+      (ticket.displayLocation && ticket.displayLocation.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (ticket.contactEmail && ticket.contactEmail.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (ticket.contactPerson && ticket.contactPerson.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (ticket.notes && ticket.notes.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (ticket.assignedTo && ticket.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesStatus = statusFilter === "all" || ticket.status === statusFilter;
+    const matchesPriority = priorityFilter === "all" || ticket.priorityLevel === priorityFilter;
+    const matchesProblem = problemFilter === "all" || ticket.errorType === problemFilter;
+    const matchesAssignee = assigneeFilter === "all" || ticket.assignedTo === assigneeFilter;
+    const matchesArchive = archiveFilter === "all" || 
+      (archiveFilter === "active" && !ticket.isArchived) ||
+      (archiveFilter === "archived" && ticket.isArchived);
     
-    return matchesSearch && matchesStatus;
+    // Date filters
+    let matchesDate = true;
+    if (dateFilter !== "all") {
+      const now = new Date();
+      const ticketDate = new Date(ticket.createdAt);
+      
+      switch (dateFilter) {
+        case "today":
+          matchesDate = ticketDate.toDateString() === now.toDateString();
+          break;
+        case "week":
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          matchesDate = ticketDate >= weekAgo;
+          break;
+        case "month":
+          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          matchesDate = ticketDate >= monthAgo;
+          break;
+        case "quarter":
+          const quarterAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+          matchesDate = ticketDate >= quarterAgo;
+          break;
+      }
+    }
+    
+    return matchesSearch && matchesStatus && matchesPriority && matchesProblem && matchesAssignee && matchesArchive && matchesDate;
   });
 
   const getStatusColor = (status: string) => {
@@ -107,11 +153,50 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
         }
       });
       if (response.ok) {
-        window.location.reload();
+        refetch();
       }
     } catch (error) {
       console.error('Test archiving failed:', error);
     }
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setPriorityFilter("all");
+    setProblemFilter("all");
+    setAssigneeFilter("all");
+    setDateFilter("all");
+    setArchiveFilter("all");
+  };
+
+  const exportToCSV = () => {
+    const headers = ["RMA-Nummer", "Account-Nummer", "Display-Nummer", "Display-Ort", "Problem", "Status", "Priorität", "Zugewiesen", "E-Mail", "Ansprechpartner", "Erstellt", "Notizen", "Archiviert"];
+    const csvData = filteredTickets.map((ticket: SupportTicket) => [
+      ticket.rmaNumber,
+      ticket.accountNumber,
+      ticket.displayNumber || "",
+      ticket.displayLocation || "",
+      ticket.errorType,
+      ticket.status,
+      ticket.priorityLevel || "",
+      ticket.assignedTo || "",
+      ticket.contactEmail,
+      ticket.contactPerson || "",
+      formatDate(ticket.createdAt),
+      ticket.notes || "",
+      ticket.isArchived ? "Ja" : "Nein"
+    ]);
+    
+    const csvContent = [headers, ...csvData].map(row => 
+      row.map(cell => `"${cell}"`).join(",")
+    ).join("\n");
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `ticket-export-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
   };
 
   return (
@@ -119,43 +204,156 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Ticket-Archiv</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Ticket-Datenbank</h1>
           <p className="text-gray-600 mt-1">
-            Archivierte Tickets nach 30 Tagen - durchsuchbar und filterbar
+            Alle Tickets durchsuchbar und filterbar - vollständige Reparatur-Historie
           </p>
         </div>
-        <Button
-          onClick={handleTestArchive}
-          variant="outline"
-          className="text-purple-600 border-purple-300"
-        >
-          Test Archivierung
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => refetch()}
+            variant="outline"
+            className="text-purple-600 border-purple-300"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Aktualisieren
+          </Button>
+          <Button
+            onClick={exportToCSV}
+            variant="outline"
+            className="text-green-600 border-green-300"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            CSV Export
+          </Button>
+          <Button
+            onClick={handleTestArchive}
+            variant="outline"
+            className="text-purple-600 border-purple-300"
+          >
+            Test Archivierung
+          </Button>
+        </div>
       </div>
 
-      {/* Search and Filter */}
+      {/* Enhanced Search and Filter */}
       <Card className="glassmorphism border-0 apple-shadow">
         <CardContent className="p-6">
-          <div className="flex gap-4 items-center">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="RMA-Nummer, Account-Nummer oder Problem suchen..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+          <div className="space-y-4">
+            {/* Main Search Bar */}
+            <div className="flex gap-4 items-center">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Alles durchsuchen: RMA, Account, Problem, E-Mail, Ansprechpartner, Notizen..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Filter className="w-4 h-4" />
+                Filter
+              </Button>
+              <Button
+                onClick={clearAllFilters}
+                variant="outline"
+                size="sm"
+              >
+                Zurücksetzen
+              </Button>
             </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="all">Alle Status</option>
-              <option value="pending">Ausstehend</option>
-              <option value="workshop">Workshop</option>
-              <option value="shipped">Versendet</option>
-            </select>
+            
+            {/* Quick Filters */}
+            <div className="flex gap-2 flex-wrap">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="all">Alle Status</option>
+                <option value="pending">Ausstehend</option>
+                <option value="workshop">Workshop</option>
+                <option value="shipped">Versendet</option>
+              </select>
+              
+              <select
+                value={archiveFilter}
+                onChange={(e) => setArchiveFilter(e.target.value)}
+                className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="all">Alle Tickets</option>
+                <option value="active">Aktive</option>
+                <option value="archived">Archivierte</option>
+              </select>
+              
+              <select
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="all">Alle Zeiten</option>
+                <option value="today">Heute</option>
+                <option value="week">Diese Woche</option>
+                <option value="month">Dieser Monat</option>
+                <option value="quarter">Letztes Quartal</option>
+              </select>
+            </div>
+            
+            {/* Advanced Filters */}
+            {showAdvancedFilters && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Problem</label>
+                  <select
+                    value={problemFilter}
+                    onChange={(e) => setProblemFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="all">Alle Probleme</option>
+                    {uniqueProblems.map(problem => (
+                      <option key={problem} value={problem}>{problem}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Priorität</label>
+                  <select
+                    value={priorityFilter}
+                    onChange={(e) => setPriorityFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="all">Alle Prioritäten</option>
+                    <option value="normal">Normal</option>
+                    <option value="high">Hoch</option>
+                    <option value="urgent">Dringend</option>
+                    {uniquePriorities.filter(p => p && !['normal', 'high', 'urgent'].includes(p)).map(priority => (
+                      <option key={priority} value={priority}>{priority}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Zugewiesen an</label>
+                  <select
+                    value={assigneeFilter}
+                    onChange={(e) => setAssigneeFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="all">Alle Bearbeiter</option>
+                    <option value="">Nicht zugewiesen</option>
+                    {uniqueAssignees.map(assignee => (
+                      <option key={assignee} value={assignee}>{assignee}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -165,30 +363,46 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
         <Card className="glassmorphism border-0 apple-shadow">
           <CardContent className="p-4">
             <div className="text-2xl font-bold" style={{ color: '#6d0df0' }}>
-              {archivedTickets.length}
+              {allTickets.length}
             </div>
-            <div className="text-sm text-gray-600">Archivierte Tickets</div>
-          </CardContent>
-        </Card>
-        <Card className="glassmorphism border-0 apple-shadow">
-          <CardContent className="p-4">
-            <div className="text-2xl font-bold text-green-600">
-              {archivedTickets.filter((t: SupportTicket) => t.status === 'shipped').length}
-            </div>
-            <div className="text-sm text-gray-600">Erfolgreich versendet</div>
-          </CardContent>
-        </Card>
-        <Card className="glassmorphism border-0 apple-shadow">
-          <CardContent className="p-4">
-            <div className="text-2xl font-bold text-blue-600">
-              {archivedTickets.filter((t: SupportTicket) => t.status === 'workshop').length}
-            </div>
-            <div className="text-sm text-gray-600">In Workshop archiviert</div>
+            <div className="text-sm text-gray-600">Gesamt Tickets</div>
           </CardContent>
         </Card>
         <Card className="glassmorphism border-0 apple-shadow">
           <CardContent className="p-4">
             <div className="text-2xl font-bold text-orange-600">
+              {allTickets.filter((t: SupportTicket) => t.status === 'pending').length}
+            </div>
+            <div className="text-sm text-gray-600">Ausstehend</div>
+          </CardContent>
+        </Card>
+        <Card className="glassmorphism border-0 apple-shadow">
+          <CardContent className="p-4">
+            <div className="text-2xl font-bold text-blue-600">
+              {allTickets.filter((t: SupportTicket) => t.status === 'workshop').length}
+            </div>
+            <div className="text-sm text-gray-600">Workshop</div>
+          </CardContent>
+        </Card>
+        <Card className="glassmorphism border-0 apple-shadow">
+          <CardContent className="p-4">
+            <div className="text-2xl font-bold text-green-600">
+              {allTickets.filter((t: SupportTicket) => t.status === 'shipped').length}
+            </div>
+            <div className="text-sm text-gray-600">Versendet</div>
+          </CardContent>
+        </Card>
+        <Card className="glassmorphism border-0 apple-shadow">
+          <CardContent className="p-4">
+            <div className="text-2xl font-bold text-red-600">
+              {allTickets.filter((t: SupportTicket) => t.isArchived).length}
+            </div>
+            <div className="text-sm text-gray-600">Archiviert</div>
+          </CardContent>
+        </Card>
+        <Card className="glassmorphism border-0 apple-shadow">
+          <CardContent className="p-4">
+            <div className="text-2xl font-bold" style={{ color: '#6d0df0' }}>
               {filteredTickets.length}
             </div>
             <div className="text-sm text-gray-600">Gefilterte Ergebnisse</div>
@@ -219,11 +433,11 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
             <Card className="glassmorphism border-0 apple-shadow">
               <CardContent className="p-12 text-center">
                 <Archive className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Keine archivierten Tickets gefunden</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Keine Tickets gefunden</h3>
                 <p className="text-gray-600">
-                  {searchTerm || statusFilter !== "all" 
+                  {searchTerm || statusFilter !== "all" || priorityFilter !== "all" || problemFilter !== "all" || assigneeFilter !== "all" || dateFilter !== "all" || archiveFilter !== "all"
                     ? "Keine Tickets entsprechen Ihren Suchkriterien." 
-                    : "Es sind noch keine Tickets archiviert worden."}
+                    : "Es sind noch keine Tickets vorhanden."}
                 </p>
               </CardContent>
             </Card>
