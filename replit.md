@@ -309,3 +309,14 @@ Preferred communication style: Simple, everyday language.
 - Funktioniert sowohl in Vollbild- als auch normaler Kanban-Ansicht
 - Kombiniert mit bestehender Prioritätsfarbgebung für optimale Übersicht
 - Hilft bei der Identifikation von Tickets die zu lange ohne Bearbeitung bleiben
+
+✓ Erweiterte Versand- und Ansprechpartner-Funktionen (July 20, 2025)
+- Neue "Versand / Ansprechpartner" Sektion im Support-Formular
+- Checkbox für abweichende Versandadresse mit zusätzlichen Feldern (Straße, PLZ, Ort)
+- Ansprechpartner-Auswahlfeld mit Anrede (Frau/Herr/Divers) und Name
+- Wichtiger Hinweistext zur Verfügbarkeit des Ansprechpartners
+- Vollständige Datenbank-Integration mit automatischer Schema-Migration
+- PDF-Generator erweitert um Ansprechpartner und alternative Versandadressen
+- ESYSYNC-Logo in PDF-Dokumenten integriert für professionelle Darstellung
+- Verbessertes PDF-Layout mit optimierten Abständen zur Vermeidung von Überlappungen
+- Fallback-PDF-Generierung unterstützt alle neuen Felder

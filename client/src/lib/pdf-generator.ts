@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import logoPath from "@assets/logo.png";
 
 interface PDFData {
   rmaNumber: string;
@@ -10,13 +11,29 @@ interface PDFData {
   displayNumber?: string;
   displayLocation?: string;
   contactEmail?: string;
+  // New shipping and contact person fields
+  alternativeShipping?: boolean;
+  alternativeAddress?: string;
+  alternativeCity?: string;
+  alternativeZip?: string;
+  contactPerson?: string;
+  contactTitle?: string;
 }
 
 export function generatePDF(data: PDFData) {
   try {
     const pdf = new jsPDF();
     
-    // Header
+    // Header with Logo
+    // Add logo (if supported)
+    try {
+      const img = new Image();
+      img.src = logoPath;
+      pdf.addImage(img, 'PNG', 20, 20, 30, 15); // x, y, width, height
+    } catch (logoError) {
+      console.log('Logo could not be added to PDF');
+    }
+    
     pdf.setFontSize(20);
     pdf.setTextColor(109, 13, 240); // Purple color
     pdf.text('ESYSYNC Service Center', 105, 30, { align: 'center' });
@@ -136,8 +153,8 @@ export function generatePDF(data: PDFData) {
       }
     }
     
-    // Return address section
-    yPosition += 10;
+    // Return address section - add more space to prevent overlap
+    yPosition += 15;
     pdf.setFontSize(14);
     pdf.setTextColor(109, 13, 240);
     pdf.text('Rücksende-Adresse:', 20, yPosition);
@@ -175,6 +192,15 @@ export function generatePDF(data: PDFData) {
     try {
       const pdf = new jsPDF();
       
+      // Try adding logo in fallback too
+      try {
+        const img = new Image();
+        img.src = logoPath;
+        pdf.addImage(img, 'PNG', 20, 20, 25, 12);
+      } catch (logoError) {
+        console.log('Logo could not be added to fallback PDF');
+      }
+      
       pdf.setFontSize(18);
       pdf.text('ESYSYNC Service Center', 60, 30);
       pdf.setFontSize(14);
@@ -208,6 +234,13 @@ export function generatePDF(data: PDFData) {
         y += gap;
       }
       
+      // Contact person information in fallback
+      if (data.contactPerson) {
+        const contactText = `Ansprechpartner: ${data.contactTitle || 'Frau'} ${data.contactPerson}`;
+        pdf.text(contactText, 20, y);
+        y += gap;
+      }
+      
       pdf.text(`Problem: ${data.errorType}`, 20, y);
       y += gap;
       
@@ -232,6 +265,22 @@ export function generatePDF(data: PDFData) {
           y += 6;
         }
       });
+      
+      // Alternative shipping address in fallback
+      if (data.alternativeShipping && data.alternativeAddress) {
+        y += gap;
+        pdf.setFontSize(12);
+        pdf.text('Alternative Versandadresse:', 20, y);
+        y += gap;
+        
+        pdf.setFontSize(11);
+        pdf.text(data.alternativeAddress, 20, y);
+        y += 6;
+        if (data.alternativeZip && data.alternativeCity) {
+          pdf.text(`${data.alternativeZip} ${data.alternativeCity}`, 20, y);
+          y += 6;
+        }
+      }
       
       y += gap;
       pdf.setFontSize(12);
@@ -261,13 +310,18 @@ Account-Nummer: ${data.accountNumber || data.customerNumber}
 ${data.displayNumber ? `Display-Nummer: ${data.displayNumber}` : ''}
 ${data.displayLocation ? `Display-Standort: ${data.displayLocation}` : ''}
 ${data.contactEmail ? `Kontakt-E-Mail: ${data.contactEmail}` : ''}
+${data.contactPerson ? `Ansprechpartner: ${data.contactTitle || 'Frau'} ${data.contactPerson}` : ''}
 Problem: ${data.errorType}
 Versandoption: ${data.shippingMethod}
 
 Versandadresse:
 ${data.address}
 
-Rücksende-Adresse:
+${data.alternativeShipping && data.alternativeAddress ? `Alternative Versandadresse:
+${data.alternativeAddress}
+${data.alternativeZip ? `${data.alternativeZip} ${data.alternativeCity}` : ''}
+
+` : ''}Rücksende-Adresse:
 AVANTO VR Solutions GmbH
 Otto-Lilienthal-Str. 20
 28199 Bremen
