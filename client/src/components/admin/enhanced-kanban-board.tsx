@@ -180,15 +180,23 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
 
   const handleEditTicket = (ticket: SupportTicket) => {
     // Set current user as processor automatically
-    const currentUserName = currentUser?.firstName && currentUser?.lastName 
-      ? `${currentUser.firstName} ${currentUser.lastName}`
-      : currentUser?.username || '';
+    const currentUserName = getCurrentUserName();
+    
+    console.log('Current user in handleEditTicket:', currentUser);
+    console.log('Generated user name:', currentUserName);
     
     setEditingTicket({
       ...ticket,
       processor: currentUserName // Always set to current user
     });
     setShowEditDialog(true);
+  };
+
+  const getCurrentUserName = () => {
+    if (currentUser?.firstName && currentUser?.lastName) {
+      return `${currentUser.firstName} ${currentUser.lastName}`;
+    }
+    return currentUser?.username || 'Aktueller Benutzer';
   };
 
   const handleSaveTicket = () => {
@@ -718,7 +726,7 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
                 <Label htmlFor="processor">Bearbeiter</Label>
                 <Input
                   id="processor"
-                  value={editingTicket.processor || ''}
+                  value={editingTicket.processor || getCurrentUserName()}
                   onChange={(e) => setEditingTicket(prev => ({ ...prev, processor: e.target.value }))}
                   placeholder="Name des Bearbeiters"
                 />
