@@ -199,6 +199,32 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
     return currentUser?.username || 'Aktueller Benutzer';
   };
 
+  // Load available users from API
+  const { data: availableUsers = [] } = useQuery<any[]>({
+    queryKey: ['/api/admin/users'],
+    enabled: !!sessionId,
+    retry: 1,
+    staleTime: 30000, // Cache for 30 seconds
+  });
+
+  // Get list of available users for dropdown
+  const getAvailableUsers = () => {
+    if (Array.isArray(availableUsers) && availableUsers.length > 0) {
+      return availableUsers.map((user: any) => 
+        user.firstName && user.lastName 
+          ? `${user.firstName} ${user.lastName}`
+          : user.username
+      );
+    }
+    // Fallback if API fails
+    const users = ['admin', 'Robby Reinemann'];
+    const currentUserName = getCurrentUserName();
+    if (currentUserName !== 'Aktueller Benutzer' && !users.includes(currentUserName)) {
+      users.push(currentUserName);
+    }
+    return users;
+  };
+
   const handleSaveTicket = () => {
     if (editingTicket.rmaNumber) {
       updateTicketMutation.mutate({
@@ -724,12 +750,21 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
               </div>
               <div>
                 <Label htmlFor="processor">Bearbeiter</Label>
-                <Input
-                  id="processor"
+                <Select
                   value={editingTicket.processor || getCurrentUserName()}
-                  onChange={(e) => setEditingTicket(prev => ({ ...prev, processor: e.target.value }))}
-                  placeholder="Name des Bearbeiters"
-                />
+                  onValueChange={(value) => setEditingTicket(prev => ({ ...prev, processor: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Bearbeiter auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getAvailableUsers().map((user) => (
+                      <SelectItem key={user} value={user}>
+                        {user}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

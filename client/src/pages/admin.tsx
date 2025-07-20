@@ -817,8 +817,14 @@ export default function AdminPage() {
           </div>
         )}
 
-        {activeTab === "kanban" && (
+        {activeTab === "kanban" && currentUser && (
           <EnhancedKanbanBoard sessionId={sessionId!} currentUser={currentUser} />
+        )}
+        
+        {activeTab === "kanban" && !currentUser && (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-purple-600">Lade Benutzerdaten...</div>
+          </div>
         )}
 
         {activeTab === "customers" && (

@@ -135,6 +135,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all users for dropdown
+  app.get("/api/admin/users", requireAuth, async (req: any, res) => {
+    try {
+      const users = await storage.getAllEmployees();
+      // Add default admin if not in database
+      const adminUser = users.find((user: any) => user.username === 'admin');
+      if (!adminUser) {
+        users.unshift({
+          id: 'admin',
+          username: 'admin',
+          firstName: null,
+          lastName: null,
+          isActive: true,
+          role: 'admin'
+        } as any);
+      }
+      res.json(users);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Get active error types for frontend
   app.get("/api/error-types", async (req, res) => {
     try {
