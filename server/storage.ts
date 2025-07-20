@@ -158,7 +158,7 @@ export class DatabaseStorage implements IStorage {
         )
       );
     
-    return result.length || 0;
+    return result.changes || 0;
   }
 
   async getActiveErrorTypes(): Promise<ErrorType[]> {

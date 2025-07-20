@@ -179,7 +179,7 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
   };
 
   const handleEditTicket = (ticket: SupportTicket) => {
-    // Set current user as processor automatically
+    // Set current user as processor automatically if not already set
     const currentUserName = getCurrentUserName();
     
     console.log('Current user in handleEditTicket:', currentUser);
@@ -187,7 +187,8 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
     
     setEditingTicket({
       ...ticket,
-      processor: currentUserName // Always set to current user
+      processor: ticket.processor || currentUserName, // Set current user if empty
+      assignedTo: ticket.assignedTo || '' // Keep existing or empty
     });
     setShowEditDialog(true);
   };
@@ -741,12 +742,21 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="assignedTo">Zuständig</Label>
-                <Input
-                  id="assignedTo"
+                <Select
                   value={editingTicket.assignedTo || ''}
-                  onChange={(e) => setEditingTicket(prev => ({ ...prev, assignedTo: e.target.value }))}
-                  placeholder="Name des Zuständigen"
-                />
+                  onValueChange={(value) => setEditingTicket(prev => ({ ...prev, assignedTo: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Zuständigen auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getAvailableUsers().map((user) => (
+                      <SelectItem key={user} value={user}>
+                        {user}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="processor">Bearbeiter</Label>
