@@ -102,12 +102,18 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
   const filteredTickets = allTickets.filter((ticket: SupportTicket) => {
     const matchesSearch = searchTerm === "" || 
       ticket.rmaNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket.id.toString().includes(searchTerm.toLowerCase()) ||
       ticket.accountNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.errorType.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (ticket.displayNumber && ticket.displayNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (ticket.displayLocation && ticket.displayLocation.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (ticket.contactEmail && ticket.contactEmail.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (ticket.contactPerson && ticket.contactPerson.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (ticket.contactTitle && ticket.contactTitle.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (ticket.returnAddress && ticket.returnAddress.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (ticket.alternativeAddress && ticket.alternativeAddress.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (ticket.alternativeCity && ticket.alternativeCity.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (ticket.alternativeZip && ticket.alternativeZip.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (ticket.notes && ticket.notes.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (ticket.assignedTo && ticket.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()));
     
@@ -203,18 +209,24 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
   };
 
   const exportToCSV = () => {
-    const headers = ["RMA-Nummer", "Account-Nummer", "Display-Nummer", "Display-Ort", "Problem", "Status", "Priorität", "Zugewiesen", "E-Mail", "Ansprechpartner", "Erstellt", "Notizen", "Archiviert"];
+    const headers = ["Ticket-ID", "RMA-Nummer", "Account-Nummer", "Display-Nummer", "Display-Ort", "Rücksendeadresse", "Problem", "Status", "Priorität", "Zugewiesen", "E-Mail", "Ansprechpartner", "Anrede", "Alternative Adresse", "Alternative Stadt", "Alternative PLZ", "Erstellt", "Notizen", "Archiviert"];
     const csvData = filteredTickets.map((ticket: SupportTicket) => [
+      ticket.id,
       ticket.rmaNumber,
       ticket.accountNumber,
       ticket.displayNumber || "",
       ticket.displayLocation || "",
+      ticket.returnAddress || "",
       ticket.errorType,
       ticket.status,
       ticket.priorityLevel || "",
       ticket.assignedTo || "",
       ticket.contactEmail,
       ticket.contactPerson || "",
+      ticket.contactTitle || "",
+      ticket.alternativeAddress || "",
+      ticket.alternativeCity || "",
+      ticket.alternativeZip || "",
       formatDate(ticket.createdAt),
       ticket.notes || "",
       ticket.isArchived ? "Ja" : "Nein"
@@ -287,7 +299,7 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  placeholder="Alles durchsuchen: RMA, Account, Problem, E-Mail, Ansprechpartner, Notizen..."
+                  placeholder="Alles durchsuchen: RMA, Ticket-ID, Account, Display-Nr., Standort, Ansprechpartner, Adresse, Notizen..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -509,6 +521,8 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex items-center gap-2">
+                      <div className="text-xs text-gray-500">ID: #{ticket.id}</div>
+                      <div className="text-xs text-gray-400">•</div>
                       <User className="w-4 h-4 text-gray-400" />
                       <div className="text-sm text-gray-600">{ticket.accountNumber}</div>
                     </div>
@@ -524,6 +538,15 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-gray-400" />
                         <div className="text-sm text-gray-600">{ticket.displayLocation}</div>
+                      </div>
+                    )}
+
+                    {ticket.contactPerson && (
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-gray-400" />
+                        <div className="text-sm text-gray-600">
+                          {ticket.contactTitle} {ticket.contactPerson}
+                        </div>
                       </div>
                     )}
 
@@ -607,6 +630,10 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
               <CardContent className="p-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
+                    <div className="font-medium text-gray-700">Ticket-ID</div>
+                    <div className="text-gray-600">#{selectedTicketForLogs?.id}</div>
+                  </div>
+                  <div>
                     <div className="font-medium text-gray-700">Account</div>
                     <div className="text-gray-600">{selectedTicketForLogs?.accountNumber}</div>
                   </div>
@@ -622,6 +649,26 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
                     <div className="font-medium text-gray-700">Problem</div>
                     <div className="text-gray-600">{selectedTicketForLogs?.errorType}</div>
                   </div>
+                  {selectedTicketForLogs?.displayNumber && (
+                    <div>
+                      <div className="font-medium text-gray-700">Display-Nr.</div>
+                      <div className="text-gray-600">{selectedTicketForLogs.displayNumber}</div>
+                    </div>
+                  )}
+                  {selectedTicketForLogs?.displayLocation && (
+                    <div>
+                      <div className="font-medium text-gray-700">Standort</div>
+                      <div className="text-gray-600">{selectedTicketForLogs.displayLocation}</div>
+                    </div>
+                  )}
+                  {selectedTicketForLogs?.contactPerson && (
+                    <div>
+                      <div className="font-medium text-gray-700">Ansprechpartner</div>
+                      <div className="text-gray-600">
+                        {selectedTicketForLogs.contactTitle} {selectedTicketForLogs.contactPerson}
+                      </div>
+                    </div>
+                  )}
                   <div>
                     <div className="font-medium text-gray-700">Erstellt</div>
                     <div className="text-gray-600">

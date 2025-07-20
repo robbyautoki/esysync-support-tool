@@ -323,13 +323,14 @@ Preferred communication style: Simple, everyday language.
 
 ✓ Vollständige Ticket-Datenbank mit umfassenden Filtermöglichkeiten (July 20, 2025)
 - Ticket-Archiv transformiert zur vollständigen Ticket-Datenbank mit ALLEN Tickets (aktive + archivierte)
-- Umfassende Suchfunktion durchsucht alle Felder: RMA, Account, Problem, E-Mail, Ansprechpartner, Notizen, Bearbeiter
+- Umfassende Suchfunktion durchsucht alle Felder: RMA, Ticket-ID, Account, Display-Nummer, Standort, E-Mail, Ansprechpartner, Adressen, Notizen, Bearbeiter
 - Erweiterte Filtermöglichkeiten: Status, Archiv-Status, Datum (heute, Woche, Monat, Quartal), Problem-Typ, Priorität, Zugewiesene Person
 - Klappbare "Erweiterte Filter" mit detaillierter Auswahl für Problem, Priorität und Bearbeiter
 - Statistik-Dashboard zeigt Gesamt-Tickets, Status-Verteilung (Ausstehend, Workshop, Versendet) und Archivierte
-- CSV-Export-Funktion für komplette Ticket-Datenbank mit allen relevanten Feldern
+- CSV-Export-Funktion für komplette Ticket-Datenbank mit allen relevanten Feldern inklusive Display-Daten und Adressen
 - "Filter zurücksetzen" Button zum schnellen Löschen aller Suchkriterien
-- Verbesserte Ticket-Karten zeigen detaillierte Informationen inklusive Versandmethode und Archiv-Status
+- Verbesserte Ticket-Karten zeigen detaillierte Informationen inklusive Ticket-ID, Display-Nummer, Standort und Ansprechpartner
 - Integration in einheitliches Admin-Dashboard mit linker Navigation
 - API-Endpoint /api/admin/archived-tickets liefert alle Tickets chronologisch sortiert
 - Echte Datenbank-Funktionalität für vollständige Reparatur-Historie und Nachverfolgung
+- Log-Modal für jedes Ticket mit vollständiger Änderungshistorie und Ticket-Details
