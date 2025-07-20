@@ -56,12 +56,15 @@ export default function AdminPage() {
             });
             if (userResponse.ok) {
               const userData = await userResponse.json();
+              console.log("Loaded user data in validation:", userData);
               setCurrentUser(userData);
               setUserRole(userData.role || "admin");
               // Set default tab based on role
               if (userData.role === "employee") {
                 setActiveTab("kanban");
               }
+            } else {
+              console.error("Failed to load user data:", userResponse.status);
             }
           } else {
             // Session invalid, clear it
@@ -131,8 +134,16 @@ export default function AdminPage() {
       return await response.json();
     },
     onSuccess: (data) => {
+      console.log("Login success data:", data);
       setSessionId(data.sessionId);
       setUserRole(data.role || "admin");
+      setCurrentUser({
+        username: data.username,
+        role: data.role || "admin",
+        isAdmin: data.isAdmin,
+        firstName: data.firstName,
+        lastName: data.lastName
+      });
       localStorage.setItem("adminSessionId", data.sessionId);
       // Set default tab based on role
       if (data.role === "employee") {
@@ -817,14 +828,8 @@ export default function AdminPage() {
           </div>
         )}
 
-        {activeTab === "kanban" && currentUser && (
+        {activeTab === "kanban" && (
           <EnhancedKanbanBoard sessionId={sessionId!} currentUser={currentUser} />
-        )}
-        
-        {activeTab === "kanban" && !currentUser && (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-purple-600">Lade Benutzerdaten...</div>
-          </div>
         )}
 
         {activeTab === "customers" && (

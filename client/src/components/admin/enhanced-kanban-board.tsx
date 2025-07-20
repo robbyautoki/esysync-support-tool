@@ -194,10 +194,11 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
   };
 
   const getCurrentUserName = () => {
+    console.log("getCurrentUserName - currentUser:", currentUser);
     if (currentUser?.firstName && currentUser?.lastName) {
       return `${currentUser.firstName} ${currentUser.lastName}`;
     }
-    return currentUser?.username || 'Aktueller Benutzer';
+    return currentUser?.username || 'admin';
   };
 
   // Load available users from API
@@ -206,6 +207,17 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
     enabled: !!sessionId,
     retry: 1,
     staleTime: 30000, // Cache for 30 seconds
+    queryFn: async () => {
+      const response = await fetch('/api/admin/users', {
+        headers: {
+          'x-session-id': sessionId!,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      return response.json();
+    },
   });
 
   // Get list of available users for dropdown
