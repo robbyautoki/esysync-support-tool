@@ -71,6 +71,7 @@ export const errorTypes = pgTable("error_types", {
   errorId: text("error_id").notNull().unique(),
   title: text("title").notNull(),
   description: text("description").notNull(),
+  category: text("category").default("hardware").notNull(), // hardware, software, network
   iconName: text("icon_name").notNull(),
   videoUrl: text("video_url"),
   videoEnabled: boolean("video_enabled").default(true).notNull(),

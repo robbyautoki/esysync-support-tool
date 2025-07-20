@@ -86,6 +86,7 @@ export default function AdminPage() {
     errorId: "",
     title: "",
     description: "",
+    category: "hardware",
     iconName: "Monitor",
     videoUrl: "",
     videoEnabled: true,
@@ -97,6 +98,7 @@ export default function AdminPage() {
     errorId: "",
     title: "",
     description: "",
+    category: "hardware",
     iconName: "Monitor",
     videoUrl: "",
     videoEnabled: true,
@@ -293,6 +295,7 @@ export default function AdminPage() {
       errorId: errorType.errorId,
       title: errorType.title,
       description: errorType.description,
+      category: errorType.category || "hardware",
       iconName: errorType.iconName,
       videoUrl: errorType.videoUrl || "",
       videoEnabled: (errorType as any).videoEnabled ?? true,
@@ -575,6 +578,20 @@ export default function AdminPage() {
                   </div>
 
                   <div>
+                    <Label htmlFor="category">Kategorie</Label>
+                    <select
+                      id="category"
+                      value={newErrorType.category}
+                      onChange={(e) => setNewErrorType(prev => ({ ...prev, category: e.target.value }))}
+                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="hardware">Hardware-Probleme</option>
+                      <option value="software">Software-Probleme</option>
+                      <option value="network">Netzwerk-Probleme</option>
+                    </select>
+                  </div>
+
+                  <div>
                     <Label htmlFor="description">Beschreibung</Label>
                     <Input
                       id="description"
@@ -683,6 +700,15 @@ export default function AdminPage() {
                               placeholder="Titel"
                               className="text-sm"
                             />
+                            <select
+                              value={editingData.category}
+                              onChange={(e) => setEditingData(prev => ({ ...prev, category: e.target.value }))}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm"
+                            >
+                              <option value="hardware">Hardware-Probleme</option>
+                              <option value="software">Software-Probleme</option>
+                              <option value="network">Netzwerk-Probleme</option>
+                            </select>
                             <Input
                               value={editingData.description}
                               onChange={(e) => setEditingData(prev => ({ ...prev, description: e.target.value }))}
@@ -745,9 +771,22 @@ export default function AdminPage() {
                           <div className="space-y-3">
                             <div className="flex items-center justify-between">
                               <div className="flex-1">
-                                <h3 className="font-semibold text-gray-900 text-sm mb-1">
-                                  {errorType.title}
-                                </h3>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h3 className="font-semibold text-gray-900 text-sm">
+                                    {errorType.title}
+                                  </h3>
+                                  <Badge 
+                                    variant="outline"
+                                    className={`text-xs ${
+                                      errorType.category === 'hardware' ? 'border-red-300 text-red-600 bg-red-50' :
+                                      errorType.category === 'software' ? 'border-blue-300 text-blue-600 bg-blue-50' :
+                                      'border-green-300 text-green-600 bg-green-50'
+                                    }`}
+                                  >
+                                    {errorType.category === 'hardware' ? 'Hardware' :
+                                     errorType.category === 'software' ? 'Software' : 'Netzwerk'}
+                                  </Badge>
+                                </div>
                                 <p className="text-xs text-gray-600 mb-1">
                                   ID: {errorType.errorId}
                                 </p>
