@@ -72,6 +72,16 @@ export function generatePDF(data: PDFData) {
       yPosition += lineHeight;
     }
     
+    // Contact person information
+    if (data.contactPerson) {
+      pdf.setTextColor(80, 80, 80);
+      pdf.text('Ansprechpartner:', 20, yPosition);
+      pdf.setTextColor(0, 0, 0);
+      const contactText = `${data.contactTitle || 'Frau'} ${data.contactPerson}`;
+      pdf.text(contactText, 80, yPosition);
+      yPosition += lineHeight;
+    }
+    
     pdf.setTextColor(80, 80, 80);
     pdf.text('Problem:', 20, yPosition);
     pdf.setTextColor(0, 0, 0);
@@ -107,6 +117,24 @@ export function generatePDF(data: PDFData) {
         yPosition += 6;
       }
     });
+    
+    // Alternative shipping address if provided
+    if (data.alternativeShipping && data.alternativeAddress) {
+      yPosition += 5;
+      pdf.setFontSize(14);
+      pdf.setTextColor(109, 13, 240);
+      pdf.text('Alternative Versandadresse:', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(11);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(data.alternativeAddress, 20, yPosition);
+      yPosition += 6;
+      if (data.alternativeZip && data.alternativeCity) {
+        pdf.text(`${data.alternativeZip} ${data.alternativeCity}`, 20, yPosition);
+        yPosition += 6;
+      }
+    }
     
     // Return address section
     yPosition += 10;

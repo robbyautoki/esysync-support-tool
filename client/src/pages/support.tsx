@@ -22,6 +22,13 @@ export interface SupportFormData {
   displayLocation: string | null;
   returnAddress: string | null;
   contactEmail: string | null;
+  // Shipping and contact person data
+  alternativeShipping: boolean;
+  alternativeAddress: string | null;
+  alternativeCity: string | null;
+  alternativeZip: string | null;
+  contactPerson: string | null;
+  contactTitle: 'Frau' | 'Herr' | 'Divers';
   rmaNumber?: string;
 }
 
@@ -38,6 +45,12 @@ export default function SupportPage() {
     displayLocation: null,
     returnAddress: null,
     contactEmail: null,
+    alternativeShipping: false,
+    alternativeAddress: null,
+    alternativeCity: null,
+    alternativeZip: null,
+    contactPerson: null,
+    contactTitle: 'Frau',
   });
 
   const updateFormData = (updates: Partial<SupportFormData>) => {
@@ -60,6 +73,12 @@ export default function SupportPage() {
       displayLocation: null,
       returnAddress: null,
       contactEmail: null,
+      alternativeShipping: false,
+      alternativeAddress: null,
+      alternativeCity: null,
+      alternativeZip: null,
+      contactPerson: null,
+      contactTitle: 'Frau',
     });
     setCurrentStep(0);
   };

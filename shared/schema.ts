@@ -25,6 +25,13 @@ export const supportTickets = pgTable("support_tickets", {
   displayLocation: text("display_location").notNull(),
   returnAddress: text("return_address"),
   contactEmail: text("contact_email").notNull(),
+  // Shipping and contact person fields
+  alternativeShipping: boolean("alternative_shipping").default(false),
+  alternativeAddress: text("alternative_address"),
+  alternativeCity: text("alternative_city"),
+  alternativeZip: text("alternative_zip"),
+  contactPerson: text("contact_person"),
+  contactTitle: text("contact_title"),
   errorType: text("error_type").notNull(),
   shippingMethod: text("shipping_method").notNull(),
   restartConfirmed: boolean("restart_confirmed").notNull(),
