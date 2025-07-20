@@ -249,48 +249,67 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
 
   return (
     <>
-      {/* Fullscreen Overlay */}
+      {/* Fullscreen Mode */}
       {isFullscreen && (
-        <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 bg-gray-50">
           <div className="h-full flex flex-col">
             {/* Fullscreen Header */}
-            <div className="bg-white/80 backdrop-blur-lg border-b border-white/20 p-4">
-              <div className="flex justify-between items-center max-w-7xl mx-auto">
-                <h2 className="text-xl font-bold text-gray-900">Kanban Board - Vollbild</h2>
-                <Button
-                  onClick={() => setIsFullscreen(false)}
-                  variant="outline"
-                  size="sm"
-                >
-                  <Minimize className="h-4 w-4 mr-2" />
-                  Schließen
-                </Button>
+            <div className="bg-white border-b border-gray-200 px-6 py-4">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                  <h2 className="text-2xl font-bold text-gray-900">Kanban Board - Vollbild</h2>
+                  <div className="text-sm text-gray-500">
+                    {filteredTickets.length} Tickets gesamt
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Tickets durchsuchen..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 w-80"
+                    />
+                  </div>
+                  <Button
+                    onClick={() => setIsFullscreen(false)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Minimize className="h-4 w-4 mr-2" />
+                    Schließen
+                  </Button>
+                </div>
               </div>
             </div>
             
             {/* Fullscreen Content */}
-            <div className="flex-1 overflow-y-auto p-4">
-              <div className="max-w-7xl mx-auto">
-                <div className="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="flex-1 overflow-hidden p-6">
+              <div className="h-full">
+                <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 h-full">
                   {['pending', 'workshop', 'shipped'].map((status) => {
                     const statusTickets = getStatusTickets(status);
                     const statusTitle = status === 'pending' ? 'Ausstehend' : 
                                        status === 'workshop' ? 'Workshop' : 'Versendet';
                     
                     return (
-                      <Card key={status} className="min-h-[500px]">
-                        <CardHeader className="pb-3">
-                          <CardTitle className="flex items-center justify-between">
-                            <span className="flex items-center gap-2">
+                      <div key={status} className="flex flex-col h-full">
+                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-4">
+                          <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-2 font-semibold text-gray-900">
                               {statusTitle}
-                              <Badge variant="secondary">{statusTickets.length}</Badge>
+                              <Badge variant="secondary" className="text-xs">
+                                {statusTickets.length}
+                              </Badge>
                             </span>
                             {status === 'workshop' && (
                               <AlertTriangle className="h-4 w-4 text-orange-500" />
                             )}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
+                          </div>
+                        </div>
+                        
+                        <div className="flex-1 overflow-y-auto space-y-3">
                           {statusTickets.map((ticket: SupportTicket) => {
                             const workshopDays = getWorkshopDays(ticket);
                             const isOverdue = status === 'workshop' && workshopDays > 7;
@@ -298,13 +317,13 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
                             return (
                               <Card
                                 key={ticket.id}
-                                className={`cursor-pointer transition-all hover:shadow-md ${getTicketPriorityColor(ticket)}`}
+                                className={`cursor-pointer transition-all hover:shadow-lg ${getTicketPriorityColor(ticket)} border-l-4`}
                                 onClick={() => setSelectedTicket(ticket)}
                               >
                                 <CardContent className="p-4">
-                                  <div className="space-y-2">
+                                  <div className="space-y-3">
                                     <div className="flex justify-between items-start">
-                                      <div className="font-medium text-purple-600 text-sm">
+                                      <div className="font-semibold text-purple-600 text-sm">
                                         {ticket.rmaNumber}
                                       </div>
                                       {isOverdue && (
@@ -314,30 +333,42 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
                                       )}
                                     </div>
                                     
-                                    <div className="text-xs text-gray-600">
-                                      <div>Account: {ticket.accountNumber}</div>
+                                    <div className="text-xs text-gray-600 space-y-1">
+                                      <div className="font-medium">Account: {ticket.accountNumber}</div>
                                       <div className="truncate">{ticket.errorType}</div>
+                                      {ticket.displayLocation && (
+                                        <div className="text-gray-500">📍 {ticket.displayLocation}</div>
+                                      )}
                                     </div>
 
-                                    {ticket.assignedTo && (
-                                      <div className="flex items-center gap-1 text-xs text-blue-600">
-                                        <User className="h-3 w-3" />
-                                        {ticket.assignedTo}
-                                      </div>
-                                    )}
+                                    <div className="space-y-1">
+                                      {ticket.assignedTo && (
+                                        <div className="flex items-center gap-1 text-xs text-blue-600">
+                                          <User className="h-3 w-3" />
+                                          <span className="font-medium">Zuständig:</span> {ticket.assignedTo}
+                                        </div>
+                                      )}
 
-                                    <div className="flex justify-between items-center">
+                                      {ticket.processor && (
+                                        <div className="flex items-center gap-1 text-xs text-green-600">
+                                          <Users className="h-3 w-3" />
+                                          <span className="font-medium">Bearbeiter:</span> {ticket.processor}
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                                       <div className="flex items-center gap-1 text-xs text-gray-500">
                                         <Clock className="h-3 w-3" />
                                         {new Date(ticket.createdAt).toLocaleDateString('de-DE')}
                                       </div>
 
-                                      <div className="flex gap-1 flex-wrap">
+                                      <div className="flex gap-1">
                                         {status !== 'shipped' && (
                                           <Button
                                             size="sm"
                                             variant="outline"
-                                            className="h-6 text-xs px-2"
+                                            className="h-7 text-xs px-3"
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               const nextStatus = status === 'pending' ? 'workshop' : 'shipped';
@@ -350,7 +381,7 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
                                         <Button
                                           size="sm"
                                           variant="ghost"
-                                          className="h-6 text-xs px-2"
+                                          className="h-7 text-xs px-2"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             handleEditTicket(ticket);
@@ -365,8 +396,14 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
                               </Card>
                             );
                           })}
-                        </CardContent>
-                      </Card>
+                          
+                          {statusTickets.length === 0 && (
+                            <div className="text-center py-8 text-gray-400">
+                              <div className="text-sm">Keine Tickets in {statusTitle}</div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
