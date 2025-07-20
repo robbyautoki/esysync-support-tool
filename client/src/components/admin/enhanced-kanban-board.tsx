@@ -287,7 +287,7 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
             {/* Fullscreen Content */}
             <div className="flex-1 overflow-hidden p-6">
               <div className="h-full">
-                <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 h-full">
+                <div className="grid grid-cols-3 gap-6 h-full">
                   {['pending', 'workshop', 'shipped'].map((status) => {
                     const statusTickets = getStatusTickets(status);
                     const statusTitle = status === 'pending' ? 'Ausstehend' : 
