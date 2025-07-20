@@ -41,20 +41,49 @@ export default function EnhancedKanbanBoard({ sessionId }: EnhancedKanbanBoardPr
 
   const { data: tickets = [], isLoading } = useQuery({
     queryKey: ['/api/admin/tickets'],
+    queryFn: async () => {
+      const response = await fetch('/api/admin/tickets', {
+        headers: {
+          'x-session-id': sessionId,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch tickets');
+      }
+      return response.json();
+    },
   });
 
   const { data: ticketLogs = [] } = useQuery({
     queryKey: ['/api/admin/tickets', selectedTicket?.rmaNumber, 'logs'],
     enabled: !!selectedTicket?.rmaNumber,
+    queryFn: async () => {
+      const response = await fetch(`/api/admin/tickets/${selectedTicket?.rmaNumber}/logs`, {
+        headers: {
+          'x-session-id': sessionId,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch ticket logs');
+      }
+      return response.json();
+    },
   });
 
   const updateTicketMutation = useMutation({
     mutationFn: async (data: { rmaNumber: string; updates: Partial<SupportTicket> }) => {
-      return await apiRequest(`/api/admin/tickets/${data.rmaNumber}`, {
+      const response = await fetch(`/api/admin/tickets/${data.rmaNumber}`, {
         method: 'PATCH',
         body: JSON.stringify(data.updates),
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-session-id': sessionId
+        }
       });
+      if (!response.ok) {
+        throw new Error('Failed to update ticket');
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/tickets'] });
@@ -75,11 +104,18 @@ export default function EnhancedKanbanBoard({ sessionId }: EnhancedKanbanBoardPr
 
   const statusChangeMutation = useMutation({
     mutationFn: async (data: { rmaNumber: string; status: string }) => {
-      return await apiRequest(`/api/admin/tickets/${data.rmaNumber}/status`, {
+      const response = await fetch(`/api/admin/tickets/${data.rmaNumber}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status: data.status }),
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-session-id': sessionId
+        }
       });
+      if (!response.ok) {
+        throw new Error('Failed to update status');
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/tickets'] });
