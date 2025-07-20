@@ -56,20 +56,20 @@ export function generatePDF(data: PDFData) {
     pdf.setTextColor(80, 80, 80);
     pdf.text('RMA-Nummer:', 20, yPosition);
     pdf.setTextColor(0, 0, 0);
-    pdf.text(data.rmaNumber, 80, yPosition);
+    pdf.text(data.rmaNumber, 90, yPosition);
     yPosition += lineHeight;
     
     pdf.setTextColor(80, 80, 80);
     pdf.text('Account-Nummer:', 20, yPosition);
     pdf.setTextColor(0, 0, 0);
-    pdf.text(data.accountNumber || data.customerNumber, 80, yPosition);
+    pdf.text(data.accountNumber || data.customerNumber, 90, yPosition);
     yPosition += lineHeight;
     
     if (data.displayNumber) {
       pdf.setTextColor(80, 80, 80);
       pdf.text('Display-Nummer:', 20, yPosition);
       pdf.setTextColor(0, 0, 0);
-      pdf.text(data.displayNumber, 80, yPosition);
+      pdf.text(data.displayNumber, 90, yPosition);
       yPosition += lineHeight;
     }
     
@@ -77,7 +77,7 @@ export function generatePDF(data: PDFData) {
       pdf.setTextColor(80, 80, 80);
       pdf.text('Display-Standort:', 20, yPosition);
       pdf.setTextColor(0, 0, 0);
-      pdf.text(data.displayLocation, 80, yPosition);
+      pdf.text(data.displayLocation, 90, yPosition);
       yPosition += lineHeight;
     }
     
@@ -85,7 +85,7 @@ export function generatePDF(data: PDFData) {
       pdf.setTextColor(80, 80, 80);
       pdf.text('Kontakt-E-Mail:', 20, yPosition);
       pdf.setTextColor(0, 0, 0);
-      pdf.text(data.contactEmail, 80, yPosition);
+      pdf.text(data.contactEmail, 90, yPosition); // Moved further right to avoid overlap
       yPosition += lineHeight;
     }
     
@@ -95,14 +95,14 @@ export function generatePDF(data: PDFData) {
       pdf.text('Ansprechpartner:', 20, yPosition);
       pdf.setTextColor(0, 0, 0);
       const contactText = `${data.contactTitle || 'Frau'} ${data.contactPerson}`;
-      pdf.text(contactText, 80, yPosition);
+      pdf.text(contactText, 90, yPosition); // Consistent positioning
       yPosition += lineHeight;
     }
     
     pdf.setTextColor(80, 80, 80);
     pdf.text('Problem:', 20, yPosition);
     pdf.setTextColor(0, 0, 0);
-    pdf.text(data.errorType, 80, yPosition);
+    pdf.text(data.errorType, 90, yPosition);
     yPosition += lineHeight;
     
     // Shipping method translation
@@ -116,7 +116,7 @@ export function generatePDF(data: PDFData) {
     pdf.setTextColor(80, 80, 80);
     pdf.text('Versandoption:', 20, yPosition);
     pdf.setTextColor(0, 0, 0);
-    pdf.text(shippingMethodMap[data.shippingMethod] || data.shippingMethod, 80, yPosition);
+    pdf.text(shippingMethodMap[data.shippingMethod] || data.shippingMethod, 90, yPosition);
     yPosition += lineHeight + 10;
     
     // Address section
