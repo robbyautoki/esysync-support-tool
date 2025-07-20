@@ -115,10 +115,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateSupportTicket(rmaNumber: string, updates: Partial<SupportTicket>, editedBy: string): Promise<SupportTicket> {
+    // Clean up date fields to ensure they are proper Date objects
+    const cleanUpdates = { ...updates };
+    
+    // Handle date fields properly - convert strings to Date objects
+    if (cleanUpdates.workshopEntryDate && typeof cleanUpdates.workshopEntryDate === 'string') {
+      cleanUpdates.workshopEntryDate = new Date(cleanUpdates.workshopEntryDate);
+    }
+    if (cleanUpdates.archivedAt && typeof cleanUpdates.archivedAt === 'string') {
+      cleanUpdates.archivedAt = new Date(cleanUpdates.archivedAt);
+    }
+    if (cleanUpdates.createdAt && typeof cleanUpdates.createdAt === 'string') {
+      cleanUpdates.createdAt = new Date(cleanUpdates.createdAt);
+    }
+    
     const [ticket] = await db
       .update(supportTickets)
       .set({ 
-        ...updates, 
+        ...cleanUpdates, 
         lastEditedBy: editedBy,
         updatedAt: new Date()
       })

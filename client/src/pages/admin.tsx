@@ -32,6 +32,7 @@ export default function AdminPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("problems");
   const [userRole, setUserRole] = useState<string>("admin");
+  const [currentUser, setCurrentUser] = useState<any>(null);
   
   // Restore session from localStorage and validate it
   useEffect(() => {
@@ -55,6 +56,7 @@ export default function AdminPage() {
             });
             if (userResponse.ok) {
               const userData = await userResponse.json();
+              setCurrentUser(userData);
               setUserRole(userData.role || "admin");
               // Set default tab based on role
               if (userData.role === "employee") {
@@ -816,7 +818,7 @@ export default function AdminPage() {
         )}
 
         {activeTab === "kanban" && (
-          <EnhancedKanbanBoard sessionId={sessionId!} />
+          <EnhancedKanbanBoard sessionId={sessionId!} currentUser={currentUser} />
         )}
 
         {activeTab === "customers" && (

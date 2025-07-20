@@ -29,9 +29,10 @@ import jsPDF from 'jspdf';
 
 interface EnhancedKanbanBoardProps {
   sessionId: string;
+  currentUser?: { username: string; firstName?: string; lastName?: string; };
 }
 
-export default function EnhancedKanbanBoard({ sessionId }: EnhancedKanbanBoardProps) {
+export default function EnhancedKanbanBoard({ sessionId, currentUser }: EnhancedKanbanBoardProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [editingTicket, setEditingTicket] = useState<Partial<SupportTicket>>({});
@@ -156,7 +157,15 @@ export default function EnhancedKanbanBoard({ sessionId }: EnhancedKanbanBoardPr
   };
 
   const handleEditTicket = (ticket: SupportTicket) => {
-    setEditingTicket(ticket);
+    // Set current user as processor if not already set
+    const currentUserName = currentUser?.firstName && currentUser?.lastName 
+      ? `${currentUser.firstName} ${currentUser.lastName}`
+      : currentUser?.username || '';
+    
+    setEditingTicket({
+      ...ticket,
+      processor: ticket.processor || currentUserName // Auto-fill if empty
+    });
     setShowEditDialog(true);
   };
 
