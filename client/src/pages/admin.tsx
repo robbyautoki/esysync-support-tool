@@ -14,6 +14,7 @@ import EmailSettings from "@/components/admin/email-settings";
 import Statistics from "@/components/admin/statistics";
 import ActivityLogs from "@/components/admin/activity-logs";
 import Employees from "@/components/admin/employees";
+import TicketArchive from "@/components/admin/ticket-archive";
 
 import type { ErrorType } from "@shared/schema";
 import logoPath from "@assets/logo.png";
@@ -493,8 +494,10 @@ export default function AdminPage() {
               </button>
             )}
             <button
-              onClick={() => window.location.href = '/archive'}
-              className="w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong transition-all duration-200 flex items-center text-left hover:bg-white/20"
+              onClick={() => setActiveTab("archive")}
+              className={`w-full justify-start px-4 py-3 rounded-xl glassmorphism-strong transition-all duration-200 flex items-center text-left ${
+                activeTab === "archive" ? "bg-white/40 shadow-lg" : "hover:bg-white/20"
+              }`}
             >
               <Archive className="w-5 h-5 mr-3" style={{ color: '#6d0df0' }} />
               Ticket-Archiv
@@ -889,6 +892,10 @@ export default function AdminPage() {
 
         {activeTab === "employees" && userRole === "admin" && (
           <Employees sessionId={sessionId!} />
+        )}
+
+        {activeTab === "archive" && (
+          <TicketArchive sessionId={sessionId!} />
         )}
       </div>
     </div>
