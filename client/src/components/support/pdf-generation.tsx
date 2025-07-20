@@ -77,6 +77,7 @@ export default function PDFGeneration({ formData, updateFormData, onStartOver }:
         errorType: formData.selectedError!,
         shippingMethod: formData.shippingMethod!,
         restartConfirmed: formData.restartConfirmed,
+        additionalDeviceAffected: formData.additionalDeviceAffected || false,
       };
 
       const response = await fetch("/api/support-tickets", {
@@ -118,6 +119,7 @@ export default function PDFGeneration({ formData, updateFormData, onStartOver }:
       alternativeZip: formData.alternativeZip || undefined,
       errorType: errorDisplayNames[formData.selectedError as keyof typeof errorDisplayNames],
       shippingMethod: formData.shippingMethod!,
+      additionalDeviceAffected: formData.additionalDeviceAffected || false,
       address: formData.returnAddress || formData.displayLocation!,
     };
 
@@ -202,6 +204,10 @@ export default function PDFGeneration({ formData, updateFormData, onStartOver }:
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-green-500 mr-2" />
                     Versandoption: {shippingDisplayNames[formData.shippingMethod as keyof typeof shippingDisplayNames]}
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="w-4 h-4 text-green-500 mr-2" />
+                    Weiteres Gerät betroffen: {formData.additionalDeviceAffected ? 'Ja' : 'Nein'}
                   </li>
                 </ul>
               </div>

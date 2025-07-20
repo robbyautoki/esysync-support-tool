@@ -137,6 +137,30 @@ export default function CustomerData({ formData, updateFormData, onNext, onPrev 
             />
           </div>
 
+          {/* Additional Device Section */}
+          <div className="glassmorphism rounded-2xl p-6">
+            <div className="flex items-center mb-4">
+              <AlertTriangle className="w-5 h-5 mr-2" style={{ color: '#6d0df0' }} />
+              <Label className="text-lg font-semibold text-gray-900">
+                Zusätzliche Geräte
+              </Label>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Checkbox
+                id="additionalDevice"
+                checked={formData.additionalDeviceAffected || false}
+                onCheckedChange={(checked) => updateFormData({ additionalDeviceAffected: checked === true })}
+                className="data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
+              />
+              <Label htmlFor="additionalDevice" className="text-gray-700 cursor-pointer font-medium">
+                Ist ein weiteres Gerät betroffen?
+              </Label>
+            </div>
+            <p className="text-sm text-gray-500 mt-2">
+              Bitte markieren, falls ein weiteres Display oder Gerät ebenfalls defekt ist und bearbeitet werden muss.
+            </p>
+          </div>
+
           {/* Shipping and Contact Person Section */}
           <div className="glassmorphism rounded-2xl p-6">
             <div className="flex items-center mb-6">

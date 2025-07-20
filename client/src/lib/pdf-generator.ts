@@ -18,6 +18,7 @@ interface PDFData {
   alternativeZip?: string;
   contactPerson?: string;
   contactTitle?: string;
+  additionalDeviceAffected?: boolean;
 }
 
 export function generatePDF(data: PDFData) {
@@ -113,6 +114,15 @@ export function generatePDF(data: PDFData) {
     pdf.setTextColor(0, 0, 0);
     pdf.text(data.errorType, 95, yPosition);
     yPosition += lineHeight;
+    
+    // Additional device affected field
+    if (data.additionalDeviceAffected !== undefined) {
+      pdf.setTextColor(80, 80, 80);
+      pdf.text('Weiteres Gerät betroffen:', 20, yPosition);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(data.additionalDeviceAffected ? 'Ja' : 'Nein', 95, yPosition);
+      yPosition += lineHeight;
+    }
     
     // Shipping method translation
     const shippingMethodMap: { [key: string]: string } = {

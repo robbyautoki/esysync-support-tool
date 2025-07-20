@@ -22,6 +22,8 @@ export interface SupportFormData {
   displayLocation: string | null;
   returnAddress: string | null;
   contactEmail: string | null;
+  // Additional device affected
+  additionalDeviceAffected: boolean;
   // Shipping and contact person data
   alternativeShipping: boolean;
   alternativeAddress: string | null;
@@ -45,6 +47,7 @@ export default function SupportPage() {
     displayLocation: null,
     returnAddress: null,
     contactEmail: null,
+    additionalDeviceAffected: false,
     alternativeShipping: false,
     alternativeAddress: null,
     alternativeCity: null,
@@ -73,6 +76,7 @@ export default function SupportPage() {
       displayLocation: null,
       returnAddress: null,
       contactEmail: null,
+      additionalDeviceAffected: false,
       alternativeShipping: false,
       alternativeAddress: null,
       alternativeCity: null,
