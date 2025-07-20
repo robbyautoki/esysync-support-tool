@@ -159,15 +159,34 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
 
   const getTicketPriorityColor = (ticket: SupportTicket) => {
     const priority = ticket.priorityLevel || 'normal';
+    const createdDate = new Date(ticket.createdAt);
+    const daysSinceCreated = Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+    
     const workshopDays = ticket.workshopEntryDate 
       ? Math.floor((Date.now() - new Date(ticket.workshopEntryDate).getTime()) / (1000 * 60 * 60 * 24))
       : 0;
 
-    // Red if in workshop for more than 7 days
+    // Critical aging - tickets older than 14 days (deep red)
+    if (daysSinceCreated > 14) {
+      return 'border-l-4 border-l-red-700 bg-red-100 shadow-md';
+    }
+    
+    // High aging - tickets older than 7 days (red)
+    if (daysSinceCreated > 7) {
+      return 'border-l-4 border-l-red-500 bg-red-50';
+    }
+    
+    // Medium aging - tickets older than 3 days (orange)
+    if (daysSinceCreated > 3) {
+      return 'border-l-4 border-l-orange-500 bg-orange-50';
+    }
+
+    // Workshop specific aging - Red if in workshop for more than 7 days
     if (ticket.status === 'workshop' && workshopDays > 7) {
       return 'border-l-4 border-l-red-500 bg-red-50';
     }
 
+    // Priority based coloring for newer tickets
     switch (priority) {
       case 'urgent': return 'border-l-4 border-l-red-500 bg-red-50';
       case 'high': return 'border-l-4 border-l-orange-500 bg-orange-50';
@@ -200,6 +219,21 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
       return `${currentUser.firstName} ${currentUser.lastName}`;
     }
     return currentUser?.username || 'admin';
+  };
+
+  const getTicketAgeInfo = (ticket: SupportTicket) => {
+    const createdDate = new Date(ticket.createdAt);
+    const daysSinceCreated = Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysSinceCreated > 14) {
+      return { text: `${daysSinceCreated} Tage alt - KRITISCH`, color: 'text-red-700', icon: '🔴' };
+    } else if (daysSinceCreated > 7) {
+      return { text: `${daysSinceCreated} Tage alt - Hoch`, color: 'text-red-600', icon: '🟠' };
+    } else if (daysSinceCreated > 3) {
+      return { text: `${daysSinceCreated} Tage alt`, color: 'text-orange-600', icon: '🟡' };
+    } else {
+      return { text: `${daysSinceCreated} Tag${daysSinceCreated === 1 ? '' : 'e'} alt`, color: 'text-gray-600', icon: '🟢' };
+    }
   };
 
   const handleDownloadRepairReport = (ticket: SupportTicket) => {
@@ -464,9 +498,15 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
                                     </div>
 
                                     <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                                        <Clock className="h-3 w-3" />
-                                        {new Date(ticket.createdAt).toLocaleDateString('de-DE')}
+                                      <div className="space-y-1">
+                                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                                          <Clock className="h-3 w-3" />
+                                          {new Date(ticket.createdAt).toLocaleDateString('de-DE')}
+                                        </div>
+                                        <div className={`flex items-center gap-1 text-xs font-medium ${getTicketAgeInfo(ticket).color}`}>
+                                          <span>{getTicketAgeInfo(ticket).icon}</span>
+                                          {getTicketAgeInfo(ticket).text}
+                                        </div>
                                       </div>
 
                                       <div className="flex gap-1">
@@ -607,9 +647,15 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
                             )}
 
                             <div className="flex justify-between items-center">
-                              <div className="flex items-center gap-1 text-xs text-gray-500">
-                                <Clock className="h-3 w-3" />
-                                {new Date(ticket.createdAt).toLocaleDateString('de-DE')}
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-1 text-xs text-gray-500">
+                                  <Clock className="h-3 w-3" />
+                                  {new Date(ticket.createdAt).toLocaleDateString('de-DE')}
+                                </div>
+                                <div className={`flex items-center gap-1 text-xs font-medium ${getTicketAgeInfo(ticket).color}`}>
+                                  <span>{getTicketAgeInfo(ticket).icon}</span>
+                                  {getTicketAgeInfo(ticket).text}
+                                </div>
                               </div>
 
                               <div className="flex gap-1 flex-wrap">

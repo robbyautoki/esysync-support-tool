@@ -297,3 +297,15 @@ Preferred communication style: Simple, everyday language.
 - Category selection in both create and edit modes for problem management
 - Database migration successfully categorized all existing problems based on title keywords
 - Improved user experience with visual category icons and descriptions
+
+✓ Ticket-Aging System im Kanban Board (July 20, 2025)
+- Automatische Farbkodierung von Tickets basierend auf ihrem Alter seit Erstellung
+- Visuelle Altersstufen mit Emojis und farbcodierten Karten:
+  * 🟢 0-3 Tage: Normal (grau/weiß, keine besondere Beachtung)
+  * 🟡 3-7 Tage: Älter (orange Markierung, Aufmerksamkeit erforderlich)
+  * 🟠 7-14 Tage: Hoch (rote Markierung, prioritäre Bearbeitung)
+  * 🔴 14+ Tage: KRITISCH (dunkelrote Markierung mit Schatten, sofortige Bearbeitung)
+- Alters-Information wird direkt auf den Ticket-Karten angezeigt
+- Funktioniert sowohl in Vollbild- als auch normaler Kanban-Ansicht
+- Kombiniert mit bestehender Prioritätsfarbgebung für optimale Übersicht
+- Hilft bei der Identifikation von Tickets die zu lange ohne Bearbeitung bleiben
