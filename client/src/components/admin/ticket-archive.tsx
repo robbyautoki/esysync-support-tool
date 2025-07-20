@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Archive, Search, Calendar, User, Monitor, MapPin, Clock, Eye, Trash2, Filter, Download, RefreshCw, AlertTriangle } from "lucide-react";
+import { Archive, Search, Calendar, User, Monitor, MapPin, Clock, Eye, Trash2, Filter, Download, RefreshCw, AlertTriangle, FileText, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface SupportTicket {
   id: number;
@@ -32,6 +33,18 @@ interface SupportTicket {
   isArchived: boolean;
 }
 
+interface TicketLog {
+  id: number;
+  ticketId: number;
+  rmaNumber: string;
+  action: string;
+  previousValue?: string;
+  newValue?: string;
+  description: string;
+  editedBy: string;
+  createdAt: string;
+}
+
 interface TicketArchiveProps {
   sessionId: string;
 }
@@ -45,6 +58,8 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
   const [dateFilter, setDateFilter] = useState("all");
   const [archiveFilter, setArchiveFilter] = useState("all");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [selectedTicketForLogs, setSelectedTicketForLogs] = useState<SupportTicket | null>(null);
+  const [showLogsModal, setShowLogsModal] = useState(false);
 
   const { data: allTickets = [], isLoading, refetch } = useQuery({
     queryKey: ["/api/admin/archived-tickets"],
@@ -66,6 +81,23 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
   const uniqueProblems = [...new Set(allTickets.map((t: SupportTicket) => t.errorType))];
   const uniqueAssignees = [...new Set(allTickets.filter((t: SupportTicket) => t.assignedTo).map((t: SupportTicket) => t.assignedTo))];
   const uniquePriorities = [...new Set(allTickets.filter((t: SupportTicket) => t.priorityLevel).map((t: SupportTicket) => t.priorityLevel))];
+
+  // Query for ticket logs
+  const { data: ticketLogs = [], isLoading: logsLoading } = useQuery({
+    queryKey: ['/api/admin/tickets', selectedTicketForLogs?.rmaNumber, 'logs'],
+    enabled: !!selectedTicketForLogs?.rmaNumber,
+    queryFn: async () => {
+      const response = await fetch(`/api/admin/tickets/${selectedTicketForLogs?.rmaNumber}/logs`, {
+        headers: {
+          'x-session-id': sessionId,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch ticket logs');
+      }
+      return response.json();
+    },
+  });
 
   const filteredTickets = allTickets.filter((ticket: SupportTicket) => {
     const matchesSearch = searchTerm === "" || 
@@ -197,6 +229,16 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
     link.href = URL.createObjectURL(blob);
     link.download = `ticket-export-${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
+  };
+
+  const openLogsModal = (ticket: SupportTicket) => {
+    setSelectedTicketForLogs(ticket);
+    setShowLogsModal(true);
+  };
+
+  const closeLogsModal = () => {
+    setShowLogsModal(false);
+    setSelectedTicketForLogs(null);
   };
 
   return (
@@ -517,7 +559,16 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
                         onClick={() => window.open(`/track/${ticket.rmaNumber}`, '_blank')}
                       >
                         <Eye className="w-3 h-3 mr-1" />
-                        Details
+                        Status
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 text-xs"
+                        onClick={() => openLogsModal(ticket)}
+                      >
+                        <FileText className="w-3 h-3 mr-1" />
+                        Logs
                       </Button>
                     </div>
                   </CardContent>
@@ -527,6 +578,123 @@ export default function TicketArchive({ sessionId }: TicketArchiveProps) {
           )}
         </>
       )}
+
+      {/* Logs Modal */}
+      <Dialog open={showLogsModal} onOpenChange={setShowLogsModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-xl font-bold" style={{ color: '#6d0df0' }}>
+                Ticket-Logs: {selectedTicketForLogs?.rmaNumber}
+              </DialogTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={closeLogsModal}
+                className="h-8 w-8 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="text-sm text-gray-600">
+              Vollständige Reparatur-Historie und Änderungen
+            </div>
+          </DialogHeader>
+
+          <div className="mt-6 space-y-4">
+            {/* Ticket Info Summary */}
+            <Card className="glassmorphism border-0">
+              <CardContent className="p-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <div className="font-medium text-gray-700">Account</div>
+                    <div className="text-gray-600">{selectedTicketForLogs?.accountNumber}</div>
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-700">Status</div>
+                    <Badge className={getStatusColor(selectedTicketForLogs?.status || '')}>
+                      {selectedTicketForLogs?.status === 'pending' ? 'Ausstehend' :
+                       selectedTicketForLogs?.status === 'workshop' ? 'Workshop' :
+                       selectedTicketForLogs?.status === 'shipped' ? 'Versendet' : selectedTicketForLogs?.status}
+                    </Badge>
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-700">Problem</div>
+                    <div className="text-gray-600">{selectedTicketForLogs?.errorType}</div>
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-700">Erstellt</div>
+                    <div className="text-gray-600">
+                      {selectedTicketForLogs ? formatDate(selectedTicketForLogs.createdAt) : ''}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Logs Section */}
+            <Card className="glassmorphism border-0">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Verlauf ({ticketLogs.length} Einträge)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {logsLoading ? (
+                  <div className="space-y-3">
+                    {[...Array(3)].map((_, i) => (
+                      <Card key={i} className="p-3 animate-pulse">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {ticketLogs.length > 0 ? (
+                      ticketLogs.map((log: TicketLog) => (
+                        <Card key={log.id} className="p-4 border border-gray-200">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="font-medium text-sm text-gray-900 mb-1">
+                                {log.description}
+                              </div>
+                              <div className="text-xs text-gray-500 flex items-center gap-2">
+                                <span>von {log.editedBy}</span>
+                                <span>•</span>
+                                <span>{new Date(log.createdAt).toLocaleString('de-DE')}</span>
+                              </div>
+                              {log.previousValue && log.newValue && (
+                                <div className="mt-2 text-xs">
+                                  <span className="text-red-600">Von: {log.previousValue}</span>
+                                  <span className="mx-2">→</span>
+                                  <span className="text-green-600">Zu: {log.newValue}</span>
+                                </div>
+                              )}
+                            </div>
+                            <Badge variant="outline" className="text-xs ml-4">
+                              {log.action.replace('_', ' ')}
+                            </Badge>
+                          </div>
+                        </Card>
+                      ))
+                    ) : (
+                      <div className="text-center text-gray-500 py-8">
+                        <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                        <div className="text-sm">Keine Logs verfügbar</div>
+                        <div className="text-xs text-gray-400">
+                          Logs werden erstellt wenn Änderungen am Ticket vorgenommen werden.
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
