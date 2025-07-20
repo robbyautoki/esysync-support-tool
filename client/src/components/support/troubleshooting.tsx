@@ -34,10 +34,57 @@ export default function Troubleshooting({ formData, updateFormData, onNext, onPr
 
   const selectedError = errorTypes?.find((error: any) => error.errorId === formData.selectedError);
 
-  const handleTroubleshootingCompleted = (resolved: boolean) => {
+  const handleTroubleshootingCompleted = async (resolved: boolean) => {
     updateFormData({ troubleshootingCompleted: true, problemResolved: resolved });
-    if (!resolved) {
+    
+    if (resolved) {
+      // Problem wurde durch Tutorial gelöst - erstelle resolved Ticket
+      updateFormData({ resolvedViaTutorial: true });
+      await createResolvedTicket();
+    } else {
       onNext();
+    }
+  };
+
+  const createResolvedTicket = async () => {
+    try {
+      // Generate RMA number for resolved ticket
+      const currentYear = new Date().getFullYear();
+      const randomNum = Math.floor(100000 + Math.random() * 900000);
+      const rmaNumber = `RESOLVED-${currentYear}-${randomNum}`;
+      
+      const resolvedTicketData = {
+        rmaNumber,
+        accountNumber: "TUTORIAL-USER", // Placeholder da keine Kundendaten erfasst
+        displayNumber: "UNKNOWN",
+        displayLocation: "Via Tutorial gelöst",
+        returnAddress: null,
+        contactEmail: "tutorial-resolved@system.local",
+        contactPerson: null,
+        contactTitle: null,
+        alternativeShipping: false,
+        alternativeAddress: null,
+        alternativeCity: null,
+        alternativeZip: null,
+        errorType: formData.selectedError!,
+        shippingMethod: "no-shipping",
+        restartConfirmed: formData.restartConfirmed,
+        additionalDeviceAffected: false,
+        resolvedViaTutorial: true,
+      };
+
+      const response = await fetch("/api/support-tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(resolvedTicketData),
+      });
+
+      if (response.ok) {
+        console.log("Resolved ticket created successfully for statistics");
+      }
+    } catch (error) {
+      console.error("Failed to create resolved ticket:", error);
+      // Nicht kritisch - Benutzer sieht Erfolg trotzdem
     }
   };
 

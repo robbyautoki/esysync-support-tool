@@ -86,7 +86,9 @@ export default function Statistics({ sessionId }: StatisticsProps) {
   const resolvedTickets = filteredTickets.filter(t => t.status === "shipped").length;
   const pendingTickets = filteredTickets.filter(t => t.status === "pending").length;
   const workshopTickets = filteredTickets.filter(t => t.status === "workshop").length;
+  const tutorialResolvedTickets = filteredTickets.filter(t => t.resolvedViaTutorial === true).length;
   const resolutionRate = totalTickets > 0 ? Math.round((resolvedTickets / totalTickets) * 100) : 0;
+  const tutorialResolutionRate = totalTickets > 0 ? Math.round((tutorialResolvedTickets / totalTickets) * 100) : 0;
 
   // Calculate average resolution time
   const avgResolutionTime = resolvedTickets > 0 ? 
@@ -161,7 +163,7 @@ export default function Statistics({ sessionId }: StatisticsProps) {
       </div>
 
       {/* Key Metrics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <Card className="border border-gray-200">
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -213,6 +215,21 @@ export default function Statistics({ sessionId }: StatisticsProps) {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Unique Kunden</p>
                 <p className="text-2xl font-bold text-gray-900">{uniqueCustomers}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border border-gray-200">
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <div className="p-3 rounded-lg bg-green-100">
+                <Monitor className="w-6 h-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Tutorial-Lösungen</p>
+                <p className="text-2xl font-bold text-gray-900">{tutorialResolvedTickets}</p>
+                <p className="text-xs text-green-600 font-medium">{tutorialResolutionRate}% der Fälle</p>
               </div>
             </div>
           </CardContent>

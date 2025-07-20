@@ -24,6 +24,7 @@ export interface SupportFormData {
   contactEmail: string | null;
   // Additional device affected
   additionalDeviceAffected: boolean;
+  resolvedViaTutorial?: boolean;
   // Shipping and contact person data
   alternativeShipping: boolean;
   alternativeAddress: string | null;
@@ -77,6 +78,7 @@ export default function SupportPage() {
       returnAddress: null,
       contactEmail: null,
       additionalDeviceAffected: false,
+      resolvedViaTutorial: false,
       alternativeShipping: false,
       alternativeAddress: null,
       alternativeCity: null,
