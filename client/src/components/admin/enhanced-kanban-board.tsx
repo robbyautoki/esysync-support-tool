@@ -243,18 +243,18 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
         accountNumber: ticket.accountNumber || '',
         displayNumber: ticket.displayNumber || '',
         displayLocation: ticket.displayLocation || '',
-        email: ticket.email || '',
+        email: ticket.contactEmail || '',
       },
       errorType: ticket.errorType,
       status: ticket.status,
-      assignedTo: ticket.assignedTo,
-      processor: ticket.processor,
-      priorityLevel: ticket.priorityLevel,
-      notes: ticket.notes,
-      repairDetails: ticket.repairDetails,
-      repairLog: ticket.repairLog,
-      createdAt: ticket.createdAt,
-      updatedAt: ticket.updatedAt || ticket.createdAt,
+      assignedTo: ticket.assignedTo || undefined,
+      processor: ticket.processor || undefined,
+      priorityLevel: ticket.priorityLevel || undefined,
+      notes: ticket.notes || undefined,
+      repairDetails: ticket.repairDetails || undefined,
+      repairLog: ticket.repairLog || undefined,
+      createdAt: new Date(ticket.createdAt).toISOString(),
+      updatedAt: new Date(ticket.updatedAt || ticket.createdAt).toISOString(),
       shippingMethod: ticket.shippingMethod,
     };
     
@@ -425,9 +425,9 @@ export default function EnhancedKanbanBoard({ sessionId, currentUser }: Enhanced
             </div>
             
             {/* Fullscreen Content */}
-            <div className="flex-1 overflow-hidden p-6">
-              <div className="h-full">
-                <div className="grid grid-cols-3 gap-6 h-full">
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="min-h-full">
+                <div className="grid grid-cols-3 gap-6 min-h-full">
                   {['pending', 'workshop', 'shipped'].map((status) => {
                     const statusTickets = getStatusTickets(status);
                     const statusTitle = status === 'pending' ? 'Ausstehend' : 
