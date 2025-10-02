@@ -66,7 +66,7 @@ export default function ErrorSelection({ formData, updateFormData, onNext, onPre
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const canContinue = formData.selectedError && formData.restartConfirmed;
 
-  const { data: errorTypes, isLoading } = useQuery({
+  const { data: errorTypes, isLoading } = useQuery<ErrorType[]>({
     queryKey: ["/api/error-types"],
   });
 
@@ -74,8 +74,20 @@ export default function ErrorSelection({ formData, updateFormData, onNext, onPre
     !selectedCategory || error.category === selectedCategory
   ) : [];
 
+  const selectedErrorType = errorTypes?.find(e => e.errorId === formData.selectedError);
+  const needsSubOption = selectedErrorType?.hasSubOptions && !formData.issueScope && !formData.specificMessage;
+  const canProceed = formData.selectedError && formData.restartConfirmed && !needsSubOption;
+
   const selectError = (errorId: string) => {
-    updateFormData({ selectedError: errorId });
+    updateFormData({ selectedError: errorId, issueScope: null, specificMessage: null });
+  };
+
+  const selectSubOption = (subOptionId: string) => {
+    if (selectedErrorType?.errorId === 'meldung-erscheint') {
+      updateFormData({ specificMessage: subOptionId });
+    } else {
+      updateFormData({ issueScope: subOptionId });
+    }
   };
 
   const toggleRestartConfirmed = (checked: boolean) => {
@@ -84,8 +96,7 @@ export default function ErrorSelection({ formData, updateFormData, onNext, onPre
 
   const selectCategory = (categoryId: string) => {
     setSelectedCategory(categoryId);
-    // Reset selected error when changing category
-    updateFormData({ selectedError: null });
+    updateFormData({ selectedError: null, issueScope: null, specificMessage: null });
   };
 
   return (
@@ -192,6 +203,41 @@ export default function ErrorSelection({ formData, updateFormData, onNext, onPre
           </>
         )}
 
+        {/* Sub-Options Selection */}
+        {selectedCategory && formData.selectedError && selectedErrorType?.hasSubOptions && (
+          <div className="bg-purple-50 border border-purple-200 rounded-2xl p-6 mb-8">
+            <h3 className="text-lg font-medium text-purple-800 mb-4">
+              {selectedErrorType.errorId === 'meldung-erscheint' 
+                ? 'Welche Meldung erscheint?'
+                : 'Welche Geräte sind betroffen?'}
+            </h3>
+            <div className="grid md:grid-cols-3 gap-4">
+              {(selectedErrorType.subOptions as any[])?.map((option: any) => {
+                const isSelected = selectedErrorType.errorId === 'meldung-erscheint'
+                  ? formData.specificMessage === option.id
+                  : formData.issueScope === option.id;
+                
+                return (
+                  <div
+                    key={option.id}
+                    className={`p-4 rounded-xl cursor-pointer transition-all duration-300 ${
+                      isSelected
+                        ? "bg-purple-600 text-white apple-shadow-lg"
+                        : "bg-white text-gray-700 hover:bg-purple-100"
+                    }`}
+                    onClick={() => selectSubOption(option.id)}
+                    data-testid={`sub-option-${option.id}`}
+                  >
+                    <p className="text-sm font-medium text-center">
+                      {option.label}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Restart Confirmation */}
         {selectedCategory && formData.selectedError && (
           <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 mb-8">
@@ -236,8 +282,9 @@ export default function ErrorSelection({ formData, updateFormData, onNext, onPre
 
           <Button
             onClick={onNext}
-            disabled={!canContinue}
+            disabled={!canProceed}
             className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white disabled:bg-gray-300"
+            data-testid="button-next"
           >
             <span>Weiter</span>
             <ArrowRight className="h-4 w-4" />

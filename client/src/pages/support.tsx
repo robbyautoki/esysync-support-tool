@@ -33,6 +33,10 @@ export interface SupportFormData {
   contactPerson: string | null;
   contactTitle: 'Frau' | 'Herr' | 'Divers';
   rmaNumber?: string;
+  // ESYSYNC-specific fields
+  issueScope?: string | null;
+  specificMessage?: string | null;
+  troubleshootingSteps?: Record<string, boolean>;
 }
 
 export default function SupportPage() {
@@ -55,6 +59,9 @@ export default function SupportPage() {
     alternativeZip: null,
     contactPerson: null,
     contactTitle: 'Frau',
+    issueScope: null,
+    specificMessage: null,
+    troubleshootingSteps: {},
   });
 
   const updateFormData = (updates: Partial<SupportFormData>) => {
@@ -85,6 +92,9 @@ export default function SupportPage() {
       alternativeZip: null,
       contactPerson: null,
       contactTitle: 'Frau',
+      issueScope: null,
+      specificMessage: null,
+      troubleshootingSteps: {},
     });
     setCurrentStep(0);
   };

@@ -27,12 +27,42 @@ const getEmbeddableVideoUrl = (url: string) => {
   return url;
 };
 
+const checkLabels: Record<string, string> = {
+  mounting: "Aufhängung geprüft",
+  restart: "Neustart durchgeführt",
+  pause30min: "30 Minuten Pause eingelegt",
+  power: "Stromzufuhr geprüft",
+  socket: "Steckdose geprüft",
+  fuse: "Sicherung geprüft",
+  timer: "Zeitschaltuhr geprüft",
+  router: "Router neu gestartet",
+  transfer: "Übertragung laut Status erfolgreich",
+};
+
 export default function Troubleshooting({ formData, updateFormData, onNext, onPrev }: TroubleshootingProps) {
-  const { data: errorTypes, isLoading } = useQuery({
+  const { data: errorTypes, isLoading } = useQuery<any[]>({
     queryKey: ["/api/error-types"],
   });
 
   const selectedError = errorTypes?.find((error: any) => error.errorId === formData.selectedError);
+  
+  const toggleCheck = (checkId: string) => {
+    const current = formData.troubleshootingSteps || {};
+    updateFormData({
+      troubleshootingSteps: {
+        ...current,
+        [checkId]: !current[checkId]
+      }
+    });
+  };
+
+  const allChecksCompleted = () => {
+    if (!selectedError?.requiredChecks || selectedError.requiredChecks.length === 0) {
+      return true;
+    }
+    const steps = formData.troubleshootingSteps || {};
+    return selectedError.requiredChecks.every((check: string) => steps[check] === true);
+  };
 
   const handleTroubleshootingCompleted = async (resolved: boolean) => {
     updateFormData({ troubleshootingCompleted: true, problemResolved: resolved });
@@ -55,7 +85,7 @@ export default function Troubleshooting({ formData, updateFormData, onNext, onPr
       
       const resolvedTicketData = {
         rmaNumber,
-        accountNumber: "TUTORIAL-USER", // Placeholder da keine Kundendaten erfasst
+        accountNumber: "TUTORIAL-USER",
         displayNumber: "UNKNOWN",
         displayLocation: "Via Tutorial gelöst",
         returnAddress: null,
@@ -71,6 +101,9 @@ export default function Troubleshooting({ formData, updateFormData, onNext, onPr
         restartConfirmed: formData.restartConfirmed,
         additionalDeviceAffected: false,
         resolvedViaTutorial: true,
+        issueScope: formData.issueScope || null,
+        specificMessage: formData.specificMessage || null,
+        troubleshootingSteps: formData.troubleshootingSteps || null,
       };
 
       const response = await fetch("/api/support-tickets", {
@@ -122,7 +155,7 @@ export default function Troubleshooting({ formData, updateFormData, onNext, onPr
                     
                     return (
                       <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100">
-                        {isYouTube ? (
+                        {isYouTube && embeddableUrl ? (
                           <iframe
                             src={embeddableUrl}
                             className="w-full h-full"
@@ -178,6 +211,48 @@ export default function Troubleshooting({ formData, updateFormData, onNext, onPr
               )}
             </div>
 
+            {/* Required Checks Checklist */}
+            {selectedError?.requiredChecks && selectedError.requiredChecks.length > 0 && (
+              <div className="glassmorphism rounded-2xl p-6 border-2 border-purple-200">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                  Erforderliche Prüfungen
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Bitte bestätigen Sie, dass Sie folgende Schritte durchgeführt haben:
+                </p>
+                <div className="space-y-3">
+                  {selectedError.requiredChecks.map((checkId: string) => {
+                    const isChecked = formData.troubleshootingSteps?.[checkId] || false;
+                    return (
+                      <div 
+                        key={checkId}
+                        className="flex items-center space-x-3 p-3 rounded-lg bg-white/50 hover:bg-white/80 transition-colors cursor-pointer"
+                        onClick={() => toggleCheck(checkId)}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleCheck(checkId)}
+                          className="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                          data-testid={`check-${checkId}`}
+                        />
+                        <label className="flex-1 text-gray-700 cursor-pointer">
+                          {checkLabels[checkId] || checkId}
+                        </label>
+                      </div>
+                    );
+                  })}
+                </div>
+                {!allChecksCompleted() && (
+                  <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                    <p className="text-sm text-orange-700">
+                      Bitte führen Sie alle erforderlichen Prüfungen durch, bevor Sie fortfahren.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Resolution Question */}
             <div className="glassmorphism rounded-2xl p-6 text-center">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">
@@ -190,17 +265,21 @@ export default function Troubleshooting({ formData, updateFormData, onNext, onPr
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
                   onClick={() => handleTroubleshootingCompleted(true)}
-                  className="px-8 py-3 bg-green-500 text-white rounded-full apple-shadow hover:bg-green-600 transition-all duration-200"
+                  disabled={!allChecksCompleted()}
+                  className="px-8 py-3 bg-green-500 text-white rounded-full apple-shadow hover:bg-green-600 transition-all duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  data-testid="button-problem-resolved"
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Ja, Problem gelöst
                 </Button>
                 <Button
                   onClick={() => handleTroubleshootingCompleted(false)}
-                  className="px-8 py-3 text-white rounded-full apple-shadow transition-all duration-200"
-                  style={{ backgroundColor: '#6d0df0' }}
-                  onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#5a0bd9'}
-                  onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#6d0df0'}
+                  disabled={!allChecksCompleted()}
+                  className="px-8 py-3 text-white rounded-full apple-shadow transition-all duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  style={{ backgroundColor: allChecksCompleted() ? '#6d0df0' : undefined }}
+                  onMouseEnter={(e) => allChecksCompleted() && ((e.target as HTMLElement).style.backgroundColor = '#5a0bd9')}
+                  onMouseLeave={(e) => allChecksCompleted() && ((e.target as HTMLElement).style.backgroundColor = '#6d0df0')}
+                  data-testid="button-continue-support"
                 >
                   Nein, weiter zum Support
                   <ArrowRight className="w-4 h-4 ml-2" />

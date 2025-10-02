@@ -1,0 +1,87 @@
+Ticket- und Fehlerbehandlungsleitfaden ESYSYNC 
+
+Kapitel 1: Entscheidungsbaum 
+
+Dieses Kapitel beschreibt die möglichen Fehlerbilder und die dazugehörigen Schritte, die vom Kunden oder Support durchgeführt werden sollen. 
+
+Display flackert 
+
+- Betrifft alle Geräte an Schiene → Aufhängung geprüft? Neustart versucht, ggf. mit 30 Minuten Pause? 
+
+- Betrifft alle Geräte am Netzteil → Aufhängung geprüft? Neustart versucht, ggf. mit 30 Minuten Pause? 
+
+- Betrifft nur einzelnes Gerät → Aufhängung geprüft? Neustart versucht, ggf. mit 30 Minuten Pause? 
+
+Meldung erscheint 
+
+- SIM-Karte entfernen → Neustart versucht, ggf. mit 30 Minuten Pause? 
+
+- Authentifizierungsproblem → Neustart versucht, ggf. mit 30 Minuten Pause? 
+
+- HomeApp auswählen → Neustart versucht, ggf. mit 30 Minuten Pause? 
+
+Display schwarz 
+
+- Betrifft alle Geräte an Schiene → Aufhängung geprüft? Fließt Strom? Steckdose geprüft? Sicherung geprüft? Zeitschaltuhr geprüft? Router neu gestartet? 
+
+- Betrifft alle Geräte am Netzteil → Aufhängung geprüft? Fließt Strom? Steckdose geprüft? Sicherung geprüft? Zeitschaltuhr geprüft? Netzteil bekommt Strom? Router neu gestartet? 
+
+- Betrifft nur einzelnes Gerät → Aufhängung geprüft? Fließt Strom? Router neu gestartet? 
+
+Weitere Fehlerbilder 
+
+No content assigned → Neustart versucht, ggf. mit 30 Minuten Pause? Übertragung lt. Status erfolgreich, auch nach Neustart? Router neu gestartet? 
+
+Veralteter Inhalt → Neustart versucht, ggf. mit 30 Minuten Pause? Übertragung lt. Status erfolgreich, auch nach Neustart? Router neu gestartet? 
+
+Bruchschaden → Display/MediaBox einsenden. 
+
+ESYSYNC-Logo erscheint dauerhaft → Neustart versucht, ggf. mit 30 Minuten Pause? Router neu gestartet? 
+
+Darstellungsproblem (Streifen, Schattierungen, Farben) → Neustart versucht, ggf. mit 30 Minuten Pause? 
+
+Frau wird angezeigt (Launcher) → Neustart versucht, ggf. mit 30 Minuten Pause? 
+
+Kapitel 2: Problem-Kategorien 
+
+Die Probleme lassen sich grundsätzlich in drei Hauptkategorien einteilen: 
+
+1. Hardware-Probleme – physische Defekte am Display oder Hardware-Komponenten. 
+
+2. Software-Probleme – Bootloop, Apps, Android-Fehler, System-Probleme. 
+
+[3. Netzwerk-Probleme – Verbindungs-, Update- und Konnektivitätsprobleme (wird meist intern geprüft).] - meldet der Kunde eher nicht 
+
+Kapitel 3: Fehlerbeschreibungen & mögliche Ursachen 
+
+Beispiele aus der Praxis, wie sie in der Support-Oberfläche erscheinen: 
+
+- Displaypanel defekt (z. B. LED-Backlight). 
+
+- Display bleibt im Bootloop hängen (ESYSYNC-Logo). 
+
+- Flackerndes Display. 
+
+- Fehlermeldungen: SIM-Karte entfernen, Authentifizierungsfehler, HomeApp auswählen. 
+
+- Alle Displays ohne Strom (Stromversorgung prüfen). 
+
+- No Content Assigned (Inhalte fehlen). 
+
+- Veralteter Inhalt (Inhalte nicht aktualisiert). 
+
+- Physische Schäden: Bruch, Sturz, Risse. 
+
+- Darstellung: Linien, Schatten, falsche Farben. 
+
+- Launcher zeigt falschen Inhalt (z. B. Frau statt App). 
+
+Kapitel 4: Handlungsempfehlungen 
+
+Wenn Probleme nach den genannten Schritten weiterhin bestehen, gilt: 
+
+A → Display/MediaBox zu uns einsenden (Reparatur). 
+
+B → Wir prüfen, ob wir per Fernwartung helfen können, Ersatz versenden oder eine Zusendung beauftragen müssen. 
+
+Hinweis: Vor Kontaktaufnahme mit dem Support muss der Kunde bestätigen, dass ein Neustart des Displays durchgeführt wurde, bzw. Je nach Meldung müssen diverse Versuche und Tests durchgeführt worden sein. 

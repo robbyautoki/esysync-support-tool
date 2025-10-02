@@ -390,6 +390,173 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Seed ESYSYNC error types
+  app.post("/api/admin/seed-esysync-errors", requireAdmin, async (req: any, res) => {
+    try {
+      const esysyncErrors = [
+        // Hardware Problems
+        {
+          errorId: "display-flackert",
+          title: "Display flackert",
+          description: "Das Display zeigt Flackern oder instabile Bilddarstellung",
+          category: "hardware",
+          iconName: "Monitor",
+          videoEnabled: true,
+          videoUrl: null,
+          instructions: "1. Prüfen Sie die Aufhängung des Displays\n2. Versuchen Sie einen Neustart\n3. Warten Sie ggf. 30 Minuten und versuchen Sie erneut\n4. Wenn mehrere Geräte betroffen sind, prüfen Sie die Stromversorgung",
+          isActive: true,
+          hasSubOptions: true,
+          subOptions: [
+            { id: "all-rail", label: "Betrifft alle Geräte an Schiene" },
+            { id: "all-power", label: "Betrifft alle Geräte am Netzteil" },
+            { id: "single", label: "Betrifft nur einzelnes Gerät" }
+          ],
+          requiredChecks: ["mounting", "restart", "pause30min"]
+        },
+        {
+          errorId: "display-schwarz",
+          title: "Display schwarz",
+          description: "Das Display bleibt komplett schwarz ohne Anzeige",
+          category: "hardware",
+          iconName: "Power",
+          videoEnabled: true,
+          videoUrl: null,
+          instructions: "1. Prüfen Sie die Aufhängung\n2. Fließt Strom? Steckdose geprüft?\n3. Sicherung geprüft?\n4. Zeitschaltuhr geprüft?\n5. Router neu gestartet?\n6. Bei Netzteil: Bekommt das Netzteil Strom?",
+          isActive: true,
+          hasSubOptions: true,
+          subOptions: [
+            { id: "all-rail", label: "Betrifft alle Geräte an Schiene" },
+            { id: "all-power", label: "Betrifft alle Geräte am Netzteil" },
+            { id: "single", label: "Betrifft nur einzelnes Gerät" }
+          ],
+          requiredChecks: ["mounting", "power", "socket", "fuse", "timer", "router"]
+        },
+        {
+          errorId: "bruchschaden",
+          title: "Bruchschaden",
+          description: "Physische Beschädigung am Display (Risse, Bruch, Sturz)",
+          category: "hardware",
+          iconName: "AlertTriangle",
+          videoEnabled: false,
+          videoUrl: null,
+          instructions: "Display/MediaBox muss zur Reparatur eingesendet werden.\n\nBitte verpacken Sie das Gerät sicher und senden Sie es an uns zurück.",
+          isActive: true,
+          hasSubOptions: false,
+          subOptions: null,
+          requiredChecks: []
+        },
+        {
+          errorId: "darstellungsproblem",
+          title: "Darstellungsproblem",
+          description: "Streifen, Schattierungen oder falsche Farben im Display",
+          category: "hardware",
+          iconName: "BarChart3",
+          videoEnabled: true,
+          videoUrl: null,
+          instructions: "1. Führen Sie einen Neustart des Displays durch\n2. Warten Sie ggf. 30 Minuten\n3. Wenn das Problem weiterhin besteht, kontaktieren Sie den Support",
+          isActive: true,
+          hasSubOptions: false,
+          subOptions: null,
+          requiredChecks: ["restart", "pause30min"]
+        },
+        // Software Problems
+        {
+          errorId: "meldung-erscheint",
+          title: "Meldung erscheint",
+          description: "Eine Fehlermeldung wird auf dem Display angezeigt",
+          category: "software",
+          iconName: "ShieldAlert",
+          videoEnabled: true,
+          videoUrl: null,
+          instructions: "Je nach Meldung:\n1. SIM-Karte entfernen → Neustart\n2. Authentifizierungsproblem → Neustart\n3. HomeApp auswählen → Neustart\n\nWarten Sie ggf. 30 Minuten zwischen den Versuchen.",
+          isActive: true,
+          hasSubOptions: true,
+          subOptions: [
+            { id: "sim-card", label: "SIM-Karte entfernen" },
+            { id: "auth", label: "Authentifizierungsproblem" },
+            { id: "homeapp", label: "HomeApp auswählen" }
+          ],
+          requiredChecks: ["restart", "pause30min"]
+        },
+        {
+          errorId: "esysync-logo-dauerhaft",
+          title: "ESYSYNC-Logo erscheint dauerhaft",
+          description: "Das Display hängt beim ESYSYNC-Logo (Bootloop)",
+          category: "software",
+          iconName: "RotateCcw",
+          videoEnabled: true,
+          videoUrl: null,
+          instructions: "1. Versuchen Sie einen Neustart\n2. Warten Sie ggf. 30 Minuten\n3. Starten Sie den Router neu\n4. Wenn das Problem weiterhin besteht, muss das Display eingesendet werden",
+          isActive: true,
+          hasSubOptions: false,
+          subOptions: null,
+          requiredChecks: ["restart", "pause30min", "router"]
+        },
+        {
+          errorId: "launcher-frau",
+          title: "Frau wird angezeigt (Launcher)",
+          description: "Der Android-Launcher zeigt eine Frau statt der App",
+          category: "software",
+          iconName: "Smartphone",
+          videoEnabled: true,
+          videoUrl: null,
+          instructions: "1. Führen Sie einen Neustart durch\n2. Warten Sie ggf. 30 Minuten\n3. Wenn das Problem weiterhin besteht, kontaktieren Sie den Support",
+          isActive: true,
+          hasSubOptions: false,
+          subOptions: null,
+          requiredChecks: ["restart", "pause30min"]
+        },
+        {
+          errorId: "no-content-assigned",
+          title: "No Content Assigned",
+          description: "Keine Inhalte wurden dem Display zugewiesen",
+          category: "software",
+          iconName: "FileX",
+          videoEnabled: true,
+          videoUrl: null,
+          instructions: "1. Versuchen Sie einen Neustart\n2. Warten Sie ggf. 30 Minuten\n3. Prüfen Sie, ob die Übertragung laut Status erfolgreich war\n4. Starten Sie den Router neu\n5. Wenn das Problem weiterhin besteht, kontaktieren Sie den Support",
+          isActive: true,
+          hasSubOptions: false,
+          subOptions: null,
+          requiredChecks: ["restart", "pause30min", "transfer", "router"]
+        },
+        {
+          errorId: "veralteter-inhalt",
+          title: "Veralteter Inhalt",
+          description: "Die angezeigten Inhalte sind nicht aktuell",
+          category: "software",
+          iconName: "Settings",
+          videoEnabled: true,
+          videoUrl: null,
+          instructions: "1. Versuchen Sie einen Neustart\n2. Warten Sie ggf. 30 Minuten\n3. Prüfen Sie, ob die Übertragung laut Status erfolgreich war (auch nach Neustart)\n4. Starten Sie den Router neu\n5. Wenn das Problem weiterhin besteht, kontaktieren Sie den Support",
+          isActive: true,
+          hasSubOptions: false,
+          subOptions: null,
+          requiredChecks: ["restart", "pause30min", "transfer", "router"]
+        }
+      ];
+
+      const createdErrors = [];
+      for (const errorData of esysyncErrors) {
+        try {
+          const created = await storage.createErrorType(errorData);
+          createdErrors.push(created);
+        } catch (err) {
+          console.log(`Error type ${errorData.errorId} might already exist, skipping...`);
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        created: createdErrors.length,
+        message: `${createdErrors.length} ESYSYNC error types created successfully` 
+      });
+    } catch (error) {
+      console.error("Error seeding ESYSYNC errors:", error);
+      res.status(500).json({ message: "Failed to seed ESYSYNC error types" });
+    }
+  });
+
   // Admin only: Get activity logs
   app.get("/api/admin/logs", requireAdmin, async (req, res) => {
     try {

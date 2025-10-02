@@ -37,6 +37,9 @@ export const supportTickets = pgTable("support_tickets", {
   restartConfirmed: boolean("restart_confirmed").notNull(),
   additionalDeviceAffected: boolean("additional_device_affected").default(false),
   resolvedViaTutorial: boolean("resolved_via_tutorial").default(false),
+  issueScope: text("issue_scope"),
+  specificMessage: text("specific_message"),
+  troubleshootingSteps: jsonb("troubleshooting_steps"),
   status: text("status").notNull().default("pending"), // pending, workshop, shipped
   statusDetails: text("status_details"), // Additional status information
   trackingNumber: text("tracking_number"), // For shipped items
@@ -86,6 +89,9 @@ export const errorTypes = pgTable("error_types", {
   videoEnabled: boolean("video_enabled").default(true).notNull(),
   instructions: text("instructions"),
   isActive: boolean("is_active").default(true).notNull(),
+  hasSubOptions: boolean("has_sub_options").default(false).notNull(),
+  subOptions: jsonb("sub_options"),
+  requiredChecks: jsonb("required_checks"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

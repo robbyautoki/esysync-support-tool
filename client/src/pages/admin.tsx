@@ -528,14 +528,44 @@ export default function AdminPage() {
                 <h1 className="text-2xl font-bold text-gray-900">Problem-Verwaltung</h1>
                 <p className="text-gray-600">Verwalten Sie alle Display-Probleme und deren Lösungsanleitungen</p>
               </div>
-              <Button
-                onClick={() => setShowCreateForm(true)}
-                className="px-6 py-3 text-white rounded-xl apple-shadow"
-                style={{ backgroundColor: '#6d0df0' }}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Neues Problem erstellen
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  onClick={async () => {
+                    try {
+                      const response = await fetch("/api/admin/seed-esysync-errors", {
+                        method: "POST",
+                        headers: {
+                          "x-session-id": sessionId || "",
+                        },
+                      });
+                      if (response.ok) {
+                        const data = await response.json();
+                        toast({ title: "Erfolg", description: data.message });
+                        queryClient.invalidateQueries({ queryKey: ["/api/admin/error-types"] });
+                      } else {
+                        toast({ title: "Fehler", description: "Fehler beim Seeden der ESYSYNC Fehlertypen", variant: "destructive" });
+                      }
+                    } catch (error) {
+                      toast({ title: "Fehler", description: "Netzwerkfehler", variant: "destructive" });
+                    }
+                  }}
+                  variant="outline"
+                  className="px-6 py-3 text-purple-600 border-purple-300 rounded-xl hover:bg-purple-50"
+                  data-testid="button-seed-esysync"
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  ESYSYNC Fehler laden
+                </Button>
+                <Button
+                  onClick={() => setShowCreateForm(true)}
+                  className="px-6 py-3 text-white rounded-xl apple-shadow"
+                  style={{ backgroundColor: '#6d0df0' }}
+                  data-testid="button-create-problem"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Neues Problem erstellen
+                </Button>
+              </div>
             </div>
 
             {/* Create Form Modal/Card */}

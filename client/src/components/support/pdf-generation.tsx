@@ -78,6 +78,9 @@ export default function PDFGeneration({ formData, updateFormData, onStartOver }:
         shippingMethod: formData.shippingMethod!,
         restartConfirmed: formData.restartConfirmed,
         additionalDeviceAffected: formData.additionalDeviceAffected || false,
+        issueScope: formData.issueScope || undefined,
+        specificMessage: formData.specificMessage || undefined,
+        troubleshootingSteps: formData.troubleshootingSteps || undefined,
       };
 
       const response = await fetch("/api/support-tickets", {
