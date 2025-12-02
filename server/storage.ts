@@ -153,18 +153,19 @@ export class DatabaseStorage implements IStorage {
     
     const result = await db
       .update(supportTickets)
-      .set({ 
-        isArchived: true, 
-        archivedAt: new Date() 
+      .set({
+        isArchived: true,
+        archivedAt: new Date()
       })
       .where(
         and(
           eq(supportTickets.isArchived, false),
           lt(supportTickets.createdAt, thirtyDaysAgo)
         )
-      );
-    
-    return result.changes || 0;
+      )
+      .returning();
+
+    return result.length;
   }
 
   async getActiveErrorTypes(): Promise<ErrorType[]> {
