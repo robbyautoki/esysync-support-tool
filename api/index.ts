@@ -9,6 +9,15 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Health check endpoint for debugging
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    hasDbUrl: !!process.env.DATABASE_URL
+  });
+});
+
 // Persistent admin sessions with in-memory storage
 const adminSessions = new Map<string, {
   username: string;
