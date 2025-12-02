@@ -2,7 +2,25 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { eq } from "drizzle-orm";
-import { errorTypes } from "../shared/schema";
+import { pgTable, text, serial, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+
+// Define errorTypes table inline
+const errorTypes = pgTable("error_types", {
+  id: serial("id").primaryKey(),
+  errorId: text("error_id").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").default("hardware").notNull(),
+  iconName: text("icon_name").notNull(),
+  videoUrl: text("video_url"),
+  videoEnabled: boolean("video_enabled").default(true).notNull(),
+  instructions: text("instructions"),
+  isActive: boolean("is_active").default(true).notNull(),
+  hasSubOptions: boolean("has_sub_options").default(false).notNull(),
+  subOptions: jsonb("sub_options"),
+  requiredChecks: jsonb("required_checks"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!process.env.DATABASE_URL) {
