@@ -1,9 +1,9 @@
 import express from "express";
 import type { Request, Response, NextFunction } from "express";
-import { storage } from "../server/storage";
+import { storage } from "../backend/storage";
 import { insertSupportTicketSchema, insertErrorTypeSchema } from "../shared/schema";
 import { z } from "zod";
-import ActivityLogger from "../server/activity-logger";
+import ActivityLogger from "../backend/activity-logger";
 
 const app = express();
 app.use(express.json());

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { storage } from '../../server/storage';
-import { ActivityLogger } from '../../server/activity-logger';
+import { storage } from '../../backend/storage';
+import { ActivityLogger } from '../../backend/activity-logger';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Verify this is a cron request from Vercel
