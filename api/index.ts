@@ -320,6 +320,83 @@ app.delete("/api/admin/error-types/:id", requireAdmin, async (req: any, res) => 
   }
 });
 
+// Admin: Clear all error types (for re-import)
+app.delete("/api/admin/error-types/all", requireAdmin, async (req: any, res) => {
+  try {
+    await storage.clearAllErrorTypes();
+
+    await ActivityLogger.logAdminAction(
+      "system",
+      req.user.username,
+      `cleared_all_error_types`,
+      `All error types have been deleted`
+    );
+
+    res.json({ success: true, message: "All error types deleted" });
+  } catch (error) {
+    console.error("Error clearing error types:", error);
+    res.status(500).json({ message: "Failed to clear error types" });
+  }
+});
+
+// Admin: Import error types from JSON (bulk)
+app.post("/api/admin/import-error-types", requireAdmin, async (req: any, res) => {
+  try {
+    const errorTypesData = req.body;
+
+    if (!Array.isArray(errorTypesData)) {
+      return res.status(400).json({ message: "Expected array of error types" });
+    }
+
+    const imported = [];
+    const skipped = [];
+
+    for (const errorData of errorTypesData) {
+      try {
+        // Map from JSON format to database format
+        const dbData = {
+          errorId: errorData.error_id || errorData.errorId,
+          title: errorData.title,
+          description: errorData.description,
+          category: errorData.category || "hardware",
+          iconName: errorData.icon_name || errorData.iconName,
+          videoUrl: errorData.video_url || errorData.videoUrl || null,
+          videoEnabled: errorData.video_enabled ?? errorData.videoEnabled ?? false,
+          instructions: errorData.instructions || "Kontaktieren Sie den technischen Support für weitere Hilfe bei diesem Problem.",
+          isActive: errorData.is_active ?? errorData.isActive ?? true,
+          hasSubOptions: errorData.has_sub_options ?? errorData.hasSubOptions ?? false,
+          subOptions: errorData.sub_options || errorData.subOptions || null,
+          requiredChecks: errorData.required_checks || errorData.requiredChecks || null,
+        };
+
+        const created = await storage.createErrorType(dbData);
+        imported.push(created);
+      } catch (err: any) {
+        // Error type might already exist
+        skipped.push({ errorId: errorData.error_id || errorData.errorId, reason: err.message });
+      }
+    }
+
+    // Log activity
+    await ActivityLogger.logAdminAction(
+      "system",
+      req.user.username,
+      `imported_error_types`,
+      `Imported ${imported.length} error types, skipped ${skipped.length}`
+    );
+
+    res.json({
+      success: true,
+      imported: imported.length,
+      skipped: skipped.length,
+      details: { imported, skipped }
+    });
+  } catch (error) {
+    console.error("Error importing error types:", error);
+    res.status(500).json({ message: "Failed to import error types" });
+  }
+});
+
 // Admin: Update video settings for error type
 app.patch("/api/admin/error-types/:id/video", requireAdmin, async (req: any, res) => {
   try {
