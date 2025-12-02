@@ -29,6 +29,7 @@ export interface IStorage {
   createErrorType(errorType: InsertErrorType): Promise<ErrorType>;
   updateErrorType(id: number, updates: Partial<InsertErrorType>): Promise<ErrorType>;
   deleteErrorType(id: number): Promise<void>;
+  clearAllErrorTypes(): Promise<void>;
   // Activity log operations
   createActivityLog(log: InsertActivityLog): Promise<ActivityLog>;
   getActivityLogs(limit?: number, offset?: number): Promise<ActivityLog[]>;
@@ -191,6 +192,10 @@ export class DatabaseStorage implements IStorage {
 
   async deleteErrorType(id: number): Promise<void> {
     await db.delete(errorTypes).where(eq(errorTypes.id, id));
+  }
+
+  async clearAllErrorTypes(): Promise<void> {
+    await db.delete(errorTypes);
   }
 
   // Activity log operations
