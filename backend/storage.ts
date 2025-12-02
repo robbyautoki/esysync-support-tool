@@ -1,4 +1,4 @@
-import { users, customers, supportTickets, errorTypes, activityLogs, ticketLogs, type User, type InsertUser, type InsertEmployee, type Customer, type InsertCustomer, type SupportTicket, type InsertSupportTicket, type ErrorType, type InsertErrorType, type ActivityLog, type InsertActivityLog, type TicketLog, type InsertTicketLog } from "@shared/schema";
+import { users, customers, supportTickets, errorTypes, activityLogs, ticketLogs, type User, type InsertUser, type InsertEmployee, type Customer, type InsertCustomer, type SupportTicket, type InsertSupportTicket, type ErrorType, type InsertErrorType, type ActivityLog, type InsertActivityLog, type TicketLog, type InsertTicketLog } from "../shared/schema";
 import { db } from "./db";
 import { eq, desc, and, lt } from "drizzle-orm";
 

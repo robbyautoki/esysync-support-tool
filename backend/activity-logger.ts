@@ -1,5 +1,5 @@
 import { storage } from "./storage";
-import type { InsertActivityLog } from "@shared/schema";
+import type { InsertActivityLog } from "../shared/schema";
 
 export class ActivityLogger {
   static async log(
