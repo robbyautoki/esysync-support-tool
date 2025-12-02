@@ -1,123 +1,68 @@
 import express from "express";
-import type { Request, Response, NextFunction } from "express";
-import { storage } from "../backend/storage";
-import { insertSupportTicketSchema, insertErrorTypeSchema } from "../shared/schema";
+import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
+import { eq, desc, and, lt } from "drizzle-orm";
 import { z } from "zod";
-import ActivityLogger from "../backend/activity-logger";
+import {
+  users,
+  customers,
+  supportTickets,
+  errorTypes,
+  activityLogs,
+  ticketLogs,
+  insertSupportTicketSchema,
+  insertErrorTypeSchema,
+} from "../shared/schema";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Health check endpoint for debugging
+// Database setup
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL must be set");
+}
+const sql = neon(process.env.DATABASE_URL);
+const db = drizzle(sql);
+
+// Health check
 app.get("/api/health", (req, res) => {
-  res.json({
-    status: "ok",
-    timestamp: new Date().toISOString(),
-    hasDbUrl: !!process.env.DATABASE_URL
-  });
+  res.json({ status: "ok", timestamp: new Date().toISOString(), hasDbUrl: true });
 });
 
-// Persistent admin sessions with in-memory storage
-const adminSessions = new Map<string, {
-  username: string;
-  isAdmin: boolean;
-  role?: string;
-  firstName?: string;
-  lastName?: string;
-  expiresAt: number;
-}>();
+// Admin sessions
+const adminSessions = new Map<string, { username: string; isAdmin: boolean; role?: string; firstName?: string; lastName?: string; expiresAt: number }>();
 
 const requireAdmin = (req: any, res: any, next: any) => {
-  const sessionId = req.headers['x-session-id'];
-
-  if (sessionId === 'dev-admin-session') {
-    req.user = { username: 'admin', isAdmin: true };
-    return next();
-  }
-
+  const sessionId = req.headers["x-session-id"];
+  if (sessionId === "dev-admin-session") { req.user = { username: "admin", isAdmin: true }; return next(); }
   const session = adminSessions.get(sessionId);
-  if (session && session.isAdmin && session.expiresAt > Date.now()) {
-    req.user = session;
-    next();
-  } else {
-    if (session && session.expiresAt <= Date.now()) {
-      adminSessions.delete(sessionId);
-    }
-    return res.status(401).json({ message: "Admin access required" });
-  }
+  if (session && session.isAdmin && session.expiresAt > Date.now()) { req.user = session; next(); }
+  else { return res.status(401).json({ message: "Admin access required" }); }
 };
 
 const requireAuth = (req: any, res: any, next: any) => {
-  const sessionId = req.headers['x-session-id'];
-
-  if (sessionId === 'dev-admin-session') {
-    req.user = { username: 'admin', isAdmin: true };
-    return next();
-  }
-
+  const sessionId = req.headers["x-session-id"];
+  if (sessionId === "dev-admin-session") { req.user = { username: "admin", isAdmin: true }; return next(); }
   const session = adminSessions.get(sessionId);
-  if (session && session.expiresAt > Date.now()) {
-    req.user = session;
-    next();
-  } else {
-    if (session && session.expiresAt <= Date.now()) {
-      adminSessions.delete(sessionId);
-    }
-    return res.status(401).json({ message: "Authentication required" });
-  }
+  if (session && session.expiresAt > Date.now()) { req.user = session; next(); }
+  else { return res.status(401).json({ message: "Authentication required" }); }
 };
 
-// Admin/Employee login
+// Login
 app.post("/api/admin/login", async (req, res) => {
   try {
     const { username, password } = req.body;
-
     if (username === "admin" && password === "admin123") {
       const sessionId = Math.random().toString(36).substring(2, 8);
-      const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
-
-      adminSessions.set(sessionId, {
-        username: "admin",
-        isAdmin: true,
-        role: "admin",
-        expiresAt
-      });
-
-      await ActivityLogger.logAdminLogin(username, req);
-
-      res.json({ sessionId, username: "admin", isAdmin: true, role: "admin" });
-      return;
+      adminSessions.set(sessionId, { username: "admin", isAdmin: true, role: "admin", expiresAt: Date.now() + 86400000 });
+      return res.json({ sessionId, username: "admin", isAdmin: true, role: "admin" });
     }
-
-    const user = await storage.getUserByUsername(username);
+    const [user] = await db.select().from(users).where(eq(users.username, username));
     if (user && user.isActive && user.password === password) {
       const sessionId = Math.random().toString(36).substring(2, 8);
-      const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
-
-      adminSessions.set(sessionId, {
-        username: user.username,
-        isAdmin: user.isAdmin || user.role === 'admin',
-        role: user.role || 'employee',
-        firstName: user.firstName ?? undefined,
-        lastName: user.lastName ?? undefined,
-        expiresAt
-      });
-
-      if (user.role === 'admin' || user.isAdmin) {
-        await ActivityLogger.logAdminLogin(username, req);
-      } else {
-        await ActivityLogger.logEmployeeLogin(username, req);
-      }
-
-      res.json({
-        sessionId,
-        username: user.username,
-        isAdmin: user.isAdmin || user.role === 'admin',
-        role: user.role || 'employee',
-        firstName: user.firstName,
-        lastName: user.lastName
-      });
+      adminSessions.set(sessionId, { username: user.username, isAdmin: user.isAdmin || user.role === "admin", role: user.role || "employee", firstName: user.firstName ?? undefined, lastName: user.lastName ?? undefined, expiresAt: Date.now() + 86400000 });
+      res.json({ sessionId, username: user.username, isAdmin: user.isAdmin || user.role === "admin", role: user.role || "employee", firstName: user.firstName, lastName: user.lastName });
     } else {
       res.status(401).json({ message: "Invalid credentials" });
     }
@@ -127,497 +72,272 @@ app.post("/api/admin/login", async (req, res) => {
   }
 });
 
-// Get current user info
+// Get current user
 app.get("/api/admin/user", requireAuth, async (req: any, res) => {
+  res.json({ username: req.user.username, role: req.user.role || "admin", isAdmin: req.user.isAdmin, firstName: req.user.firstName, lastName: req.user.lastName });
+});
+
+// Get all users
+app.get("/api/admin/users", requireAuth, async (req, res) => {
   try {
-    res.json({
-      username: req.user.username,
-      role: req.user.role || "admin",
-      isAdmin: req.user.isAdmin,
-      firstName: req.user.firstName,
-      lastName: req.user.lastName
-    });
+    const allUsers = await db.select().from(users);
+    res.json(allUsers);
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// Get all users for dropdown
-app.get("/api/admin/users", requireAuth, async (req: any, res) => {
-  try {
-    const users = await storage.getAllEmployees();
-    const adminUser = users.find((user: any) => user.username === 'admin');
-    if (!adminUser) {
-      users.unshift({
-        id: 'admin',
-        username: 'admin',
-        firstName: null,
-        lastName: null,
-        isActive: true,
-        role: 'admin'
-      } as any);
-    }
-    res.json(users);
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
-// Get active error types for frontend
+// Get active error types (PUBLIC)
 app.get("/api/error-types", async (req, res) => {
   try {
-    const errorTypes = await storage.getActiveErrorTypes();
-    res.json(errorTypes);
+    const types = await db.select().from(errorTypes).where(eq(errorTypes.isActive, true));
+    res.json(types);
   } catch (error) {
+    console.error("Error fetching error types:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// Admin/Employee: Get all support tickets for Kanban board
+// Get all tickets
 app.get("/api/admin/tickets", requireAuth, async (req, res) => {
   try {
-    const tickets = await storage.getAllSupportTickets();
+    const tickets = await db.select().from(supportTickets).where(eq(supportTickets.isArchived, false)).orderBy(desc(supportTickets.createdAt));
     res.json(tickets);
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// Admin: Get archived tickets
+// Get archived tickets
 app.get("/api/admin/archived-tickets", requireAuth, async (req, res) => {
   try {
-    const tickets = await storage.getAllTicketsForArchive();
+    const tickets = await db.select().from(supportTickets).orderBy(desc(supportTickets.createdAt));
     res.json(tickets);
   } catch (error) {
-    console.error('Error fetching all tickets for archive:', error);
-    res.status(500).json({ message: "Failed to fetch tickets" });
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// Admin: Update ticket (extended version)
+// Update ticket
 app.patch("/api/admin/tickets/:rmaNumber", requireAuth, async (req: any, res) => {
   try {
     const { rmaNumber } = req.params;
     const updates = req.body;
-    const editedBy = req.user?.username || 'system';
-
-    const ticket = await storage.updateSupportTicket(rmaNumber, updates, editedBy);
-
-    await storage.createTicketLog({
-      ticketId: ticket.id,
-      rmaNumber: ticket.rmaNumber,
-      action: 'ticket_updated',
-      description: `Ticket wurde von ${editedBy} bearbeitet`,
-      editedBy,
-      newValue: JSON.stringify(updates)
-    });
-
+    const [ticket] = await db.update(supportTickets).set({ ...updates, updatedAt: new Date() }).where(eq(supportTickets.rmaNumber, rmaNumber)).returning();
     res.json(ticket);
   } catch (error) {
-    console.error('Error updating ticket:', error);
-    res.status(500).json({ message: "Failed to update ticket" });
-  }
-});
-
-// Admin: Get ticket logs
-app.get("/api/admin/tickets/:rmaNumber/logs", requireAuth, async (req, res) => {
-  try {
-    const { rmaNumber } = req.params;
-    const logs = await storage.getTicketLogs(rmaNumber);
-    res.json(logs);
-  } catch (error) {
-    console.error('Error fetching ticket logs:', error);
-    res.status(500).json({ message: "Failed to fetch ticket logs" });
-  }
-});
-
-// Admin: Archive old tickets (manual trigger)
-app.post("/api/admin/tickets/archive", requireAdmin, async (req, res) => {
-  try {
-    const archivedCount = await storage.archiveOldTickets();
-    res.json({ archivedCount });
-  } catch (error) {
-    console.error('Error archiving tickets:', error);
-    res.status(500).json({ message: "Failed to archive tickets" });
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
 // Update ticket status
-const updateTicketStatus = async (req: any, res: any) => {
+app.patch("/api/admin/tickets/:rmaNumber/status", requireAdmin, async (req: any, res) => {
   try {
     const { rmaNumber } = req.params;
     const { status, statusDetails, trackingNumber } = req.body;
-
-    const oldTicket = await storage.getSupportTicket(rmaNumber);
-    const ticket = await storage.updateSupportTicketStatus(rmaNumber, status, statusDetails, trackingNumber);
-
-    if (oldTicket && oldTicket.status !== status) {
-      await ActivityLogger.logStatusChanged(rmaNumber, oldTicket.status, status, req.user.username, req);
-    }
-
+    const [ticket] = await db.update(supportTickets).set({ status, statusDetails, trackingNumber, updatedAt: new Date() }).where(eq(supportTickets.rmaNumber, rmaNumber)).returning();
     res.json(ticket);
   } catch (error) {
-    console.error("Error updating ticket status:", error);
     res.status(500).json({ message: "Internal server error" });
   }
-};
+});
 
-app.patch("/api/admin/tickets/:rmaNumber/status", requireAdmin, updateTicketStatus);
-app.put("/api/admin/tickets/:rmaNumber/status", requireAdmin, updateTicketStatus);
-
-// Admin: Get all error types
-app.get("/api/admin/error-types", requireAdmin, async (req, res) => {
+app.put("/api/admin/tickets/:rmaNumber/status", requireAdmin, async (req: any, res) => {
   try {
-    const errorTypes = await storage.getActiveErrorTypes();
-    res.json(errorTypes);
+    const { rmaNumber } = req.params;
+    const { status, statusDetails, trackingNumber } = req.body;
+    const [ticket] = await db.update(supportTickets).set({ status, statusDetails, trackingNumber, updatedAt: new Date() }).where(eq(supportTickets.rmaNumber, rmaNumber)).returning();
+    res.json(ticket);
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// Admin: Create error type
-app.post("/api/admin/error-types", requireAdmin, async (req: any, res) => {
+// Get ticket logs
+app.get("/api/admin/tickets/:rmaNumber/logs", requireAuth, async (req, res) => {
   try {
-    const validatedData = insertErrorTypeSchema.parse(req.body);
-    const errorType = await storage.createErrorType(validatedData);
-
-    await ActivityLogger.logErrorTypeCreated(validatedData.title, req.user.username, req);
-
-    res.json(errorType);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({ message: "Invalid data", errors: error.errors });
-    } else {
-      res.status(500).json({ message: "Internal server error" });
-    }
-  }
-});
-
-// Admin: Update error type
-app.put("/api/admin/error-types/:id", requireAdmin, async (req: any, res) => {
-  try {
-    const id = parseInt(req.params.id);
-    const updates = req.body;
-    const errorType = await storage.updateErrorType(id, updates);
-
-    await ActivityLogger.logErrorTypeUpdated(updates.title || `ID ${id}`, req.user.username, req);
-
-    res.json(errorType);
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
-// Admin: Delete error type
-app.delete("/api/admin/error-types/:id", requireAdmin, async (req: any, res) => {
-  try {
-    const id = parseInt(req.params.id);
-
-    const errorTypes = await storage.getActiveErrorTypes();
-    const errorType = errorTypes.find(et => et.id === id);
-
-    await storage.deleteErrorType(id);
-
-    if (errorType) {
-      await ActivityLogger.logErrorTypeDeleted(errorType.title, req.user.username, req);
-    }
-
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
-// Admin: Clear all error types (for re-import)
-app.delete("/api/admin/error-types/all", requireAdmin, async (req: any, res) => {
-  try {
-    await storage.clearAllErrorTypes();
-
-    await ActivityLogger.logAdminAction(
-      "system",
-      req.user.username,
-      `cleared_all_error_types`,
-      `All error types have been deleted`
-    );
-
-    res.json({ success: true, message: "All error types deleted" });
-  } catch (error) {
-    console.error("Error clearing error types:", error);
-    res.status(500).json({ message: "Failed to clear error types" });
-  }
-});
-
-// Admin: Import error types from JSON (bulk)
-app.post("/api/admin/import-error-types", requireAdmin, async (req: any, res) => {
-  try {
-    const errorTypesData = req.body;
-
-    if (!Array.isArray(errorTypesData)) {
-      return res.status(400).json({ message: "Expected array of error types" });
-    }
-
-    const imported = [];
-    const skipped = [];
-
-    for (const errorData of errorTypesData) {
-      try {
-        // Map from JSON format to database format
-        const dbData = {
-          errorId: errorData.error_id || errorData.errorId,
-          title: errorData.title,
-          description: errorData.description,
-          category: errorData.category || "hardware",
-          iconName: errorData.icon_name || errorData.iconName,
-          videoUrl: errorData.video_url || errorData.videoUrl || null,
-          videoEnabled: errorData.video_enabled ?? errorData.videoEnabled ?? false,
-          instructions: errorData.instructions || "Kontaktieren Sie den technischen Support für weitere Hilfe bei diesem Problem.",
-          isActive: errorData.is_active ?? errorData.isActive ?? true,
-          hasSubOptions: errorData.has_sub_options ?? errorData.hasSubOptions ?? false,
-          subOptions: errorData.sub_options || errorData.subOptions || null,
-          requiredChecks: errorData.required_checks || errorData.requiredChecks || null,
-        };
-
-        const created = await storage.createErrorType(dbData);
-        imported.push(created);
-      } catch (err: any) {
-        // Error type might already exist
-        skipped.push({ errorId: errorData.error_id || errorData.errorId, reason: err.message });
-      }
-    }
-
-    // Log activity
-    await ActivityLogger.logAdminAction(
-      "system",
-      req.user.username,
-      `imported_error_types`,
-      `Imported ${imported.length} error types, skipped ${skipped.length}`
-    );
-
-    res.json({
-      success: true,
-      imported: imported.length,
-      skipped: skipped.length,
-      details: { imported, skipped }
-    });
-  } catch (error) {
-    console.error("Error importing error types:", error);
-    res.status(500).json({ message: "Failed to import error types" });
-  }
-});
-
-// Admin: Update video settings for error type
-app.patch("/api/admin/error-types/:id/video", requireAdmin, async (req: any, res) => {
-  try {
-    const id = parseInt(req.params.id);
-    const { videoEnabled, videoUrl } = req.body;
-
-    const updates: any = {};
-    if (typeof videoEnabled === 'boolean') {
-      updates.videoEnabled = videoEnabled;
-    }
-    if (videoUrl !== undefined) {
-      updates.videoUrl = videoUrl || null;
-    }
-
-    const errorType = await storage.updateErrorType(id, updates);
-
-    await ActivityLogger.logErrorTypeUpdated(
-      `Video-Einstellungen für ${errorType.title}`,
-      req.user.username,
-      req
-    );
-
-    res.json(errorType);
-  } catch (error) {
-    console.error("Error updating video settings:", error);
-    res.status(500).json({ message: "Failed to update video settings" });
-  }
-});
-
-// Admin only: Get activity logs
-app.get("/api/admin/logs", requireAdmin, async (req, res) => {
-  try {
-    const limit = parseInt(req.query.limit as string) || 100;
-    const offset = parseInt(req.query.offset as string) || 0;
-    const activityType = req.query.type as string;
-    const userType = req.query.userType as string;
-    const userId = req.query.userId as string;
-
-    let logs;
-    if (activityType) {
-      logs = await storage.getActivityLogsByType(activityType);
-    } else if (userType && userId) {
-      logs = await storage.getActivityLogsByUser(userId, userType);
-    } else {
-      logs = await storage.getActivityLogs(limit, offset);
-    }
-
+    const { rmaNumber } = req.params;
+    const logs = await db.select().from(ticketLogs).where(eq(ticketLogs.rmaNumber, rmaNumber)).orderBy(desc(ticketLogs.createdAt));
     res.json(logs);
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// Employee Management Routes
-app.get('/api/admin/employees', requireAdmin, async (req, res) => {
+// Admin error types
+app.get("/api/admin/error-types", requireAdmin, async (req, res) => {
   try {
-    const employees = await storage.getAllEmployees();
-    res.json(employees);
+    const types = await db.select().from(errorTypes).where(eq(errorTypes.isActive, true));
+    res.json(types);
   } catch (error) {
-    console.error("Error fetching employees:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-app.post('/api/admin/employees', requireAdmin, async (req: any, res) => {
+app.post("/api/admin/error-types", requireAdmin, async (req: any, res) => {
   try {
-    const employee = await storage.createEmployee(req.body);
-    await ActivityLogger.logEmployeeCreated(employee.username, req.user.username, req);
-    res.json(employee);
+    const data = insertErrorTypeSchema.parse(req.body);
+    const [errorType] = await db.insert(errorTypes).values(data).returning();
+    res.json(errorType);
   } catch (error) {
-    console.error("Error creating employee:", error);
+    if (error instanceof z.ZodError) { res.status(400).json({ message: "Invalid data", errors: error.errors }); }
+    else { res.status(500).json({ message: "Internal server error" }); }
+  }
+});
+
+app.put("/api/admin/error-types/:id", requireAdmin, async (req: any, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [errorType] = await db.update(errorTypes).set(req.body).where(eq(errorTypes.id, id)).returning();
+    res.json(errorType);
+  } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-app.put('/api/admin/employees/:id', requireAdmin, async (req: any, res) => {
+app.delete("/api/admin/error-types/:id", requireAdmin, async (req: any, res) => {
   try {
-    const { id } = req.params;
-    const employee = await storage.updateEmployee(parseInt(id), req.body);
-    await ActivityLogger.logEmployeeUpdated(employee.username, req.user.username, req);
-    res.json(employee);
-  } catch (error) {
-    console.error("Error updating employee:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
-app.delete('/api/admin/employees/:id', requireAdmin, async (req: any, res) => {
-  try {
-    const { id } = req.params;
-    const employee = await storage.getUser(parseInt(id));
-    await storage.deleteEmployee(parseInt(id));
-    if (employee) {
-      await ActivityLogger.logEmployeeDeleted(employee.username, req.user.username, req);
-    }
+    const id = parseInt(req.params.id);
+    await db.delete(errorTypes).where(eq(errorTypes.id, id));
     res.json({ success: true });
   } catch (error) {
-    console.error("Error deleting employee:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-app.patch('/api/admin/employees/:id/toggle', requireAdmin, async (req: any, res) => {
+app.patch("/api/admin/error-types/:id/video", requireAdmin, async (req: any, res) => {
   try {
-    const { id } = req.params;
-    const { isActive } = req.body;
-    const employee = await storage.toggleEmployeeStatus(parseInt(id), isActive);
-    await ActivityLogger.logEmployeeStatusChanged(employee.username, isActive, req.user.username, req);
+    const id = parseInt(req.params.id);
+    const { videoEnabled, videoUrl } = req.body;
+    const [errorType] = await db.update(errorTypes).set({ videoEnabled, videoUrl: videoUrl || null }).where(eq(errorTypes.id, id)).returning();
+    res.json(errorType);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Activity logs
+app.get("/api/admin/logs", requireAdmin, async (req, res) => {
+  try {
+    const logs = await db.select().from(activityLogs).orderBy(desc(activityLogs.timestamp)).limit(100);
+    res.json(logs);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Employees
+app.get("/api/admin/employees", requireAdmin, async (req, res) => {
+  try {
+    const employees = await db.select().from(users);
+    res.json(employees);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.post("/api/admin/employees", requireAdmin, async (req: any, res) => {
+  try {
+    const [employee] = await db.insert(users).values(req.body).returning();
     res.json(employee);
   } catch (error) {
-    console.error("Error toggling employee status:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// Validate customer number
+app.put("/api/admin/employees/:id", requireAdmin, async (req: any, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [employee] = await db.update(users).set(req.body).where(eq(users.id, id)).returning();
+    res.json(employee);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.delete("/api/admin/employees/:id", requireAdmin, async (req: any, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    await db.delete(users).where(eq(users.id, id));
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.patch("/api/admin/employees/:id/toggle", requireAdmin, async (req: any, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { isActive } = req.body;
+    const [employee] = await db.update(users).set({ isActive }).where(eq(users.id, id)).returning();
+    res.json(employee);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Customer validation
 app.get("/api/customers/:customerNumber/validate", async (req, res) => {
   try {
     const { customerNumber } = req.params;
-    const customer = await storage.getCustomerByNumber(customerNumber);
-
-    if (customer) {
-      res.json({ valid: true, customer });
-    } else {
-      res.json({ valid: false });
-    }
+    const [customer] = await db.select().from(customers).where(eq(customers.customerNumber, customerNumber));
+    res.json(customer ? { valid: true, customer } : { valid: false });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// Generate RMA number
+// Generate RMA
 app.post("/api/rma/generate", async (req, res) => {
-  try {
-    const year = new Date().getFullYear();
-    const randomNumber = Math.floor(Math.random() * 999999).toString().padStart(6, '0');
-    const rmaNumber = `RMA-${year}-${randomNumber}`;
-
-    res.json({ rmaNumber });
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
-  }
+  const year = new Date().getFullYear();
+  const randomNumber = Math.floor(Math.random() * 999999).toString().padStart(6, "0");
+  res.json({ rmaNumber: `RMA-${year}-${randomNumber}` });
 });
 
-// Create support ticket
+// Create ticket
 app.post("/api/support-tickets", async (req, res) => {
   try {
-    const validatedData = insertSupportTicketSchema.parse(req.body);
-    const ticket = await storage.createSupportTicket(validatedData);
-
-    await ActivityLogger.logTicketCreated(
-      ticket.rmaNumber,
-      ticket.accountNumber || 'Unbekannt',
-      ticket.errorType,
-      req
-    );
-
+    const data = insertSupportTicketSchema.parse(req.body);
+    const [ticket] = await db.insert(supportTickets).values(data).returning();
     res.json(ticket);
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({ message: "Invalid data", errors: error.errors });
-    } else {
-      res.status(500).json({ message: "Internal server error" });
-    }
+    if (error instanceof z.ZodError) { res.status(400).json({ message: "Invalid data", errors: error.errors }); }
+    else { console.error("Error:", error); res.status(500).json({ message: "Internal server error" }); }
   }
 });
 
-// Get support ticket by RMA number
+// Get ticket by RMA
 app.get("/api/support-tickets/:rmaNumber", async (req, res) => {
   try {
     const { rmaNumber } = req.params;
-    const ticket = await storage.getSupportTicket(rmaNumber);
-
-    if (ticket) {
-      res.json(ticket);
-    } else {
-      res.status(404).json({ message: "Support ticket not found" });
-    }
+    const [ticket] = await db.select().from(supportTickets).where(eq(supportTickets.rmaNumber, rmaNumber));
+    if (ticket) { res.json(ticket); } else { res.status(404).json({ message: "Ticket not found" }); }
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// Public ticket tracking route
-app.get('/api/track/:rmaNumber', async (req, res) => {
+// Public ticket tracking
+app.get("/api/track/:rmaNumber", async (req, res) => {
   try {
     const { rmaNumber } = req.params;
-    const ticket = await storage.getSupportTicket(rmaNumber);
-
-    if (!ticket) {
-      return res.status(404).json({ message: "Ticket nicht gefunden" });
-    }
-
-    const publicTicketData = {
-      id: ticket.id,
-      rmaNumber: ticket.rmaNumber,
-      accountNumber: ticket.accountNumber,
-      displayNumber: ticket.displayNumber,
-      displayLocation: ticket.displayLocation,
-      contactEmail: ticket.contactEmail,
-      errorType: ticket.errorType,
-      shippingMethod: ticket.shippingMethod,
-      status: ticket.status,
-      statusDetails: ticket.statusDetails,
-      trackingNumber: ticket.trackingNumber,
-      createdAt: ticket.createdAt
-    };
-
-    res.json(publicTicketData);
+    const [ticket] = await db.select().from(supportTickets).where(eq(supportTickets.rmaNumber, rmaNumber));
+    if (!ticket) { return res.status(404).json({ message: "Ticket nicht gefunden" }); }
+    res.json({ id: ticket.id, rmaNumber: ticket.rmaNumber, accountNumber: ticket.accountNumber, displayNumber: ticket.displayNumber, displayLocation: ticket.displayLocation, contactEmail: ticket.contactEmail, errorType: ticket.errorType, shippingMethod: ticket.shippingMethod, status: ticket.status, statusDetails: ticket.statusDetails, trackingNumber: ticket.trackingNumber, createdAt: ticket.createdAt });
   } catch (error) {
-    console.error("Error fetching ticket:", error);
-    res.status(500).json({ message: "Fehler beim Abrufen des Tickets" });
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Archive tickets
+app.post("/api/admin/tickets/archive", requireAdmin, async (req, res) => {
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const result = await db.update(supportTickets).set({ isArchived: true, archivedAt: new Date() }).where(and(eq(supportTickets.status, "shipped"), eq(supportTickets.isArchived, false), lt(supportTickets.updatedAt, thirtyDaysAgo))).returning();
+    res.json({ archivedCount: result.length });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
