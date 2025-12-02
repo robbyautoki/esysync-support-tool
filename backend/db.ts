@@ -1,17 +1,6 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from "@shared/schema";
-
-// Only use ws in Node.js environment, not in serverless
-if (typeof globalThis.WebSocket === 'undefined') {
-  // Node.js environment - use ws
-  import("ws").then((ws) => {
-    neonConfig.webSocketConstructor = ws.default;
-  }).catch(() => {
-    // In serverless environment, ws might not be available
-    // Neon will use fetch-based connection instead
-  });
-}
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -19,5 +8,9 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle({ client: pool, schema });
+// Use HTTP-based connection which works in both Node.js and serverless environments
+const sql = neon(process.env.DATABASE_URL);
+export const db = drizzle(sql, { schema });
+
+// Export pool as null for backward compatibility (not needed with HTTP driver)
+export const pool = null;
