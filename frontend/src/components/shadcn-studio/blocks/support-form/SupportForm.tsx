@@ -1,5 +1,5 @@
 import * as Stepperize from '@stepperize/react'
-import { AlertTriangleIcon, CheckCircleIcon, FileTextIcon, PackageIcon, TruckIcon, UserIcon } from 'lucide-react'
+import { AlertTriangleIcon, CheckCircleIcon, FileTextIcon, TruckIcon, UserIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -28,64 +28,49 @@ interface SupportFormProps {
   formData: SupportFormData
   updateFormData: (updates: Partial<SupportFormData>) => void
   onComplete: () => void
-  onBack: () => void
 }
 
-const SupportForm = ({ formData, updateFormData, onComplete, onBack }: SupportFormProps) => {
+const SupportForm = ({ formData, updateFormData, onComplete }: SupportFormProps) => {
   const stepper = useStepper()
   const currentStep = utils.getIndex(stepper.current.id)
 
   return (
     <Card className='gap-0 p-0 md:grid md:max-lg:grid-cols-5 lg:grid-cols-4'>
-      {/* Sidebar Navigation */}
       <CardContent className='col-span-5 p-6 max-md:border-b md:border-r md:max-lg:col-span-2 lg:col-span-1'>
         <nav aria-label='Support Steps'>
           <ol className='flex flex-col justify-between gap-x-2 gap-y-4'>
-            {stepper.all.map((step, index) => (
-              <li key={step.id}>
-                <Button
-                  variant='ghost'
-                  className='h-auto w-full shrink-0 cursor-pointer justify-start gap-2 rounded !bg-transparent p-0'
-                  onClick={() => {
-                    // Nur zu bereits besuchten Steps zurück navigieren
-                    if (index <= currentStep) {
-                      stepper.goTo(step.id)
-                    }
-                  }}
-                  disabled={index > currentStep}
-                >
-                  <Avatar className='size-9.5'>
-                    <AvatarFallback
-                      className={cn({
-                        'bg-primary text-primary-foreground shadow-sm': index <= currentStep,
-                        'bg-muted text-muted-foreground': index > currentStep
-                      })}
-                    >
-                      <step.icon className='size-4' />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className='flex flex-col items-start'>
-                    <span className={cn({
-                      'text-foreground': index <= currentStep,
-                      'text-muted-foreground': index > currentStep
-                    })}>{step.title}</span>
-                    <span className='text-muted-foreground text-sm'>{step.description}</span>
-                  </div>
-                </Button>
-              </li>
-            ))}
+            {stepper.all
+              .filter(step => step.id !== 'summary')
+              .map((step, index) => (
+                <li key={step.id}>
+                  <Button
+                    variant='ghost'
+                    className='h-auto w-full shrink-0 cursor-pointer justify-start gap-2 rounded !bg-transparent p-0'
+                    onClick={() => stepper.goTo(step.id)}
+                  >
+                    <Avatar className='size-9.5'>
+                      <AvatarFallback
+                        className={cn({ 'bg-primary text-primary-foreground shadow-sm': index <= currentStep })}
+                      >
+                        <step.icon className='size-4' />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className='flex flex-col items-start'>
+                      <span>{step.title}</span>
+                      <span className='text-muted-foreground text-sm'>{step.description}</span>
+                    </div>
+                  </Button>
+                </li>
+              ))}
           </ol>
         </nav>
       </CardContent>
-
-      {/* Step Content */}
       {stepper.switch({
         'error-selection': () => (
           <ErrorSelectionStep
             stepper={stepper}
             formData={formData}
             updateFormData={updateFormData}
-            onBack={onBack}
           />
         ),
         'troubleshooting': () => (

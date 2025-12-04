@@ -80,11 +80,13 @@ export default function SupportPage() {
     <div className='min-h-screen bg-background flex flex-col'>
       {showForm ? (
         <main className='flex-1 py-8'>
-          <SupportForm
-            formData={formData}
-            updateFormData={updateFormData}
-            onComplete={handleComplete}
-          />
+          <div className='mx-auto max-w-4xl px-4'>
+            <SupportForm
+              formData={formData}
+              updateFormData={updateFormData}
+              onComplete={handleComplete}
+            />
+          </div>
         </main>
       ) : (
         <HeroSection onStartSupport={handleStartSupport} />

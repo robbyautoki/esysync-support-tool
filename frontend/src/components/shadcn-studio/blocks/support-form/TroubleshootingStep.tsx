@@ -1,10 +1,11 @@
-import { ArrowLeftIcon, ArrowRightIcon, PlayIcon, CheckCircleIcon } from 'lucide-react'
+import { ArrowLeftIcon, ArrowRightIcon, CheckCircleIcon, PlayIcon } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 
+import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 import type { StepperType } from './SupportForm'
 import type { SupportFormData } from '@/pages/support'
@@ -131,7 +132,7 @@ const TroubleshootingStep = ({ stepper, formData, updateFormData }: Troubleshoot
         <div className='text-center'>
           <h2 className='text-2xl font-semibold mb-2'>Problem erfolgreich gelöst!</h2>
           <p className='text-muted-foreground'>
-            Schön, dass wir Ihnen helfen konnten. Ihr Display sollte jetzt wieder einwandfrei funktionieren.
+            Schön, dass wir Ihnen helfen konnten.
           </p>
         </div>
         <Button variant='outline' onClick={() => window.location.reload()}>
@@ -142,32 +143,35 @@ const TroubleshootingStep = ({ stepper, formData, updateFormData }: Troubleshoot
   }
 
   return (
-    <CardContent className='col-span-5 flex flex-col gap-6 p-6 md:col-span-3 overflow-y-auto max-h-[80vh]'>
-      <div className='text-center'>
-        <h2 className='text-2xl font-semibold mb-2'>
-          Lösungsanleitung: {selectedError?.title}
-        </h2>
-        <p className='text-muted-foreground'>
-          Bitte folgen Sie dieser Anleitung, um das Problem möglicherweise selbst zu lösen.
-        </p>
-      </div>
+    <CardContent className='col-span-5 flex flex-col gap-6 p-6 md:col-span-3'>
+      {/* Grid layout like DealDetailsStep */}
+      <div className='grid grid-cols-1 gap-6 sm:grid-cols-2'>
+        {/* Instructions - left column */}
+        <div className='flex flex-col items-start gap-1 md:max-lg:col-span-2'>
+          <Label htmlFor='instructions'>Schritt-für-Schritt Anleitung</Label>
+          <Textarea
+            id='instructions'
+            rows={6}
+            value={selectedError?.instructions || 'Keine Anleitung verfügbar'}
+            readOnly
+            className='h-full bg-muted/50'
+          />
+        </div>
 
-      {/* Video Section */}
-      {selectedError?.videoEnabled && (
-        <div className='rounded-lg border p-4'>
-          <h3 className='font-medium flex items-center gap-2 mb-4'>
-            <PlayIcon className='size-5 text-primary' />
-            Video-Anleitung
-          </h3>
-
-          {selectedError?.videoUrl ? (
-            (() => {
-              const embeddableUrl = getEmbeddableVideoUrl(selectedError.videoUrl)
-              const isYouTube = selectedError.videoUrl.includes('youtube.com') || selectedError.videoUrl.includes('youtu.be')
-
-              return (
-                <div className='relative aspect-video rounded-lg overflow-hidden bg-muted'>
-                  {isYouTube && embeddableUrl ? (
+        {/* Right column - video and checks */}
+        <div className='flex flex-col gap-6 md:max-lg:col-span-2'>
+          {/* Video Section */}
+          {selectedError?.videoEnabled && selectedError?.videoUrl && (
+            <div className='flex flex-col items-start gap-1'>
+              <Label className='flex items-center gap-2'>
+                <PlayIcon className='size-4' />
+                Video-Anleitung
+              </Label>
+              <div className='w-full aspect-video rounded-lg overflow-hidden bg-muted border'>
+                {(() => {
+                  const embeddableUrl = getEmbeddableVideoUrl(selectedError.videoUrl)
+                  const isYouTube = selectedError.videoUrl.includes('youtube.com') || selectedError.videoUrl.includes('youtu.be')
+                  return isYouTube && embeddableUrl ? (
                     <iframe
                       src={embeddableUrl}
                       className='w-full h-full'
@@ -179,85 +183,41 @@ const TroubleshootingStep = ({ stepper, formData, updateFormData }: Troubleshoot
                   ) : (
                     <video controls className='w-full h-full object-cover'>
                       <source src={selectedError.videoUrl} type='video/mp4' />
-                      Ihr Browser unterstützt keine HTML5-Videos.
                     </video>
-                  )}
-                </div>
-              )
-            })()
-          ) : (
-            <div className='relative aspect-video rounded-lg overflow-hidden bg-muted flex items-center justify-center'>
-              <div className='text-center'>
-                <PlayIcon className='size-12 text-muted-foreground mx-auto mb-2' />
-                <p className='text-muted-foreground text-sm'>Kein Video verfügbar</p>
+                  )
+                })()}
+              </div>
+            </div>
+          )}
+
+          {/* Required Checks */}
+          {selectedError?.requiredChecks && selectedError.requiredChecks.length > 0 && (
+            <div className='flex flex-col items-start gap-1'>
+              <Label className='font-semibold'>Erforderliche Prüfungen</Label>
+              <div className='flex size-full flex-wrap items-start gap-x-6 gap-y-2'>
+                {selectedError.requiredChecks.map((checkId: string) => (
+                  <div key={checkId} className='flex items-center gap-2'>
+                    <Checkbox
+                      id={`check-${checkId}`}
+                      className='size-5'
+                      checked={formData.troubleshootingSteps?.[checkId] || false}
+                      onCheckedChange={() => toggleCheck(checkId)}
+                    />
+                    <Label htmlFor={`check-${checkId}`}>
+                      {checkLabels[checkId] || checkId}
+                    </Label>
+                  </div>
+                ))}
               </div>
             </div>
           )}
         </div>
-      )}
-
-      {/* Instructions Section */}
-      <div className='rounded-lg border p-4'>
-        <h3 className='font-medium flex items-center gap-2 mb-4'>
-          <CheckCircleIcon className='size-5 text-primary' />
-          Schritt-für-Schritt Anleitung
-        </h3>
-
-        {selectedError?.instructions ? (
-          <div className='prose prose-sm dark:prose-invert max-w-none'>
-            <div className='whitespace-pre-wrap text-muted-foreground leading-relaxed'>
-              {selectedError.instructions}
-            </div>
-          </div>
-        ) : (
-          <div className='text-center py-4'>
-            <p className='text-muted-foreground'>Keine detaillierte Anleitung verfügbar</p>
-          </div>
-        )}
       </div>
 
-      {/* Required Checks */}
-      {selectedError?.requiredChecks && selectedError.requiredChecks.length > 0 && (
-        <div className='rounded-lg border border-primary/20 bg-primary/5 p-4'>
-          <h3 className='font-medium mb-3'>Erforderliche Prüfungen</h3>
-          <p className='text-muted-foreground text-sm mb-4'>
-            Bitte bestätigen Sie, dass Sie folgende Schritte durchgeführt haben:
-          </p>
-          <div className='space-y-2'>
-            {selectedError.requiredChecks.map((checkId: string) => {
-              const isChecked = formData.troubleshootingSteps?.[checkId] || false
-              return (
-                <div
-                  key={checkId}
-                  className='flex items-center space-x-3 p-3 rounded-lg bg-background hover:bg-muted/50 transition-colors cursor-pointer'
-                  onClick={() => toggleCheck(checkId)}
-                >
-                  <Checkbox
-                    id={`check-${checkId}`}
-                    checked={isChecked}
-                    onCheckedChange={() => toggleCheck(checkId)}
-                  />
-                  <Label htmlFor={`check-${checkId}`} className='flex-1 cursor-pointer'>
-                    {checkLabels[checkId] || checkId}
-                  </Label>
-                </div>
-              )
-            })}
-          </div>
-          {!allChecksCompleted() && (
-            <div className='mt-4 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg'>
-              <p className='text-sm text-amber-700 dark:text-amber-300'>
-                Bitte führen Sie alle erforderlichen Prüfungen durch, bevor Sie fortfahren.
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Resolution Question */}
-      <div className='rounded-lg border p-6 text-center'>
+      <div className='rounded-lg border p-4 text-center'>
         <h3 className='font-semibold mb-2'>Konnte das Problem gelöst werden?</h3>
-        <p className='text-muted-foreground text-sm mb-6'>
+        <p className='text-muted-foreground text-sm mb-4'>
           Funktioniert Ihr Display jetzt wieder ordnungsgemäß?
         </p>
 
@@ -280,11 +240,15 @@ const TroubleshootingStep = ({ stepper, formData, updateFormData }: Troubleshoot
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className='flex justify-between gap-4 pt-4 border-t'>
+      {/* Navigation - exactly like DealDetailsStep */}
+      <div className='flex justify-between gap-4'>
         <Button variant='secondary' size='lg' onClick={stepper.prev}>
-          <ArrowLeftIcon className='size-4' />
+          <ArrowLeftIcon />
           Zurück
+        </Button>
+        <Button size='lg' onClick={stepper.next} disabled={!allChecksCompleted()}>
+          Weiter
+          <ArrowRightIcon />
         </Button>
       </div>
     </CardContent>
