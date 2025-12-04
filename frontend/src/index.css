@@ -23,7 +23,7 @@
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
-  
+
   /* Apple Glassmorphism Colors */
   --ios-blue: hsl(269, 95%, 50%);
   --apple-gray: hsl(0, 0%, 11.4%);
@@ -66,6 +66,11 @@
     @apply font-sans antialiased bg-gray-50 text-foreground;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
   }
+  .theme {
+    --animate-ripple: ripple var(--duration, 3s) ease calc(var(--i, 0) * 0.2s) infinite;
+    --animate-marquee-horizontal: marquee-horizontal var(--marquee-duration) infinite linear;
+    --animate-marquee-vertical: marquee-vertical var(--marquee-duration) infinite linear;
+  }
 }
 
 @layer components {
@@ -75,40 +80,40 @@
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
   }
-  
+
   .glassmorphism-strong {
     background: var(--glass-bg-strong);
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
     border: 1px solid var(--glass-border-strong);
   }
-  
+
   .apple-shadow {
     box-shadow: 0 4px 24px hsla(268, 95%, 50%, 0.08), 0 2px 8px hsla(0, 0%, 0%, 0.04);
   }
-  
+
   .apple-shadow-lg {
     box-shadow: 0 8px 32px hsla(268, 95%, 50%, 0.12), 0 4px 16px hsla(0, 0%, 0%, 0.06);
   }
-  
+
   .fade-in {
     animation: fadeIn 0.6s ease-out;
   }
-  
+
   .chip {
     transition: all 0.2s ease;
   }
-  
+
   .chip:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px hsla(268, 95%, 50%, 0.15);
   }
-  
+
   .chip.selected {
     background: linear-gradient(135deg, var(--ios-blue), hsl(268, 95%, 70%));
     color: white;
   }
-  
+
   .pulse-loading {
     animation: pulse 2s infinite;
   }
@@ -134,4 +139,40 @@
 .bg-pattern {
   background-image: radial-gradient(circle at 1px 1px, hsla(268, 95%, 50%, 0.05) 1px, transparent 0);
   background-size: 20px 20px;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@theme inline {
+  @keyframes ripple {
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    }
+  50% {
+    transform: translate(-50%, -50%) scale(0.9);
+    }
+  }
+  @keyframes marquee-horizontal {
+  from {
+    transform: translateX(0);
+    }
+  to {
+    transform: translateX(calc(-100% - var(--marquee-gap)));
+    }
+  }
+  @keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+    }
+  to {
+    transform: translateY(calc(-100% - var(--marquee-gap)));
+    }
+  }
 }
