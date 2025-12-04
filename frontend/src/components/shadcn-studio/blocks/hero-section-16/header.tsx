@@ -63,7 +63,7 @@ const Header = ({ navigationData, className }: HeaderProps) => {
             <a href='#'>Login</a>
           </Button>
 
-          <HeroNavigation02SmallScreen navigationData={navigationData} logoName={'shadcn/studio'} />
+          <HeroNavigation02SmallScreen navigationData={navigationData} logoName={'ESYSYNC Support'} />
         </div>
       </div>
     </header>

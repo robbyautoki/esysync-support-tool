@@ -1,8 +1,17 @@
 import { useState } from 'react'
 
+import Header from '@/components/shadcn-studio/blocks/hero-section-16/header'
 import HeroSection from '@/components/shadcn-studio/blocks/hero-section-16/hero-section-16'
 import SupportForm from '@/components/shadcn-studio/blocks/support-form/SupportForm'
 import Footer from '@/components/shadcn-studio/blocks/footer-component-05/footer-component-05'
+
+import type { Navigation } from '@/components/shadcn-studio/blocks/hero-navigation-02'
+
+const navigationData: Navigation[] = [
+  { title: 'Support', href: '/' },
+  { title: 'RMA Status', href: '/track' },
+  { title: 'Kontakt', href: '#kontakt' },
+]
 
 export interface SupportFormData {
   selectedError: string | null
@@ -78,6 +87,7 @@ export default function SupportPage() {
 
   return (
     <div className='min-h-screen bg-background flex flex-col'>
+      <Header navigationData={navigationData} />
       {showForm ? (
         <main className='flex-1 py-8'>
           <div className='mx-auto max-w-4xl px-4'>

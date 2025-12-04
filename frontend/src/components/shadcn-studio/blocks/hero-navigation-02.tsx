@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { useMedia } from 'react-use'
-import { ChevronRightIcon, CircleSmallIcon, MenuIcon } from 'lucide-react'
+import { ChevronRightIcon, CircleIcon, MenuIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
@@ -255,7 +255,7 @@ const HeroNavigation02SmallScreen = ({
                       className='hover:bg-accent ml-3 flex items-center gap-2 rounded-sm px-3 py-2 text-sm'
                       onClick={handleLinkClick}
                     >
-                      {item.icon ? item.icon : <CircleSmallIcon className='size-4' />}
+                      {item.icon ? item.icon : <CircleIcon className='size-4' />}
                       {item.title}
                     </a>
                   ))}
