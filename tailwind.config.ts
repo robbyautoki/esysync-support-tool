@@ -5,6 +5,28 @@ export default {
   content: ["./frontend/index.html", "./frontend/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      // Custom spacing for shadcn/studio components
+      spacing: {
+        '13': '3.25rem',
+        '18': '4.5rem',
+        '68': '17rem',
+        '100': '25rem',
+        '122': '30.5rem',
+      },
+      // Custom max-width values
+      maxWidth: {
+        '68': '17rem',
+        '100': '25rem',
+      },
+      // Custom scale values
+      scale: {
+        '55': '0.55',
+        '102': '1.02',
+      },
+      // Custom inset values (for end-13)
+      inset: {
+        '13': '3.25rem',
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
